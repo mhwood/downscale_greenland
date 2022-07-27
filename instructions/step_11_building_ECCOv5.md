@@ -4,16 +4,6 @@ This configuration is nearly identical to that described in the [LLC270 experime
 
 Here, we outline the steps to run this model on the Pleiades computing cluster. If the model is to be run on different machines, small changes might be necessary. Note also that these instructions have a redundancy in that the model is compiled twice - the steps here are written as they were implemented for the successful run of the model. 
 
-## Clone the pertinent repositories
-First, clone the three respositories we will need for this experiment
-```
-cd Global/Analysis # if using the recommended directory structure
-git clone https://github.com/MITgcm-contrib/llc_hires.git
-git clone https://github.com/MITgcm/MITgcm.git
-git clone https://github.com/mhwood/diagnostics_vec.git
-```
-
-
 ## Building the LLC270 ECCOv5 model
 To start, follow all of the instructions in the LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) up until the job submission (last line with qsub). For convenience, the list of steps from this directory have been copied here (wuth comments removed):
 ```
@@ -61,7 +51,8 @@ There are 3 main steps to add diagnostics_vec to the model
 ### Step 1: Add the `diagnostics_vec` package files to MITgcm
 The diagnostics_vec package files can be easily added to MITgcm using a Python utilities function in the diagnostics_vec directory:
 ```
-cd ../../ # back to the Global/Analysis directory
+git clone https://github.com/mhwood/diagnostics_vec.git
+cd ../../ # back to the head directory
 cd diagnostics_vec/utils/
 copy_pkg_files_to_MITgcm.py -m ../../MITgcm
 cd ../../MITgcm/build
