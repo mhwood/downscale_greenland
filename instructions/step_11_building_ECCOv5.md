@@ -14,18 +14,9 @@ git clone https://github.com/mhwood/diagnostics_vec.git
 ```
 
 
-## Building the LLC540 tides experiment
-To start, follow all of the instructions in the LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) up until the job submission (last line with qsub). For convenience, the list of steps from this directory have been copied here:
+## Building the LLC270 ECCOv5 model
+To start, follow all of the instructions in the LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) up until the job submission (last line with qsub). For convenience, the list of steps from this directory have been copied here (wuth comments removed):
 ```
- # ========
-#
-# LLC270 state estimate
-# WARNING: - Before starting make you have an Earthdata account (Or create it at: https://urs.earthdata.nasa.gov/users/new)
-#
-# ========
-
-# ==============
-# 1. Get code
 git clone https://github.com/MITgcm/MITgcm.git
 cd MITgcm
 git checkout checkpoint64x
@@ -43,24 +34,16 @@ mv drive/files/Version5/Alpha/input_init    llc_270/
 mv drive/files/Version5/Alpha/XX            llc_270/
 rm -r drive/
 
-# ================
-# 2. Build executable
-#    Prerequisite: 1. Get code
-==============
 cd MITgcm
 mkdir build run
 cd build
-
-   module purge
-   module load comp-intel/2016.2.181 mpi-sgi/mpt.2.14r19 hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
-   ../tools/genmake2 -of ../../llc_270/code_ad/linux_amd64_ifort+mpi_ice_nas \
-   -mo ../../llc_270/code_ad
-   make depend
-   make -j 16
+module purge
+module load comp-intel/2016.2.181 mpi-sgi/mpt.2.14r19 hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
+../tools/genmake2 -of ../../llc_270/code_ad/linux_amd64_ifort+mpi_ice_nas \
+-mo ../../llc_270/code_ad
+make depend
+make -j 16
  
-# ================
-# 3. Run model
-#    Prerequisite: 2. Build executable
 cd ../run
 mkdir diags tapes
 cp ../../llc_270/input_ad/* .
