@@ -15,37 +15,60 @@ git clone https://github.com/mhwood/diagnostics_vec.git
 
 
 ## Building the LLC540 tides experiment
-To start, follow all of the instructions in the LLC540 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_540/tides_exp/readme) up until the job submission (last line with qsub). For convenience, the list of steps from this directory have been copied here:
+To start, follow all of the instructions in the LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) up until the job submission (last line with qsub). For convenience, the list of steps from this directory have been copied here:
 ```
- MOD90="../../llc_hires/llc_90/tides_exps"
- MOD540="../../llc_hires/llc_540/tides_exp"
+ # ========
+#
+# LLC270 state estimate
+# WARNING: - Before starting make you have an Earthdata account (Or create it at: https://urs.earthdata.nasa.gov/users/new)
+#
+# ========
 
- cd MITgcm
- cd pkg
- ln -s ${MOD90}/pkg_tides tides
- cd ..
- mkdir build run
- cd build
- sed "s|useMYPACKAGE|&, useTIDES|" ../model/inc/PARAMS.h>PARAMS.h
- module purge
- module load comp-intel mpi-hpe/mpt hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
- ../tools/genmake2 -of ../tools/build_options/linux_amd64_ifort+mpi_ice_nas -mo ${MOD540}/code -mpi
- sed -i "s|-lnetcdff -lnetcdf|& -L${MOD90}/lib -lspice|" Makefile
- make depend
- make -j 16
- cd ..
+# ==============
+# 1. Get code
+git clone https://github.com/MITgcm/MITgcm.git
+cd MITgcm
+git checkout checkpoint64x
+cd ..
+svn checkout https://github.com/MITgcm-contrib/llc_hires/trunk/llc_270
+# For the following requests you need your Earthdata username and WebDAV password (different from Earthdata password)
+# Find it at :https://ecco.jpl.nasa.gov/drive
+wget -r -nH -np --user=USERNAME --ask-password https://ecco.jpl.nasa.gov/drive/files/Version5/Alpha/input_forcing
+wget -r -nH -np --user=USERNAME --ask-password https://ecco.jpl.nasa.gov/drive/files/Version5/Alpha/input_ecco
+wget -r -nH -np --user=USERNAME --ask-password https://ecco.jpl.nasa.gov/drive/files/Version5/Alpha/input_init
+wget -r -nH -np --user=USERNAME --ask-password https://ecco.jpl.nasa.gov/drive/files/Version5/Alpha/XX
+mv drive/files/Version5/Alpha/input_forcing llc_270/
+mv drive/files/Version5/Alpha/input_ecco    llc_270/
+mv drive/files/Version5/Alpha/input_init    llc_270/
+mv drive/files/Version5/Alpha/XX            llc_270/
+rm -r drive/
 
- cd run
- cp ${MOD540}/input/* . 
- ln -sf /nobackup/hzhang1/pub/llc540/RUN2/pickup*1440.*ta .
- ln -sf /nobackup/hzhang1/pub/llc540/RUN2/kernels .
- ln -sf /nobackup/hzhang1/pub/llc540/RUN2/tile* .
- ln -sf /nobackup/hzhang1/pub/llc540/RUN2/BATHY* .
- ln -sf /nobackup/hzhang1/pub/llc540/RUN2/DIFFKR* .
- ln -sf /nobackup/hzhang1/pub/llc540/RUN2/runoff* .
- ln -sf /nobackup/hzhang1/forcing/era5 .
- ln -sf ../build/mitgcmuv mitgcmuv
- ln -sf data.exch2_60_EXP2 data.exch2
+# ================
+# 2. Build executable
+#    Prerequisite: 1. Get code
+==============
+cd MITgcm
+mkdir build run
+cd build
+
+   module purge
+   module load comp-intel/2016.2.181 mpi-sgi/mpt.2.14r19 hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
+   ../tools/genmake2 -of ../../llc_270/code_ad/linux_amd64_ifort+mpi_ice_nas \
+   -mo ../../llc_270/code_ad
+   make depend
+   make -j 16
+ 
+# ================
+# 3. Run model
+#    Prerequisite: 2. Build executable
+cd ../run
+mkdir diags tapes
+cp ../../llc_270/input_ad/* .
+ln -s ../build/mitgcmuv .
+ln -s ../../llc_270/input_forcing era_xx
+ln -s ../../llc_270/input_ecco/* .
+ln -s ../../llc_270/input_init/* .
+ln -s ../../llc_270/XX/* .
  ```
 
 
@@ -146,12 +169,12 @@ Add this file from the code directory in this repository.
 cp ../../../downscaled_east_pacific/L0_540/code/DIAGNOSTICS_VEC_SIZE.h ${MOD540}/code/
 ```
 
-After the package is added and code modification files are edited, the model can be rebuilt using the same commands in LLC540 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_540/tides_exp/readme) which are copied here for convenience:
+After the package is added and code modification files are edited, the model can be rebuilt using the same commands in LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) which are copied here for convenience:
 ```
  module purge
- module load comp-intel mpi-hpe/mpt hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
- ../tools/genmake2 -of ../tools/build_options/linux_amd64_ifort+mpi_ice_nas -mo ${MOD540}/code -mpi
- sed -i "s|-lnetcdff -lnetcdf|& -L${MOD90}/lib -lspice|" Makefile
+ module load comp-intel/2016.2.181 mpi-sgi/mpt.2.14r19 hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
+ ../tools/genmake2 -of ../../llc_270/code_ad/linux_amd64_ifort+mpi_ice_nas \
+ -mo ../../llc_270/code_ad
  make depend
  make -j 16
  cd ..
@@ -159,6 +182,5 @@ After the package is added and code modification files are edited, the model can
  
  
 
-
 ## Run the model
-Now that the model is built, it is nearly ready to run. To run this model, follow the steps provided in the [Step 1.2: Running the L0_540](https://github.com/mhwood/downscaled_east_pacific/blob/main/instructions/step_12_running_L0_540.md) instructions.
+Now that the model is built, it is nearly ready to run. To run this model, follow the steps provided in the [Step 1.2: Running the L0](https://github.com/mhwood/downscaled_east_pacific/blob/main/instructions/step_12_running_L0.md) instructions.
