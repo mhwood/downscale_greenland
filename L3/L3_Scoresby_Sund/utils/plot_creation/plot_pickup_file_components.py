@@ -47,6 +47,7 @@ def create_plot(config_dir):
     output_dir = os.path.join(config_dir,'L3',model_name, 'plots', 'init_files')
 
     var_names, row_bounds, var_grids, global_metadata = read_pickup_file(input_dir)
+    print(var_names)
 
     fig = plt.figure(figsize=(12, 8))
 
@@ -61,6 +62,11 @@ def create_plot(config_dir):
         print(' Plotting ' + var_names[ff])  # +' (global min: '+str(np.max(var_grids[ff][var_grids[ff]!=0]))+
         # ', min: '+str(np.min(var_grids[ff][var_grids[ff]!=0]))+')')
 
+        if np.sum(np.isnan(  var_grids[ff]  ))>0:
+            depths,rows,cols = np.where(np.isnan(var_grids[ff]))
+            for i in range(20):
+                print(depths[i],rows[i],cols[i])
+
         var_grid_subset = var_grids[ff][0, :, :]
 
         cmap = 'viridis'
@@ -74,8 +80,12 @@ def create_plot(config_dir):
                 vmin = -1.5e-5
                 vmax = 1.5e-5
         else:
-            vmin = np.min(var_grid_subset[var_grids[-3][0, :, :] != 0])
-            vmax = np.max(var_grid_subset[var_grids[-3][0, :, :] != 0])
+            if np.any(var_grids[ff][0, :, :])>0:
+                vmin = np.min(var_grid_subset[var_grids[ff][0, :, :] != 0])
+                vmax = np.max(var_grid_subset[var_grids[ff][0, :, :] != 0])
+            else:
+                vmin=-0.1
+                vmax=0.1
 
         C = plt.imshow(var_grid_subset, origin='lower', cmap=cmap, vmin=vmin, vmax=vmax)
 

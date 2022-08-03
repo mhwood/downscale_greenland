@@ -1,0 +1,37 @@
+# Open-boundaries
+ &OBCS_PARM01
+#
+ OBCSfixTopo=.FALSE.,
+#
+ OB_Jnorth= 179*-1,
+ OB_Jsouth= 179*1,
+ OB_Ieast = 112*-1,
+ OB_Iwest = 112*1,
+#
+ useOBCSprescribe = .TRUE.,
+ useOBCSbalance = .TRUE.,
+#
+ OBNuFile = 'obcs/L3_Scoresby_Sund_ASTE_UVEL_north_BC.bin',
+ OBSuFile = 'obcs/L3_Scoresby_Sund_ASTE_UVEL_south_BC.bin',
+# OBWuFile = 'obcs/L3_Scoresby_Sund_ASTE_UVEL_west_BC.bin',
+ OBEuFile = 'obcs/L3_Scoresby_Sund_ASTE_UVEL_east_BC.bin',
+#
+ OBNvFile = 'obcs/L3_Scoresby_Sund_ASTE_VVEL_north_BC.bin',
+ OBSvFile = 'obcs/L3_Scoresby_Sund_ASTE_VVEL_south_BC.bin',
+# OBWvFile = 'obcs/L3_Scoresby_Sund_ASTE_VVEL_west_BC.bin',
+ OBEvFile = 'obcs/L3_Scoresby_Sund_ASTE_VVEL_east_BC.bin',
+#
+ OBNtFile = 'obcs/L3_Scoresby_Sund_ASTE_THETA_north_BC.bin',
+ OBStFile = 'obcs/L3_Scoresby_Sund_ASTE_THETA_south_BC.bin',
+# OBWtFile = 'obcs/L3_Scoresby_Sund_ASTE_THETA_west_BC.bin',
+ OBEtFile = 'obcs/L3_Scoresby_Sund_ASTE_THETA_east_BC.bin',
+#
+ OBNsFile = 'obcs/L3_Scoresby_Sund_ASTE_SALT_north_BC.bin',
+ OBSsFile = 'obcs/L3_Scoresby_Sund_ASTE_SALT_south_BC.bin',
+# OBWsFile = 'obcs/L3_Scoresby_Sund_ASTE_SALT_west_BC.bin',
+ OBEsFile = 'obcs/L3_Scoresby_Sund_ASTE_SALT_east_BC.bin',
+ &
+
+
+ &OBCS_PARM02
+ &

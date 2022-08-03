@@ -7,19 +7,30 @@ import sys
 def create_boundary_condition_files(config_dir):
 
     sys.path.insert(1, os.path.join(config_dir,'L3','utils','init_file_creation'))
-    import create_L3_ASTE_BCs as cbc
+    import create_L3_ASTE_tracer_BCs as tbc
+    import create_L3_ASTE_vector_BCs as vbc
 
     model_name = 'L3_Scoresby_Sund'
     ordered_aste_tiles = [[14,5]]
     ordered_aste_tile_rotations = [[2,3]] # rotations are counter-clockwise
 
-    var_names = ['THETA']
-    boundaries = ['north']
+    tracer_var_names = ['THETA','SALT']
+    boundaries = ['north','south','east']
 
-    for var_name in var_names:
+    for var_name in tracer_var_names:
         for boundary in boundaries:
-            cbc.create_L3_ASTE_boundary_condition(config_dir,model_name,
+            tbc.create_L3_ASTE_tracer_boundary_condition(config_dir,model_name,
                                                   var_name,boundary,
+                                                  ordered_aste_tiles,ordered_aste_tile_rotations)
+
+    # note: uvel and vvel get done at the same time
+    vector_var_name_sets = [['UVEL','VVEL']] # U should be first
+    boundaries = ['north','south','east']
+
+    for var_set in vector_var_name_sets:
+        for boundary in boundaries:
+            vbc.create_L3_ASTE_vector_boundary_condition(config_dir,model_name,
+                                                  var_set[0],var_set[1],boundary,
                                                   ordered_aste_tiles,ordered_aste_tile_rotations)
 
 

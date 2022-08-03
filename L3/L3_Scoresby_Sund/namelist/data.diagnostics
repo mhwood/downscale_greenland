@@ -1,0 +1,19 @@
+# Diagnostic Package Choices
+#
+ &diagnostics_list
+     dumpAtLast = .TRUE.,
+#--
+  fields(1,1) = 'ETAN    ',
+  levels(1,1) = 1.,
+  fileName(1) = 'surfDiag',
+  frequency(1) =  -3600.,
+#
+  fields(1:4,2) = 'UVEL    ','VVEL    ','THETA   ','SALT    ',
+  fileName(2) = 'dynDiag',
+  frequency(2) = -3600.,
+  levels(1:4,2) = 1,
+ &
+
+# Parameter for Diagnostics of per level statistics:
+ &DIAG_STATIS_PARMS
+ &

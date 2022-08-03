@@ -1,0 +1,110 @@
+# *********************
+# External Forcing Data
+# *********************
+
+ &EXF_NML_01
+ useAtmWind        = .FALSE.,
+ exf_albedo        = 0.1,
+ useExfZenIncoming = .TRUE., 
+ select_ZenAlbedo  = 1,
+#
+ ocean_emissivity = 0.97,
+ ice_emissivity = 0.95,
+ snow_emissivity = 0.95,
+ exf_iprec         = 32,
+ exf_yftype        = 'RL',
+ useExfYearlyFields= .FALSE.,
+ useExfCheckRange  = .FALSE.,
+# useRelativeWind   = .FALSE.,
+ readStressOnAgrid = .TRUE.,
+ rotateStressOnAgrid = .TRUE.,
+ /
+
+ &EXF_NML_02
+# ustressfile       = 'exf/L3_exf_USTRESS.bin',
+# vstressfile       = 'exf/L3_exf_VSTRESS.bin',
+# atempfile         = 'exf/L3_exf_ATEMP.bin',
+# aqhfile           = 'exf/L3_exf_AQH.bin',
+# precipfile        = 'exf/L3_exf_PRECIP.bin',
+# wspeedfile        = 'exf/L3_exf_WSPEED.bin',
+# swdownfile        = 'exf/L3_exf_SWDOWN.bin',
+# lwdownfile        = 'exf/L3_exf_LWDOWN.bin',
+# apressurefile     = 'exf/L3_exf_APRESS.bin',
+# runofffile        = 'exf/L3_exf_RUNOFF.bin',
+
+# ustressstartdate1   = 19920101,
+# ustressstartdate2   = 000130,
+# ustressperiod       = 45.0,
+
+# vstressstartdate1   = 19920101,
+# vstressstartdate2   = 000130,
+# vstressperiod       = 45.0,
+
+# atempstartdate1   = 19920101,
+# atempstartdate2   = 000130,
+# atempperiod       = 45.0,
+
+# aqhstartdate1     = 19920101,
+# aqhstartdate2     = 000130,
+# aqhperiod         = 45.0,
+
+# precipstartdate1  = 19920101,
+# precipstartdate2  = 000130,
+# precipperiod      = 45.0,
+
+# runoffstartdate1   = 19920101,
+# runoffstartdate2   = 000130,
+# runoffperiod       = 45.0,
+
+# wspeedstartdate1   = 19920101,
+# wspeedstartdate2   = 000130,
+# wspeedperiod       = 45.0,
+
+# swdownstartdate1  = 19920101,
+# swdownstartdate2  = 000130,
+# swdownperiod      = 45.0,
+
+# lwdownstartdate1  = 19920101,
+# lwdownstartdate2  = 000130,
+# lwdownperiod      = 45.0,
+
+# apressurestartdate1   = 19920101,
+# apressurestartdate2   = 000130,
+# apressureperiod       = 45.0,
+
+# climsstperiod     = -12.,
+# climsssperiod     = -12.,
+ /
+
+
+ &EXF_NML_03
+ /
+
+ &EXF_NML_04
+ runoff_interpMethod = 0,
+ climsss_interpMethod = 0,
+ ustress_interpMethod = 0,
+ vstress_interpMethod = 0,
+ atemp_interpMethod = 0,
+ aqh_interpMethod = 0,
+ precip_interpMethod = 0,
+ wspeed_interpMethod = 0,
+ swdown_interpMethod = 0,
+ lwdown_interpMethod = 0,
+ apressure_interpMethod = 0,
+ /
+
+ &EXF_NML_OBCS
+ obcsNstartdate1     = 20011216,
+ obcsNstartdate2     = 000000,
+ obcsNperiod         = 2592000.0,
+#
+ obcsSstartdate1     = 20011216,
+ obcsSstartdate2     = 000000,
+ obcsSperiod         = 2592000.0,
+#
+ obcsWstartdate1     = 20011216,
+ obcsWstartdate2     = 000000,
+ obcsWperiod         = 2592000.0,
+#
+ &

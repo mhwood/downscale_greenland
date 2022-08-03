@@ -8,34 +8,43 @@ from MITgcmutils import mds
 import sys
 
 def read_grid_geometry(config_dir,model_name, n_rows, n_cols):
-    file_path = os.path.join(config_dir, 'mitgrids', model_name + '.mitgrid')
-    entire_grid = np.fromfile(file_path, dtype='>f8')
-    entire_grid = np.reshape(entire_grid, (16, n_rows + 1, n_cols + 1))
-    XC = entire_grid[0, :, :]
-    YC = entire_grid[1, :, :]
-    XC = XC[:-1, :-1]
-    YC = YC[:-1, :-1]
+    # file_path = os.path.join(config_dir, 'mitgrids', model_name + '.mitgrid')
+    # entire_grid = np.fromfile(file_path, dtype='>f8')
+    # entire_grid = np.reshape(entire_grid, (16, n_rows + 1, n_cols + 1))
+    # XC = entire_grid[0, :, :]
+    # YC = entire_grid[1, :, :]
+    # XC = XC[:-1, :-1]
+    # YC = YC[:-1, :-1]
+    #
+    # delR = np.array([1.00, 1.14, 1.30, 1.49, 1.70,
+    #                      1.93, 2.20, 2.50, 2.84, 3.21,
+    #                      3.63, 4.10, 4.61, 5.18, 5.79,
+    #                      6.47, 7.20, 7.98, 8.83, 9.73,
+    #                      10.69, 11.70, 12.76, 13.87, 15.03,
+    #                      16.22, 17.45, 18.70, 19.97, 21.27,
+    #                      22.56, 23.87, 25.17, 26.46, 27.74,
+    #                      29.00, 30.24, 31.45, 32.65, 33.82,
+    #                      34.97, 36.09, 37.20, 38.29, 39.37,
+    #                      40.45, 41.53, 42.62, 43.73, 44.87,
+    #                      46.05, 47.28, 48.56, 49.93, 51.38,
+    #                      52.93, 54.61, 56.42, 58.38, 60.53,
+    #                      62.87, 65.43, 68.24, 71.33, 74.73,
+    #                      78.47, 82.61, 87.17, 92.21, 97.79,
+    #                      103.96, 110.79, 118.35, 126.73, 136.01,
+    #                      146.30, 157.71, 170.35, 184.37, 199.89,
+    #                      217.09, 236.13, 257.21, 280.50, 306.24,
+    #                      334.64, 365.93, 400.38, 438.23, 479.74, ])
 
-    delR = np.array([1.00, 1.14, 1.30, 1.49, 1.70,
-                         1.93, 2.20, 2.50, 2.84, 3.21,
-                         3.63, 4.10, 4.61, 5.18, 5.79,
-                         6.47, 7.20, 7.98, 8.83, 9.73,
-                         10.69, 11.70, 12.76, 13.87, 15.03,
-                         16.22, 17.45, 18.70, 19.97, 21.27,
-                         22.56, 23.87, 25.17, 26.46, 27.74,
-                         29.00, 30.24, 31.45, 32.65, 33.82,
-                         34.97, 36.09, 37.20, 38.29, 39.37,
-                         40.45, 41.53, 42.62, 43.73, 44.87,
-                         46.05, 47.28, 48.56, 49.93, 51.38,
-                         52.93, 54.61, 56.42, 58.38, 60.53,
-                         62.87, 65.43, 68.24, 71.33, 74.73,
-                         78.47, 82.61, 87.17, 92.21, 97.79,
-                         103.96, 110.79, 118.35, 126.73, 136.01,
-                         146.30, 157.71, 170.35, 184.37, 199.89,
-                         217.09, 236.13, 257.21, 280.50, 306.24,
-                         334.64, 365.93, 400.38, 438.23, 479.74, ])
+    file_path = os.path.join(config_dir, 'L3', model_name, 'input', model_name + '_grid.nc')
+    ds = nc4.Dataset(file_path)
+    XC = np.array(ds.variables['XC'][:, :])
+    YC = np.array(ds.variables['YC'][:, :])
+    AngleCS = np.array(ds.variables['AngleCS'][:, :])
+    AngleSN = np.array(ds.variables['AngleSN'][:, :])
+    delR = np.array(ds.variables['drF'][:])
+    ds.close()
 
-    return(XC, YC, delR)
+    return(XC, YC, AngleCS, AngleSN, delR)
 
 def read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotations, L_XC, L_YC):
 
@@ -45,6 +54,8 @@ def read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotati
 
     aste_XC = np.zeros((aste_sNy*len(ordered_aste_tiles),aste_sNx*len(ordered_aste_tiles[0])))
     aste_YC = np.zeros((aste_sNy * len(ordered_aste_tiles), aste_sNx * len(ordered_aste_tiles[0])))
+    aste_AngleCS = np.zeros((aste_sNy * len(ordered_aste_tiles), aste_sNx * len(ordered_aste_tiles[0])))
+    aste_AngleSN = np.zeros((aste_sNy * len(ordered_aste_tiles), aste_sNx * len(ordered_aste_tiles[0])))
     aste_hfacC = np.zeros((aste_Nr, aste_sNy * len(ordered_aste_tiles), aste_sNx * len(ordered_aste_tiles[0])))
 
     for r in range(len(ordered_aste_tiles)):
@@ -58,6 +69,8 @@ def read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotati
             hfac_grid = ds.variables['hFacC'][:, :, :]
             XC = ds.variables['XC'][:, :]
             YC = ds.variables['YC'][:, :]
+            AngleCS = ds.variables['AngleCS'][:, :]
+            AngleSN = ds.variables['AngleSN'][:, :]
             ds.close()
 
             # rotate things as necessary
@@ -65,11 +78,15 @@ def read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotati
                 hfac_grid = np.rot90(hfac_grid, axes=(1, 2))
                 XC = np.rot90(XC)
                 YC = np.rot90(YC)
+                AngleCS = np.rot90(AngleCS)
+                AngleSN = np.rot90(AngleSN)
 
             # put it into the big grid
             aste_hfacC[:, r * aste_sNy:(r + 1) * aste_sNy, c * aste_sNx:(c + 1) * aste_sNx] = hfac_grid
             aste_XC[r * aste_sNy:(r + 1) * aste_sNy, c * aste_sNx:(c + 1) * aste_sNx] = XC
             aste_YC[r * aste_sNy:(r + 1) * aste_sNy, c * aste_sNx:(c + 1) * aste_sNx] = YC
+            aste_AngleCS[r * aste_sNy:(r + 1) * aste_sNy, c * aste_sNx:(c + 1) * aste_sNx] = AngleCS
+            aste_AngleSN[r * aste_sNy:(r + 1) * aste_sNy, c * aste_sNx:(c + 1) * aste_sNx] = AngleSN
 
     # C = plt.imshow(aste_grid[0,:,:],origin='lower')
     # C = plt.imshow(aste_XC, origin='lower')
@@ -97,6 +114,10 @@ def read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotati
               min_col - dist_buffer:max_col + dist_buffer]
     aste_YC = aste_YC[min_row - dist_buffer:max_row + dist_buffer,
               min_col - dist_buffer:max_col + dist_buffer]
+    aste_AngleCS = aste_AngleCS[min_row - dist_buffer:max_row + dist_buffer,
+              min_col - dist_buffer:max_col + dist_buffer]
+    aste_AngleSN = aste_AngleSN[min_row - dist_buffer:max_row + dist_buffer,
+              min_col - dist_buffer:max_col + dist_buffer]
     aste_hfacC = aste_hfacC[:, min_row - dist_buffer:max_row + dist_buffer,
                 min_col - dist_buffer:max_col + dist_buffer]
 
@@ -109,7 +130,7 @@ def read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotati
 
     aste_subset_bounds = [min_row,max_row,min_col,max_col]
 
-    return(aste_XC,aste_YC,aste_hfacC,aste_delR,aste_subset_bounds)
+    return(aste_XC,aste_YC,aste_AngleCS,aste_AngleSN,aste_hfacC,aste_delR,aste_subset_bounds)
 
 def read_pickup_file_to_compact(pickup_file_path):
 
@@ -274,6 +295,53 @@ def read_aste_pickup_to_stiched_grid(aste_dir,pickup_file,ordered_aste_tiles,ord
 
     return(var_names, var_grids, global_metadata)
 
+def rotate_aste_grids_to_natural_grids(var_names, var_grids, aste_AngleCS, aste_AngleSN):
+
+    def rotate_velocity_vectors_to_natural(angle_cos, angle_sin, uvel, vvel):
+        zonal_velocity = np.zeros_like(uvel)
+        meridional_velocity = np.zeros_like(vvel)
+        for k in range(np.shape(uvel)[0]):
+            zonal_velocity[k,:,:] = angle_cos * uvel[k,:,:] - angle_sin * vvel[k,:,:]
+            meridional_velocity[k,:,:] = angle_sin * uvel[k,:,:] + angle_cos * vvel[k,:,:]
+        return (zonal_velocity, meridional_velocity)
+
+    uvel_grid_index = var_names.index('Uvel')
+    vvel_grid_index = var_names.index('Vvel')
+
+    zonal_uvel, meridional_vvel = rotate_velocity_vectors_to_natural(aste_AngleCS, aste_AngleSN,
+                                                              var_grids[uvel_grid_index], var_grids[vvel_grid_index])
+
+    # plt.subplot(2,2,1)
+    # C = plt.imshow(var_grids[uvel_grid_index][0,:,:],origin='lower',cmap='seismic',vmin=-0.4,vmax=0.4)
+    # plt.colorbar(C)
+    #
+    # plt.subplot(2, 2, 2)
+    # C = plt.imshow(var_grids[vvel_grid_index][0, :, :], origin='lower', cmap='seismic', vmin=-0.4, vmax=0.4)
+    # plt.colorbar(C)
+    #
+    # plt.subplot(2, 2, 3)
+    # C = plt.imshow(zonal_uvel[0, :, :], origin='lower', cmap='seismic', vmin=-0.4, vmax=0.4)
+    # plt.colorbar(C)
+    #
+    # plt.subplot(2, 2, 4)
+    # C = plt.imshow(meridional_vvel[0, :, :], origin='lower', cmap='seismic', vmin=-0.4, vmax=0.4)
+    # plt.colorbar(C)
+    #
+    # plt.show()
+
+    gunm1_grid_index = var_names.index('GuNm1')
+    gvnm1_grid_index = var_names.index('GvNm1')
+
+    zonal_gunm1, meridional_gvnm1 = rotate_velocity_vectors_to_natural(aste_AngleCS, aste_AngleSN,
+                                                                var_grids[gunm1_grid_index], var_grids[gvnm1_grid_index])
+
+    var_grids[uvel_grid_index] = zonal_uvel
+    var_grids[vvel_grid_index] = meridional_vvel
+
+    var_grids[gunm1_grid_index] = zonal_gunm1
+    var_grids[gvnm1_grid_index] = meridional_gvnm1
+    return(var_grids)
+
 def read_mask_from_nc(nc_file, hFac='C'):
     ds = nc4.Dataset(nc_file)
     mask = ds.variables['wet_grid_'+hFac][:,:,:]
@@ -287,6 +355,42 @@ def read_mask_from_grid_nc(nc_file, hFac='C'):
     mask[mask<=0]=0
     ds.close()
     return(mask)
+
+def rotate_interpolated_grids_to_domain(var_names, var_grids, AngleCS, AngleSN):
+
+    def rotate_velocity_vectors_to_domain(angle_cos, angle_sin, zonal_vel, meridional_vel):
+        uvel = np.zeros_like(zonal_vel)
+        vvel = np.zeros_like(meridional_vel)
+        for k in range(np.shape(uvel)[0]):
+            uvel[k, : ,:] = angle_cos * zonal_vel[k,:,:] + angle_sin * meridional_vel[k,:,:]
+            vvel[k, : ,:] = -1 * angle_sin * zonal_vel[k,:,:] + angle_cos * meridional_vel[k,:,:]
+        return (uvel, vvel)
+
+    uvel_grid_index = var_names.index('Uvel')
+    vvel_grid_index = var_names.index('Vvel')
+    uvel, vvel = rotate_velocity_vectors_to_domain(AngleCS, AngleSN,
+                                                   var_grids[uvel_grid_index], var_grids[vvel_grid_index])
+
+    gunm1_grid_index = var_names.index('GuNm1')
+    gvnm1_grid_index = var_names.index('GvNm1')
+    gunm1, gvnm1 = rotate_velocity_vectors_to_domain(AngleCS, AngleSN,
+                                                     var_grids[gunm1_grid_index], var_grids[gvnm1_grid_index])
+
+    gunm2_grid_index = var_names.index('GuNm2')
+    gvnm2_grid_index = var_names.index('GvNm2')
+    gunm2, gvnm2 = rotate_velocity_vectors_to_domain(AngleCS, AngleSN,
+                                                     var_grids[gunm2_grid_index], var_grids[gvnm2_grid_index])
+
+    var_grids[uvel_grid_index] = uvel
+    var_grids[vvel_grid_index] = vvel
+
+    var_grids[gunm1_grid_index] = gunm1
+    var_grids[gvnm1_grid_index] = gvnm1
+
+    var_grids[gunm2_grid_index] = gunm2
+    var_grids[gvnm2_grid_index] = gvnm2
+
+    return(var_grids)
 
 def stack_grids_to_pickup(interp_grids):
     counter = 0
@@ -347,15 +451,21 @@ def create_L3_ASTE_pickup_file(config_dir,model_name,ordered_aste_tiles,ordered_
     n_cols = L_size[1]
 
     # step 0: get the model domain
-    XC, YC, delR = read_grid_geometry(config_dir,model_name, n_rows, n_cols)
+    XC, YC, AngleCS, AngleSN, delR = read_grid_geometry(config_dir,model_name, n_rows, n_cols)
 
     # step 1: create a stitched grid around the domain using ASTE data
     aste_dir = '/Users/michwood/Documents/Research/Data Repository/Greenland/Ocean Properties/Models/ASTE'
 
-    aste_XC, aste_YC, aste_hfacC, aste_delR, aste_subset_bounds = read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotations, XC, YC)
+    aste_XC, aste_YC, aste_AngleCS, aste_AngleSN, aste_hfacC, aste_delR, aste_subset_bounds = \
+        read_aste_grid_geometry(aste_dir,ordered_aste_tiles,ordered_aste_tile_rotations, XC, YC)
+
     pickup_file = 'pickup_it55warm.0000000007'
     var_names, var_grids, pickup_metadata = read_aste_pickup_to_stiched_grid(aste_dir, pickup_file,
-                                                            ordered_aste_tiles, ordered_aste_tile_rotations,aste_subset_bounds)
+                                                                             ordered_aste_tiles, ordered_aste_tile_rotations,aste_subset_bounds)
+
+    print(pickup_metadata)
+
+    var_grids = rotate_aste_grids_to_natural_grids(var_names, var_grids, aste_AngleCS, aste_AngleSN)
 
     ASTE_wet_cells = np.copy(aste_hfacC)
     ASTE_wet_cells[ASTE_wet_cells>0]=1
@@ -414,6 +524,10 @@ def create_L3_ASTE_pickup_file(config_dir,model_name,ordered_aste_tiles,ordered_
                                                  mean_vertical_difference=0, fill_downward=True, remove_zeros=True,
                                                  printing=True)
 
+            if np.sum(np.isnan(interp_field))>0:
+                print('Setting '+str(np.sum(np.isnan(interp_field)))+' values to 0 in this grid')
+                interp_field[np.isnan(interp_field)] = 0
+
             # plt.subplot(2, 3, 1)
             # plt.imshow(ASTE_wet_cells[0, :, :], origin='lower')
             # plt.subplot(2, 3, 2)
@@ -442,22 +556,15 @@ def create_L3_ASTE_pickup_file(config_dir,model_name,ordered_aste_tiles,ordered_
             interp_grids.append(interp_field)
             output_var_names.append('GvNm2')
 
+    interp_grids = rotate_interpolated_grids_to_domain(output_var_names, interp_grids, AngleCS, AngleSN)
+
     pickup_grid = stack_grids_to_pickup(interp_grids)
-    print(np.shape(pickup_grid))
 
     output_dir = os.path.join(config_dir, 'L3', model_name, 'input')
     output_file = os.path.join(output_dir, 'pickup.' + '{:010d}'.format(1))
     dtype = '>f8'
     pickup_metadata['timestepnumber'] = [int(1)]
-    pickup_metadata['nrecords'] = [int(len(output_var_names) * len(delR) + 3)]
+    pickup_metadata['nFlds'] = [11]
+    pickup_metadata['nrecords'] = [int((len(output_var_names)-3) * len(delR) + 3)]
     pickup_metadata['fldlist'] = output_var_names
     write_pickup_file(output_file, dtype, pickup_grid, pickup_metadata)
-
-
-
-    # step 2: run the downscale scripts to do the interpolation
-
-
-
-   
-

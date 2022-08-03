@@ -1,0 +1,132 @@
+
+import os
+import numpy as np
+import netCDF4 as nc4
+import argparse
+import ast
+
+########################################################################################################################
+
+def read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_nonblank_tiles):
+
+    stitched_XC = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
+    stitched_YC = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
+
+    stitched_DXC = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0]) + 1))
+    stitched_DYC = np.zeros((sNy * len(ordered_nonblank_tiles) + 1, sNx * len(ordered_nonblank_tiles[0])))
+    stitched_Depth = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
+
+    stitched_hFacC = np.zeros((Nr, sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
+    stitched_hFacS = np.zeros((Nr, sNy * len(ordered_nonblank_tiles) + 1, sNx * len(ordered_nonblank_tiles[0])))
+    stitched_hFacW = np.zeros((Nr, sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0]) + 1))
+
+    N = len(ordered_nonblank_tiles) * len(ordered_nonblank_tiles[0])
+
+    grid_dir = os.path.join(config_dir, 'L3', model_name, 'run_for_grid')
+
+    for r in range(len(ordered_nonblank_tiles)):
+        for c in range(len(ordered_nonblank_tiles[0])):
+            tile_number = ordered_nonblank_tiles[r][c]
+            for n in range(N):
+                if 'grid.t'+'{:03d}'.format(tile_number)+'.nc' in os.listdir(os.path.join(grid_dir,'mnc_'+'{:04d}'.format(n+1))):
+                    ds = nc4.Dataset(os.path.join(grid_dir,'mnc_'+'{:04d}'.format(n+1),'grid.t'+'{:03d}'.format(tile_number)+'.nc'))
+                    XC = ds.variables['XC'][:, :]
+                    YC = ds.variables['YC'][:, :]
+                    DXC = ds.variables['dxC'][:, :]
+                    DYC = ds.variables['dyC'][:, :]
+                    hFacC = ds.variables['HFacC'][:, :, :]
+                    hFacS = ds.variables['HFacS'][:, :, :]
+                    hFacW = ds.variables['HFacW'][:, :, :]
+                    DRF = ds.variables['drF'][:]
+                    Depth = ds.variables['Depth'][:, :]
+                    ds.close()
+
+                    stitched_XC[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = XC
+                    stitched_YC[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = YC
+
+                    stitched_DXC[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx+1] = DXC
+                    stitched_DYC[r * sNy:(r + 1) * sNy+1, c * sNx:(c + 1) * sNx] = DYC
+
+                    stitched_hFacC[:, r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = hFacC
+                    stitched_hFacS[:, r * sNy:(r + 1) * sNy + 1, c * sNx:(c + 1) * sNx] = hFacS
+                    stitched_hFacW[:, r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx + 1] = hFacW
+
+                    stitched_Depth[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = Depth
+
+    return(stitched_XC, stitched_YC, stitched_DXC, stitched_DYC,
+           stitched_hFacC, stitched_hFacS, stitched_hFacW,
+           stitched_Depth, DRF)
+
+
+def write_grid_to_nc(config_dir, model_name,
+                     XC, YC, DXC, DYC, hFacC, hFacS, hFacW, DRF, Depth):
+
+    output_path = os.path.join(config_dir, 'nc_grids', model_name+'_grid.nc')
+
+    ds = nc4.Dataset(output_path,'w')
+
+    ds.createDimension('X', np.shape(XC)[1])
+    ds.createDimension('Y', np.shape(XC)[0])
+    ds.createDimension('Xp1', np.shape(DXC)[1])
+    ds.createDimension('Yp1', np.shape(DYC)[0])
+    ds.createDimension('Z',np.shape(DRF)[0])
+
+    var = ds.createVariable('XC','f4',('Y','X'))
+    var[:,:] = XC
+
+    var = ds.createVariable('YC', 'f4', ('Y', 'X'))
+    var[:, :] = YC
+
+    var = ds.createVariable('dxC', 'f4', ('Y', 'Xp1'))
+    var[:, :] = DXC
+
+    var = ds.createVariable('dyC', 'f4', ('Yp1', 'X'))
+    var[:, :] = DYC
+
+    var = ds.createVariable('HFacC', 'f4', ('Z', 'Y', 'X'))
+    var[:, :, :] = hFacC
+
+    var = ds.createVariable('HFacW', 'f4', ('Z', 'Y', 'Xp1'))
+    var[:, :, :] = hFacW
+
+    var = ds.createVariable('HFacS', 'f4', ('Z', 'Yp1', 'X'))
+    var[:, :, :] = hFacS
+
+    var = ds.createVariable('drF', 'f4', ('Z',))
+    var[:] = DRF
+
+    var = ds.createVariable('Depth', 'f4', ('Y', 'X'))
+    var[:, :] = Depth
+
+    ds.close()
+
+def stitch_grid_files(config_dir):
+
+    print('Stitching the nc grid files')
+
+    model_name = 'L3_Scoresby_Sund'
+    ordered_tiles = [[1,2],[3,4],[5,6]]
+    Nr = 90
+    sNx = 210
+    sNy = 150
+
+    XC, YC, DXC, DYC, hFacC, hFacS, hFacW, Depth, DRF = read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_tiles)
+
+    write_grid_to_nc(config_dir, model_name,
+                     XC, YC, DXC, DYC,
+                     hFacC, hFacS, hFacW, DRF, Depth)
+
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-d", "--config_dir", action="store",
+                        help="The directory where the L1, L1, and L3 configurations are stored.", dest="config_dir",
+                        type=str, required=True)
+
+    args = parser.parse_args()
+    config_dir = args.config_dir
+
+    stitch_grid_files(config_dir)
