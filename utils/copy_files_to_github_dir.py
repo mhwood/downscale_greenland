@@ -7,62 +7,78 @@ import os
 
 def copy_files(config_dir, github_dir):
 
-    if 'L3' not in os.listdir(github_dir):
-        os.mkdir(os.path.join(github_dir,'L3'))
+    level_names = ['L1','L2','L3','L05','L0']
 
-    L3_models = ['L3_Scoresby_Sund']
-    subdirs = ['code','code_for_grid','namelist_for_grid']
+    for level_name in level_names:
+        if level_name not in os.listdir(github_dir):
+            os.mkdir(os.path.join(github_dir,level_name))
+
+    level_name_model_dict = {'L1':['L1_CE_Greenland'],
+                             'L2':['L2_CE_Greenland'],
+                             'L3':['L3_Scoresby_Sund'],
+                             'L05':['L05_CE_Greenland'],
+                             'L0':[]}
+    subdirs = ['code','code_for_grid','namelist','namelist_for_grid']
     utils_subdirs = ['init_file_creation','plot_creation']
 
-    for model_name in L3_models:
-        if model_name not in os.listdir(os.path.join(github_dir,'L3')):
-            os.mkdir(os.path.join(github_dir,'L3',model_name))
+    for level_name in level_names:
+
+        #################################################################
+        # copy the model files first
+        model_names = level_name_model_dict[level_name]
+
+        for model_name in model_names:
+            if model_name not in os.listdir(os.path.join(github_dir,level_name)):
+                os.mkdir(os.path.join(github_dir,level_name,model_name))
+
+            #####################################
+            # copy the code and namelist files
+            for dir_name in subdirs:
+                if dir_name in os.listdir(os.path.join(config_dir,level_name,model_name)):
+                    if dir_name not in os.listdir(os.path.join(github_dir,level_name,model_name)):
+                        os.mkdir(os.path.join(github_dir,level_name,model_name,dir_name))
+                    for file_name in os.listdir(os.path.join(config_dir,level_name,model_name,dir_name)):
+                        if file_name[0]!='.' and file_name[-3:]!='.nc':
+                            shutil.copyfile(os.path.join(config_dir,level_name,model_name,dir_name,file_name),
+                                            os.path.join(github_dir,level_name,model_name,dir_name,file_name))
+
+            #####################################
+            # copy the utils files
+            if 'utils' not in os.listdir(os.path.join(github_dir, level_name, model_name)):
+                os.mkdir(os.path.join(github_dir, level_name, model_name, 'utils'))
+            for dir_name in utils_subdirs:
+                if dir_name in os.listdir(os.path.join(config_dir, level_name, model_name, 'utils')):
+                    if dir_name not in os.listdir(os.path.join(github_dir, level_name, model_name,'utils')):
+                        os.mkdir(os.path.join(github_dir, level_name, model_name, 'utils', dir_name))
+                    for file_name in os.listdir(os.path.join(config_dir, level_name, model_name, 'utils',dir_name)):
+                        if file_name[0] != '.' and file_name[-3:]=='.py' and file_name[0] != '_':
+                            shutil.copyfile(os.path.join(config_dir, level_name, model_name, 'utils',dir_name, file_name),
+                                            os.path.join(github_dir, level_name, model_name, 'utils',dir_name, file_name))
+            for file_name in os.listdir(os.path.join(config_dir, level_name, model_name, 'utils')):
+                if file_name[-3:]=='.sh' or file_name[-3:]=='.py':
+                    shutil.copyfile(os.path.join(config_dir, level_name, model_name, 'utils', file_name),
+                                    os.path.join(github_dir, level_name, model_name, 'utils', file_name))
 
         #####################################
-        # copy the code and namelist files
-        for dir_name in subdirs:
-            if dir_name in os.listdir(os.path.join(config_dir,'L3',model_name)):
-                if dir_name not in os.listdir(os.path.join(github_dir,'L3',model_name)):
-                    os.mkdir(os.path.join(github_dir,'L3',model_name,dir_name))
-                for file_name in os.listdir(os.path.join(config_dir,'L3',model_name,dir_name)):
-                    if file_name[0]!='.':
-                        shutil.copyfile(os.path.join(config_dir,'L3',model_name,dir_name,file_name),
-                                        os.path.join(github_dir,'L3',model_name,dir_name,file_name))
+        # copy the general level utils files
+        if 'utils' in os.listdir(os.path.join(config_dir, level_name)):
+            if 'utils' not in os.listdir(os.path.join(github_dir, level_name)):
+                os.mkdir(os.path.join(github_dir, level_name, 'utils'))
+            for dir_name in utils_subdirs:
+                if dir_name in os.listdir(os.path.join(config_dir, level_name, 'utils')):
+                    if dir_name not in os.listdir(os.path.join(github_dir, level_name, 'utils')):
+                        os.mkdir(os.path.join(github_dir, level_name, 'utils', dir_name))
+                    for file_name in os.listdir(os.path.join(config_dir, level_name, 'utils', dir_name)):
+                        if file_name[0] != '.' and file_name[0] != '_':
+                            shutil.copyfile(
+                                os.path.join(config_dir, level_name, 'utils', dir_name, file_name),
+                                os.path.join(github_dir, level_name, 'utils', dir_name, file_name))
+            for file_name in os.listdir(os.path.join(config_dir, level_name, 'utils')):
+                if file_name[-3:] == '.sh' or file_name[-3:] == '.py':
+                    shutil.copyfile(os.path.join(config_dir, level_name, 'utils', file_name),
+                                    os.path.join(github_dir, level_name, 'utils', file_name))
 
-        #####################################
-        # copy the code and namelist files
-        for dir_name in utils_subdirs:
-            if dir_name in os.listdir(os.path.join(config_dir, 'L3', model_name, 'utils')):
-                if dir_name not in os.listdir(os.path.join(github_dir, 'L3', model_name,'utils')):
-                    os.mkdir(os.path.join(github_dir, 'L3', model_name, 'utils', dir_name))
-                for file_name in os.listdir(os.path.join(config_dir, 'L3', model_name, 'utils',dir_name)):
-                    if file_name[0] != '.':
-                        shutil.copyfile(os.path.join(config_dir, 'L3', model_name, 'utils',dir_name, file_name),
-                                        os.path.join(github_dir, 'L3', model_name, 'utils',dir_name, file_name))
-        for file_name in os.listdir(os.path.join(config_dir, 'L3', model_name, 'utils')):
-            if file_name[-3:]=='.sh' or file_name[-3:]=='.py':
-                shutil.copyfile(os.path.join(config_dir, 'L3', model_name, 'utils', file_name),
-                                os.path.join(github_dir, 'L3', model_name, 'utils', file_name))
-
-    #####################################
-    # copy the L3 code and namelist files
-    if 'utils' not in os.listdir(os.path.join(github_dir, 'L3')):
-        os.mkdir(os.path.join(github_dir, 'L3', 'utils'))
-    for dir_name in utils_subdirs:
-        if dir_name in os.listdir(os.path.join(config_dir, 'L3', 'utils')):
-            if dir_name not in os.listdir(os.path.join(github_dir, 'L3', 'utils')):
-                os.mkdir(os.path.join(github_dir, 'L3', 'utils', dir_name))
-            for file_name in os.listdir(os.path.join(config_dir, 'L3', 'utils', dir_name)):
-                if file_name[0] != '.' and file_name[0] != '_':
-                    shutil.copyfile(
-                        os.path.join(config_dir, 'L3', 'utils', dir_name, file_name),
-                        os.path.join(github_dir, 'L3', 'utils', dir_name, file_name))
-    for file_name in os.listdir(os.path.join(config_dir, 'L3', 'utils')):
-        if file_name[-3:] == '.sh' or file_name[-3:] == '.py':
-            shutil.copyfile(os.path.join(config_dir, 'L3', 'utils', file_name),
-                            os.path.join(github_dir, 'L3', 'utils', file_name))
-
-    #####################################
+    ####################################################################################################################
     # copy the general code and namelist files
     if 'utils' not in os.listdir(github_dir):
         os.mkdir(os.path.join(github_dir, 'utils'))
@@ -76,7 +92,7 @@ def copy_files(config_dir, github_dir):
                         os.path.join(config_dir,  'utils', dir_name, file_name),
                         os.path.join(github_dir,  'utils', dir_name, file_name))
     for file_name in os.listdir(os.path.join(config_dir,  'utils')):
-        if file_name[-3:] == '.sh' or file_name[-3:] == '.py':
+        if file_name[-3:] == '.sh' or file_name[-3:] == '.py' and file_name[0] != '_':
             shutil.copyfile(os.path.join(config_dir, 'utils', file_name),
                             os.path.join(github_dir, 'utils', file_name))
 

@@ -20,8 +20,10 @@ def create_bathymetry_file(config_dir,level_name,model_name):
     n_cols = L_size[1]
 
     file_path = os.path.join(config_dir, 'mitgrids', model_name + '.mitgrid')
+    print(file_path)
     entire_grid = np.fromfile(file_path, dtype='>f8')
     entire_grid = np.reshape(entire_grid, (16, n_rows + 1, n_cols + 1))
+    print(np.shape(entire_grid))
 
     Lon_C = entire_grid[0, :, :]
     Lat_C = entire_grid[1, :, :]
@@ -117,9 +119,10 @@ def create_bathymetry_file(config_dir,level_name,model_name):
                 else:
                     bathy[i,j] = 0
 
-    # C = plt.imshow(bathy, origin='lower')
-    # plt.colorbar(C)
-    # plt.show()
+    C = plt.imshow(bathy, origin='lower')
+    plt.colorbar(C)
+    plt.title(np.shape(bathy))
+    plt.show()
 
     output_dir = os.path.join(config_dir,level_name,model_name)
     if 'input' not in os.listdir(output_dir):
