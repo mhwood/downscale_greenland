@@ -1,0 +1,29 @@
+# Diagnostic Package Choices
+#
+ &diagnostics_list
+     dumpAtLast = .TRUE.,
+#--
+  fields(1,1) = 'ETAN    ',
+  levels(1,1) = 1.,
+  fileName(1) = 'surfDiag',
+  frequency(1) =  -3600.,
+#
+  fields(1:4,2) = 'UVEL    ','VVEL    ','THETA   ','SALT    ',
+  fileName(2) = 'dynDiag',
+  frequency(2) = -3600.,
+  levels(1:4,2) = 1,
+#
+  fields(1:5,3) = 'SIarea  ','SIheff  ','SIhsnow ','SIuice ','SIvice ',
+  fileName(3) = 'seaiceDiag',
+  frequency(3) = -3600.,
+  levels(1:5,3) = 1,
+#
+  fields(1:2,4) = 'THETA   ','SALT    ',
+  fileName(4) = 'awDiag',
+  frequency(4) = -3600.,
+  levels(1:2,4) = 33,
+ &
+
+# Parameter for Diagnostics of per level statistics:
+ &DIAG_STATIS_PARMS
+ &
