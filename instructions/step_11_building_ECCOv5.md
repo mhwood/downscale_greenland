@@ -61,7 +61,7 @@ cd ../../MITgcm/build
 ### Step 2: Add/Edit complile time files:
 There are 7 files which need to be added or edited manually.
 
-1. `PARAMS.h`: This file is inside the build directory (edited for the tides pkg above). Here, we will add two lines for the `diagnostics_vec` package. First define the `useDiagnostics_vec` as a LOGICAL and then put it in the name list. Its easiest to find where the usual `diagnostics` package is defined, and then add lines accordingly. For example:
+1. `PARAMS.h`: This file is inside the `model/inc` directory. Here, we will add two lines for the `diagnostics_vec` package. First define the `useDiagnostics_vec` as a LOGICAL and then put it in the name list. Its easiest to find where the usual `diagnostics` package is defined, and then add lines accordingly. For example:
 ```
 1069      LOGICAL useDiagnostics
 1070      LOGICAL useDiagnostics_vec                                  # new line added
@@ -74,7 +74,7 @@ and
 1090     &        useRunClock, useEMBED_FILES,
 ```
 
-2. `packages_boot.F`: This file is inside the `${MOD540}/code` directory. For this file, we will similarly add the `diagnostics_vec` package in the same location where the `diagnostics` package is include. This occurs in three places:
+2. `packages_boot.F`: This file is inside the `model/src` directory. For this file, we will similarly add the `diagnostics_vec` package in the same location where the `diagnostics` package is include. This occurs in three places:
 ```
 90     &          useDiagnostics,
 91     &          useDiagnostics_vec,                  # added line
@@ -117,7 +117,7 @@ and
 672 #ifdef ALLOW_DIAGNOSTICS
 ```
 
-4. `packages_readparms.F`: This file is inside the `${MOD540}/code` directory. For this file, we will add the `diagnostics_vec` package after the block for the `diagnostics` package:
+4. `packages_readparms.F`: This file is inside the `model/src` directory. For this file, we will add the `diagnostics_vec` package after the block for the `diagnostics` package:
 ```
 363 #endif /* ALLOW_DIAGNOSTICS */
 364 
@@ -126,9 +126,37 @@ and
 367 #endif /* ALLOW_DIAGNOSTICS_VEC */
 ```
 
-5. `packages.conf`: This file is inside the `${MOD540}/code` directory. For this file, we simply add a line for `diagnostics_vec`.
+5. `packages_check.F`: This file is inside the `model/src` directory. For this file, we will add the `diagnostics_vec` package after the block for the `diagnostics` package:
+```
+440 #ifdef ALLOW_DIAGNOSTICS_VEC
+441       IF (useDiagnostics_vec) CALL DIAGNOSTICS_VEC_CHECK( myThid )
+442 #else
+443       IF (useDiagnostics_vec)
+444      &   CALL PACKAGES_ERROR_MSG( 'Diagnostics_vec', ' ', myThid )
+445 #endif
+```
 
-6. `CPP_OPTIONS.h`: This file is inside the `${MOD540}/code` directory. For this file, we will add three lines so that `diagnostics_vec` can access external forcing variables:
+5. `packages_check.F`: This file is inside the `model/src` directory. For this file, we will add the `diagnostics_vec` package after the block for the `diagnostics` package:
+```
+440 #ifdef ALLOW_DIAGNOSTICS_VEC
+441       IF (useDiagnostics_vec) CALL DIAGNOSTICS_VEC_CHECK( myThid )
+442 #else
+443       IF (useDiagnostics_vec)
+444      &   CALL PACKAGES_ERROR_MSG( 'Diagnostics_vec', ' ', myThid )
+445 #endif
+```
+
+6. `do_the_model_io.F`: This file is inside the `model/src` directory. For this file, we will add the `diagnostics_vec` package before the block for the `diagnostics` package:
+```
+#ifdef ALLOW_DIAGNOSTICS_VEC
+      IF ( useDiagnostics_vec )
+     &     CALL DIAGNOSTICS_VEC_OUTPUT( myTime, myIter, myThid )
+#endif
+```
+
+7. `packages.conf`: This file is inside the `code` directory. For this file, we simply add a line for `diagnostics_vec`.
+
+8. `CPP_OPTIONS.h`: This file is inside the `code` directory. For this file, we will add three lines so that `diagnostics_vec` can access external forcing variables (not available when `ecco` is used for some reason I can't figure out...):
 ```
 18 C-- Forcing code options:
 19 
@@ -137,11 +165,8 @@ and
 22 #define ALLOW_RUNOFF                                   # added line
 ```
 
-7. `DIAGNOSTICS_VEC_SIZE.h`: This is a new file, provided in this repository, which we will copy to the `${MOD540}/code` directory.
-Add this file from the code directory in this repository.
-```
-cp ../../../downscaled_east_pacific/L0_540/code/DIAGNOSTICS_VEC_SIZE.h ${MOD540}/code/
-```
+9. `DIAGNOSTICS_VEC_SIZE.h`: This is a new file, provided in this repository, which we will copy to the `$code` directory.
+Add this file from the `code` directory in this repository to the `code` directory of the model.
 
 After the package is added and code modification files are edited, the model can be rebuilt using the same commands in LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) which are copied here for convenience:
 ```
