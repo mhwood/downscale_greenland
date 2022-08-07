@@ -4,10 +4,9 @@ import numpy as np
 import argparse
 
 
-def create_mitgrids(config_dir, config_name, ecco_dir,
-                    sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict):
-
-    llc = 1080
+def create_mitgrids(config_dir, config_name, ecco_dir, llc,
+                    sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict,
+                    print_level):
 
     face_dimensions = {}
     face_index_extents = {}
@@ -41,6 +40,8 @@ def create_mitgrids(config_dir, config_name, ecco_dir,
 
     for face in range(1,6):
         if face in face_dimensions.keys():
+            if print_level>=1:
+                print('   - Creating mitgrid for face '+str(face))
 
             grid_file = os.path.join(ecco_dir,'LLC'+str(llc)+'_Files','mitgrid_tiles', 'tile' + '{:03d}'.format(face) + '.mitgrid')
             grid = np.fromfile(grid_file, '>f8')
@@ -64,17 +65,17 @@ def create_mitgrids(config_dir, config_name, ecco_dir,
             if face==5:
                 grid = np.reshape(grid, (16, llc + 1, 3*llc + 1))
 
-            print('  - Creating face '+str(face))
-            print('      - Reading in rows '+str(extents[2])+' to '+str(extents[3]+1)+' ('+str(extents[3]-extents[2]+1)+' total)')
-            print('      - Reading in cols ' + str(extents[0]) + ' to ' + str(extents[1]+1) + ' (' + str(extents[1] - extents[0]+1) + ' total)')
+            if print_level >= 2:
+                print('      - Reading in rows ' + str(extents[2]) + ' to ' + str(extents[3]+1) + ' (' + str(extents[3] - extents[2]+1) + ' total)')
+                print('      - Reading in cols ' + str(extents[0]) + ' to ' + str(extents[1]+1) + ' (' + str(extents[1] - extents[0]+1) + ' total)')
             grid = grid[:, extents[2]:extents[3]+1, extents[0]:extents[1]+1]
 
             grid.ravel(order='C').astype('>f8').tofile(output_file)
 
-    dict_file = os.path.join(config_dir, 'L1', config_name, 'namelist', 'face_dimensions.txt')
-    f = open(dict_file,'w')
-    f.write(str(face_dimensions))
-    f.close()
+    # dict_file = os.path.join(config_dir, 'L1', config_name, 'namelist', 'face_dimensions.txt')
+    # f = open(dict_file,'w')
+    # f.write(str(face_dimensions))
+    # f.close()
 
 
 

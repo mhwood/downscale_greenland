@@ -6,27 +6,17 @@ import argparse
 from pyproj import Transformer
 import sys
 
-def create_L1_CE_Greenland_mitgrid_files(config_dir, ecco_dir):
+def create_L1_CE_Greenland_mitgrid_files(config_dir, L1_model_name, ecco_dir,
+                                         sNx,sNy,global_ordered_nonblank_tiles,global_tile_face_index_dict,
+                                         print_level):
     sys.path.insert(1, os.path.join(config_dir, 'L1', 'utils', 'init_file_creation'))
-    import create_L1_mitgrids as cm
+    import create_L1_mitgrids as cLm
 
-    model_name = 'L1_CE_Greenland'
     llc = 1080
 
-    sNx = 180
-    sNy = 180
-
-    tile_face_index_dict = {103: [1, 17 * sNy, 0],
-                            104: [1, 17 * sNy, sNx],
-                            105: [1, 17 * sNy, 2 * sNx],
-                            235: [3, 3 * sNy, 0],
-                            241: [3, 4 * sNy, 0],
-                            247: [3, 5 * sNy, 0]}
-
-    ordered_nonblank_tiles = [[103, 104, 105], [247, 241, 235]]
-
-    cm.create_mitgrids(config_dir, model_name, ecco_dir,
-                       sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict)
+    cLm.create_mitgrids(config_dir, L1_model_name, ecco_dir, llc,
+                       sNx,sNy,global_ordered_nonblank_tiles,global_tile_face_index_dict,
+                       print_level)
 
 
 

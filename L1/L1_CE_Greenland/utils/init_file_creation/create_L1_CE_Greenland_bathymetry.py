@@ -6,34 +6,13 @@ import argparse
 from pyproj import Transformer
 import sys
 
-def create_L1_CE_Greenland_mitgrid_files(config_dir, ecco_dir):
+def create_L1_CE_Greenland_bathymetry(config_dir, L1_model_name, ecco_dir, sNx, sNy, print_level):
     sys.path.insert(1, os.path.join(config_dir, 'L1', 'utils', 'init_file_creation'))
     import create_L1_bathymetry as cb
 
-    model_name = 'L1_CE_Greenland'
-
     llc = 1080
 
-    sNx = 180
-    sNy = 180
-
-    # when decomposed into 180 x 180 tiles, face 1 has 17 rows before the top 1
-    # when decomposed into 180 x 180 tiles, face 3 has 3 rows before the third one
-
-    # when decomposed into 180 x 180 tiles, face 1 has 108 tiles
-    # when decomposed into 180 x 180 tiles, face 2 has 108 tiles
-    # when decomposed into 180 x 180 tiles, face 3 has 36 tiles
-
-    tile_face_index_dict = {103: [1, 17 * sNy, 0],
-                            104: [1, 17 * sNy, sNx],
-                            105: [1, 17 * sNy, 2 * sNx],
-                            235: [3, 3 * sNy, 0],
-                            241: [3, 4 * sNy, 0],
-                            247: [3, 5 * sNy, 0]}
-
-    ordered_nonblank_tiles = [[103, 104, 105], [247, 241, 235]]
-
-    cb.create_bathymetry(config_dir, model_name, ecco_dir)
+    cb.create_bathymetry(config_dir, L1_model_name, ecco_dir, sNx, sNy, llc, print_level)
 
 
 
@@ -52,6 +31,6 @@ if __name__ == '__main__':
     config_dir = args.config_dir
     ecco_dir = args.ecco_dir
 
-    create_L1_CE_Greenland_mitgrid_files(config_dir,ecco_dir)
+    create_L1_CE_Greenland_bathymetry(config_dir,ecco_dir)
    
 

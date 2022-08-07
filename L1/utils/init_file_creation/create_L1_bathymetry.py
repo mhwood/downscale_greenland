@@ -72,17 +72,14 @@ def read_llc_bathymetry_file_to_faces(grid_file,llc=1080):
 
     return(grid_faces)
 
-def create_bathymetry(config_dir, model_name, ecco_dir):
-
-    llc = 1080
-    compact_tile_size = 180
+def create_bathymetry(config_dir, model_name, ecco_dir, sNx, sNy, llc, print_status):
 
     faces, XC_faces, YC_faces = read_domain_face_geometry_from_mitgrids(config_dir, model_name)
 
+    if print_status>=1:
+        print('    - Reading bathymetry from the ECCO LLC'+str(llc)+' model')
     bathy_file = os.path.join(ecco_dir,'LLC'+str(llc)+'_Files','input_init', 'bathy_llc'+str(llc))
-    bathy_faces = read_llc_bathymetry_file_to_faces(bathy_file,llc=1080)
-
-    full_grid_started = False
+    bathy_faces = read_llc_bathymetry_file_to_faces(bathy_file,llc=llc)
 
     interpolated_bathy_faces = {}
 
@@ -124,13 +121,15 @@ def create_bathymetry(config_dir, model_name, ecco_dir):
     for f in range(len(faces)):
         face = faces[f]
         grid = interpolated_bathy_faces[face]
-        n_rows = int((np.shape(grid)[0] * np.shape(grid)[1]) / compact_tile_size)
-        grid = np.reshape(grid, (n_rows, compact_tile_size))
+        n_rows = int((np.shape(grid)[0] * np.shape(grid)[1]) / sNx)
+        grid = np.reshape(grid, (n_rows, sNx))
         if face == 1:
             compact_stack = grid
         else:
             compact_stack = np.concatenate([compact_stack, grid], axis=0)
 
+    if print_status>=1:
+        print('    - Outputting bathymetry as compact')
     output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'bathymetry.bin')
     compact_stack.ravel(order='C').astype('>f4').tofile(output_file)
 
