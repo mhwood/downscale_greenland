@@ -80,7 +80,8 @@
  &PARM03
  niter0=4032,
 # timesteps for testing
- nTimeSteps = 4032,
+# nTimeSteps = 25,
+ nTimeSteps = 29952,
 # nTimeSteps = 3360,
  doAB_onGtGs=.FALSE.,
  alph_AB=0.5,

@@ -15,50 +15,50 @@
 #
  exf_iprec         = 32,
  exf_yftype        = 'RL',
- useExfYearlyFields= .TRUE.,
+ useExfYearlyFields= .FALSE.,
  useExfCheckRange  = .FALSE.,
  /
 
  &EXF_NML_02
- uwindfile       = 'exf/L2_exf_UWIND',
- vwindfile       = 'exf/L2_exf_VWIND',
- atempfile         = 'exf/L2_exf_ATEMP',
- aqhfile           = 'exf/L2_exf_AQH',
- precipfile        = 'exf/L2_exf_PRECIP',
- swdownfile        = 'exf/L2_exf_SWDOWN',
- lwdownfile        = 'exf/L2_exf_LWDOWN',
-# runofffile        = 'exf/L05_exf_RUNOFF.bin',
+ uwindfile       = 'exf/L2_exf_UWIND.bin',
+ vwindfile       = 'exf/L2_exf_VWIND.bin',
+ atempfile         = 'exf/L2_exf_ATEMP.bin',
+ aqhfile           = 'exf/L2_exf_AQH.bin',
+ precipfile        = 'exf/L2_exf_PRECIP.bin',
+ swdownfile        = 'exf/L2_exf_SWDOWN.bin',
+ lwdownfile        = 'exf/L2_exf_LWDOWN.bin',
+# runofffile        = 'exf/L2_exf_RUNOFF.bin',
 #
- atempstartdate1   = 20020101,
- atempstartdate2   = 000000,
- atempperiod       = 3600.0,
+ atempstartdate1   = 20011231,
+ atempstartdate2   = 210000,
+ atempperiod       = 21600.0,
 #
- aqhstartdate1     = 20020101,
- aqhstartdate2     = 000000,
- aqhperiod         = 3600.0,
+ aqhstartdate1     = 20011231,
+ aqhstartdate2     = 210000,
+ aqhperiod         = 21600.0,
 #
- precipstartdate1  = 20020101,
- precipstartdate2  = 030000,
- precipperiod      = 3600.0,
+ precipstartdate1  = 20011231,
+ precipstartdate2  = 210000,
+ precipperiod      = 21600.0,
 #
 # runofffile        = 'runoff-2d-Fekete-1deg-mon-V4-SMOOTH.bin',
 # runoffperiod      = -12,
 #
- uwindstartdate1   = 20020101,
- uwindstartdate2   = 000000,
- uwindperiod       = 3600.0,
+ uwindstartdate1   = 20011231,
+ uwindstartdate2   = 210000,
+ uwindperiod       = 21600.0,
 #
- vwindstartdate1   = 20020101,
- vwindstartdate2   = 000000,
- vwindperiod       = 3600.0,
+ vwindstartdate1   = 20011231,
+ vwindstartdate2   = 210000,
+ vwindperiod       = 21600.0,
 #
- swdownstartdate1  = 20020101,
- swdownstartdate2  = 030000,
- swdownperiod      = 3600.0,
+ swdownstartdate1  = 20011231,
+ swdownstartdate2  = 210000,
+ swdownperiod      = 21600.0,
 #
- lwdownstartdate1  = 20020101,
- lwdownstartdate2  = 030000,
- lwdownperiod      = 3600.0,
+ lwdownstartdate1  = 20011231,
+ lwdownstartdate2  = 210000,
+ lwdownperiod      = 21600.0,
 #
  /
 

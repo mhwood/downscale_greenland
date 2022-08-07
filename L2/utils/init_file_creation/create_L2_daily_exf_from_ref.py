@@ -268,7 +268,7 @@ def create_exf_field(config_dir, L05_model_name, L2_model_name,
     source_faces,source_rows,source_cols = read_mask_reference_from_nc_dict(nc_dict_file, 'surface')
 
     for dest_file in dest_files:
-        if dest_file not in os.listdir(os.path.join(output_dir,var_name)):
+        if dest_file not in []:#os.listdir(os.path.join(output_dir,var_name)):
             # try:
             print('    - Downscaling the timesteps to be stored in file ' + str(dest_file))
             source_files = source_file_read_dict[dest_file]

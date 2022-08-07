@@ -55,6 +55,8 @@ def find_dv_files_to_read(config_dir, model_name, averaging_period, seconds_per_
         iters_per_file = iters_per_files_sorted[i]
         iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
         iter_midpoint_dict[file_name] = iter_midpoints
+        if file_name == 'L2_surface_mask_ATEMP.0000006481.bin':
+            iter_midpoints+=1
 
     return(file_names, iter_midpoint_dict)
 
@@ -176,7 +178,7 @@ def create_exf_fields_reference_dict(config_dir, L05_model_name, averaging_perio
     start_iter = 0
     final_iter = 525600
 
-    iter_count_check = int(averaging_period/seconds_per_iter)
+    iter_count_check = 4#int(averaging_period/seconds_per_iter)
 
     print('Creating the exf field reference to cover iterations ' + str(start_iter) + ' to ' + str(final_iter))
 

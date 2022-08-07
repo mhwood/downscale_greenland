@@ -448,7 +448,7 @@ def create_bc_fields_via_interpolation(config_dir, L05_model_name, L2_model_name
                      'SALT','SALT','SALT',
                      'UVEL','UVEL','UVEL',
                      'VVEL','VVEL','VVEL',
-                     'UICE','UICE','IUCE',
+                     'UICE','UICE','UICE',
                      'VICE','VICE','VICE',
                      'HSNOW','HSNOW','HSNOW',
                      'HEFF','HEFF','HEFF',

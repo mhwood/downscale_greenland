@@ -3,7 +3,7 @@
 #
  OBCSfixTopo=.FALSE.,
 #
- OB_Jsouth= 24*1,
+ OB_Jsouth= 240*1,
  OB_Ieast = 240*-1,
  OB_Jnorth = 240*-1,
 #
@@ -30,25 +30,25 @@
  OBSsFile = 'obcs/L2_BC_south_SALT.bin',
  OBNsFile = 'obcs/L2_BC_north_SALT.bin',
 #
- OBEaFile = 'obcs/L2_BC_east_SIarea.bin',
- OBSaFile = 'obcs/L2_BC_south_SIarea.bin',
- OBNaFile = 'obcs/L2_BC_north_SIarea.bin',
+ OBEaFile = 'obcs/L2_BC_east_AREA.bin',
+ OBSaFile = 'obcs/L2_BC_south_AREA.bin',
+ OBNaFile = 'obcs/L2_BC_north_AREA.bin',
 #
- OBEhFile = 'obcs/L2_BC_east_SIhsnow.bin',
- OBShFile = 'obcs/L2_BC_south_SIhsnow.bin',
- OBNhFile = 'obcs/L2_BC_north_SIhsnow.bin',
+ OBEhFile = 'obcs/L2_BC_east_HSNOW.bin',
+ OBShFile = 'obcs/L2_BC_south_HSNOW.bin',
+ OBNhFile = 'obcs/L2_BC_north_HSNOW.bin',
 #
- OBEsnFile = 'obcs/L2_BC_east_SIheff.bin',
- OBSsnFile = 'obcs/L2_BC_south_SIheff.bin',
- OBNsnFile = 'obcs/L2_BC_north_SIheff.bin',
+ OBEsnFile = 'obcs/L2_BC_east_HEFF.bin',
+ OBSsnFile = 'obcs/L2_BC_south_HEFF.bin',
+ OBNsnFile = 'obcs/L2_BC_north_HEFF.bin',
 #
- OBEuiceFile = 'obcs/L2_BC_east_SIuice.bin',
- OBSuiceFile = 'obcs/L2_BC_south_SIuice.bin',
- OBNuiceFile = 'obcs/L2_BC_north_SIuice.bin',
+ OBEuiceFile = 'obcs/L2_BC_east_UICE.bin',
+ OBSuiceFile = 'obcs/L2_BC_south_UICE.bin',
+ OBNuiceFile = 'obcs/L2_BC_north_UICE.bin',
 #
- OBEviceFile = 'obcs/L2_BC_east_SIvice.bin',
- OBSviceFile = 'obcs/L2_BC_south_SIvice.bin',
- OBNviceFile = 'obcs/L2_BC_north_SIvice.bin',
+ OBEviceFile = 'obcs/L2_BC_east_VICE.bin',
+ OBSviceFile = 'obcs/L2_BC_south_VICE.bin',
+ OBNviceFile = 'obcs/L2_BC_north_VICE.bin',
  &
 
  &OBCS_PARM02
@@ -56,8 +56,8 @@
 
  &OBCS_PARM03
  spongeThickness = 10,
- Urelaxobcsinner = 86400.E0,
- Vrelaxobcsinner = 86400.E0,
- Urelaxobcsbound=3600.E0,
- Vrelaxobcsbound=3600.E0,
+ Urelaxobcsinner = 1296000.E0,
+ Vrelaxobcsinner = 1296000.E0,
+ Urelaxobcsbound=43200.E0,
+ Vrelaxobcsbound=43200.E0,
  &

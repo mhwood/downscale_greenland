@@ -17,8 +17,8 @@ def create_exf_ref(config_dir):
 
     print('Creating the External Forcing ref file for the '+L2_model_name+' model')
 
-    averaging_period = 3600
-    seconds_per_iter = 150
+    averaging_period = 21600
+    seconds_per_iter = 600
 
     # pass to general function to generate mitgrid
     cexr.create_exf_fields_reference_dict(config_dir, L05_model_name, averaging_period, seconds_per_iter)

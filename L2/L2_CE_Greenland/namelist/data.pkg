@@ -7,6 +7,6 @@
  useMNC = .TRUE.,
  useDiagnostics_vec = .TRUE.,
  useSALT_PLUME  = .TRUE.,
-# useObcs=.TRUE.,
+ useObcs=.TRUE.,
  useSeaice=.TRUE.,
  &

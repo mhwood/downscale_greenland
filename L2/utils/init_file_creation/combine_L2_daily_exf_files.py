@@ -32,7 +32,7 @@ def get_dest_file_list(var_name,n_rows_L2,n_cols_L2,
                 if test_date >= start_date and test_date <= final_date:
                     dest_file = 'L2_exf_' + var_name + '.' + str(year) + '{:02d}'.format(month)+ '{:02d}'.format(day) + '.bin'
                     dest_files.append(dest_file)
-                    nTimesteps = 24
+                    nTimesteps = 4
                     total_timesteps += nTimesteps
                     dest_file_shapes[dest_file] = (nTimesteps, n_rows_L2, n_cols_L2)
 

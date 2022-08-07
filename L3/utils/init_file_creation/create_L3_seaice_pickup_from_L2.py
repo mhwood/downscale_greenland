@@ -93,20 +93,21 @@ def write_pickup_file(output_file,dtype,pickup_grid,subset_metadata):
     f.write(output)
     f.close()
 
-def create_L3_seaice_pickup_file(config_dir, L2_model_name, L3_model_name):
+def create_L3_seaice_pickup_file(config_dir, L3_model_name, L2_model_name, iter_number, print_level):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils', 'init_file_creation'))
     import downscale_functions as df
 
-    print('    - Creating the seaice pickup file for the '+L3_model_name+' model from L2 output')
+    if print_level >= 1:
+        print('    - Creating the seaice pickup file for the ' + L3_model_name + ' model from L2 output')
 
     # step 0: get the model domain
     L2_XC, L2_YC, L2_delR = read_grid_geometry_from_nc(config_dir, L2_model_name)
-
     L3_XC, L3_YC, L3_delR = read_grid_geometry_from_nc(config_dir, L3_model_name)
 
-    print('    - Reading in variables from the L2 seaice pickup file')
-    seaice_pickup_file_path = os.path.join(config_dir,'L2',L2_model_name,'run','pickup_seaice.0000008064')
+    if print_level >= 1:
+        print('    - Reading in variables from the L2 seaice pickup file')
+    seaice_pickup_file_path = os.path.join(config_dir,'L2',L2_model_name,'run','pickup_seaice.'+'{:010d}'.format(iter_number))
     var_names, _, var_grids, pickup_metadata = read_seaice_pickup_file(seaice_pickup_file_path)
 
     # for i in range(len(pickup_var_names)):
@@ -145,14 +146,16 @@ def create_L3_seaice_pickup_file(config_dir, L2_model_name, L3_model_name):
     L2_XC = L2_XC[:, min_col:max_col]
     L2_YC = L2_YC[:, min_col:max_col]
 
-    print('    - Downscaling the pickup grids')
+    if print_level >= 1:
+        print('    - Downscaling the pickup grids')
     interp_grids = []
     for vn in range(len(var_names)):
         var_name = var_names[vn]
 
         # if var_name in ['EtaN']:
         L2_var = var_grids[vn]
-        print('      - Downscaling ' + var_name)
+        if print_level >= 2:
+            print('        - Downscaling ' + var_name)
 
         if var_name in ['siVICE']:
             L2_wet_cells = read_wetgrid_from_nc(config_dir, L2_model_name, hFac='S')
@@ -178,31 +181,37 @@ def create_L3_seaice_pickup_file(config_dir, L2_model_name, L3_model_name):
         # plt.imshow(L2_wet_cells[0,:,:])
         # plt.show()
 
-        print('        Variable shapes:')
-        print('            L2_XC: ' + str(np.shape(L2_XC)))
-        print('            L2_YC: ' + str(np.shape(L2_YC)))
-        print('            L2_var: ' + str(np.shape(L2_var)))
-        print('            L2_wet_cells: ' + str(np.shape(L2_wet_cells)))
-        # print('            L2_wet_cells_on_L3: ' + str(np.shape(L2_wet_cells_on_L3)))
-        print('            L3_XC: ' + str(np.shape(L3_XC)))
-        print('            L3_YC: ' + str(np.shape(L3_YC)))
-        print('            L3_wet_cells ' + str(np.shape(L3_wet_cells)))
+        if print_level >= 3:
+            print('        - Variable shapes:')
+            print('            - L2_XC: ' + str(np.shape(L2_XC)))
+            print('            - L2_YC: ' + str(np.shape(L2_YC)))
+            print('            - L2_var: ' + str(np.shape(L2_var)))
+            print('            - L2_wet_cells: ' + str(np.shape(L2_wet_cells)))
+            # print('            L2_wet_cells_on_L3: ' + str(np.shape(L2_wet_cells_on_L3)))
+            print('            - L3_XC: ' + str(np.shape(L3_XC)))
+            print('            - L3_YC: ' + str(np.shape(L3_YC)))
+            print('            - L3_wet_cells ' + str(np.shape(L3_wet_cells)))
 
         if var_name in ['siAREA','siHEFF','siHSNOW']:
             remove_zeros = False
         else:
             remove_zeros = True
 
+        if print_level >= 4:
+            printing = True
+        else:
+            printing = False
+
         interp_field = df.downscale_3D_field(L2_XC, L2_YC, L2_var,
                                           L2_wet_cells, L2_wet_cells_on_L3,
                                           L3_XC, L3_YC, L3_wet_cells,
-                                          printing=True, remove_zeros = remove_zeros)
+                                          printing=printing, remove_zeros = remove_zeros)
 
-        plt.subplot(1,2,1)
-        plt.imshow(L2_var[0, :,:],origin='lower')
-        plt.subplot(1,2,2)
-        plt.imshow(interp_field[0,:,:],origin='lower')
-        plt.show()
+        # plt.subplot(1,2,1)
+        # plt.imshow(L2_var[0, :,:],origin='lower')
+        # plt.subplot(1,2,2)
+        # plt.imshow(interp_field[0,:,:],origin='lower')
+        # plt.show()
 
         # else:
         #     if var_name.lower() not in ['etan','detahdt','etah']:
@@ -215,7 +224,8 @@ def create_L3_seaice_pickup_file(config_dir, L2_model_name, L3_model_name):
     pickup_grid = stack_grids_to_pickup(interp_grids)
 
     output_dir = os.path.join(config_dir,'L3', L3_model_name, 'input')
-    output_file = os.path.join(output_dir, 'pickup_seaice.0000008064')
+    output_file = os.path.join(output_dir, 'pickup_seaice.'+'{:010d}'.format(2*iter_number))
+    pickup_metadata['timestepnumber'] = [2 * iter_number]
     dtype = '>f8'
     write_pickup_file(output_file, dtype, pickup_grid, pickup_metadata)
 

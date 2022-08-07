@@ -6,7 +6,8 @@ import argparse
 import matplotlib.pyplot as plt
 import cmocean.cm as cm
 from PIL import Image, ImageDraw
-
+from osgeo import gdal
+from pyproj import Transformer
 
 def read_geometry_from_grid_tiles_nc(config_dir,model_name):
 
@@ -58,16 +59,82 @@ def read_geometry_from_grid_nc(config_dir,model_name):
 
     return(XC, YC, Depth)
 
-def generate_subdomain_plot(config_dir,model_name,
+def reproject_points(points,inputCRS,outputCRS,x_column=0,y_column=1):
+
+    transformer = Transformer.from_crs('EPSG:' + str(inputCRS), 'EPSG:' + str(outputCRS))
+
+    # There seems to be a serious problem with pyproj
+    # The x's and y's are mixed up for these transformations
+    #       For 4326->3413, you put in (y,x) and get out (x,y)
+    #       Foe 3413->4326, you put in (x,y) and get out (y,x)
+    # Safest to run check here to ensure things are outputting as expected with future iterations of pyproj
+
+    if inputCRS == 4326 and outputCRS == 3413:
+        x2, y2 = transformer.transform(points[:, y_column], points[:, x_column])
+        x2 = np.array(x2)
+        y2 = np.array(y2)
+    elif inputCRS == 3413 and outputCRS == 4326:
+        y2, x2 = transformer.transform(points[:, x_column], points[:, y_column])
+        x2 = np.array(x2)
+        y2 = np.array(y2)
+    elif str(inputCRS)[:3] == '326' and outputCRS == 3413:
+        x2, y2 = transformer.transform(points[:, y_column], points[:, x_column])
+        x2 = np.array(x2)
+        y2 = np.array(y2)
+        run_test = False
+    else:
+        raise ValueError('Reprojection with this epsg is not safe - no test for validity has been implemented')
+
+    output_polygon = np.copy(points)
+    output_polygon[:, x_column] = x2
+    output_polygon[:, y_column] = y2
+    return output_polygon
+
+def read_background_imagery(file_path):
+    ds = gdal.Open(file_path)
+    R = np.array(ds.GetRasterBand(1).ReadAsArray())
+    G = np.array(ds.GetRasterBand(2).ReadAsArray())
+    B = np.array(ds.GetRasterBand(3).ReadAsArray())
+    rows = np.shape(R)[0]
+    cols = np.shape(R)[1]
+    R = R.reshape((rows,cols, 1))
+    G = G.reshape((rows, cols, 1))
+    B = B.reshape((rows, cols, 1))
+    image = np.concatenate([B,G,R],axis=2)
+    brightness_factor = 0.1 # 0 - 1
+    image = (np.max(image)-np.max(image)*(brightness_factor))/(np.max(image)-np.min(image))*(image-np.min(image))+np.max(image)*(brightness_factor)
+    print(np.min(image),np.max(image))
+    transform = ds.GetGeoTransform()
+    extents = [transform[0],transform[0]+transform[1]*np.shape(image)[1],transform[3]+ transform[5] * np.shape(image)[0], transform[3]]
+    # x_resolution = transform[1]
+    # y_resolution = transform[5]
+    return(image,extents)
+
+def generate_subdomain_plot(config_dir, model_name,
                             parent_XC,parent_YC,parent_Depth,
                             child_XC, child_YC):
+
+    add_background_imagery = True
+    if add_background_imagery:
+        file_path = os.path.join(config_dir,'plots','basemap',model_name+'_MODIS_20220720_3413.tif')
+        print(file_path)
+        background_image, extents = read_background_imagery(file_path)
 
     output_path = os.path.join(config_dir,'plots','bathymetry',model_name+'_bathymetry.png')
 
     fig = plt.figure(figsize=(12, 12))
     # plt.style.use('dark_background')
 
-    plt.imshow(parent_Depth, cmap=cm.deep, vmin=0, vmax=3000, origin='lower')#,
+    plt.imshow(background_image, extent = extents,alpha=0.7)
+
+    points = np.column_stack([parent_XC.ravel(), parent_YC.ravel()])
+    points = reproject_points(points, inputCRS=4326, outputCRS=3413)
+    X = np.reshape(points[:, 0], np.shape(parent_XC))
+    Y = np.reshape(points[:, 1], np.shape(parent_YC))
+    masked_depth = np.ma.masked_where(parent_Depth<=0,parent_Depth)
+    plt.pcolormesh(X, Y, masked_depth, shading='nearest',cmap=cm.deep)
+
+    # plt.imshow(parent_Depth, cmap=cm.deep, vmin=0, vmax=3000, origin='lower')#,
                    # extent = [np.min(parent_XC), np.max(parent_XC), np.min(parent_YC), np.max(parent_YC)])
 
     # if len(child_XC)>0:
@@ -192,24 +259,24 @@ def combine_panels_to_figure(config_dir, L0_model_name, L1_model_name, L2_model_
 
 def create_nested_plot(config_dir, L1_model_name, L2_model_name, L3_model_name):
 
-    L1_XC, L1_YC, L1_Depth = read_geometry_from_grid_tiles_nc(config_dir, L1_model_name)
+    # L1_XC, L1_YC, L1_Depth = read_geometry_from_grid_tiles_nc(config_dir, L1_model_name)
     L2_XC, L2_YC, L2_Depth = read_geometry_from_grid_nc(config_dir, L2_model_name)
     L3_XC, L3_YC, L3_Depth = read_geometry_from_grid_nc(config_dir, L3_model_name)
 
-    generate_subdomain_plot(config_dir, L1_model_name,
-                            L1_XC, L1_YC, L1_Depth,
-                            L2_XC, L2_YC)
+    # generate_subdomain_plot(config_dir, L1_model_name,
+    #                         L1_XC, L1_YC, L1_Depth,
+    #                         L2_XC, L2_YC)
 
     generate_subdomain_plot(config_dir, L2_model_name,
                             L2_XC, L2_YC, L2_Depth,
                             L3_XC, L3_YC)
 
-    generate_subdomain_plot(config_dir, L3_model_name,
-                            L3_XC, L3_YC, L3_Depth,
-                            child_XC = [], child_YC = [])
+    # generate_subdomain_plot(config_dir,L3_model_name,
+    #                         L3_XC, L3_YC, L3_Depth,
+    #                         child_XC = [], child_YC = [])
 
-    L0_model_name = 'L0_Global'
-    combine_panels_to_figure(config_dir, L0_model_name, L1_model_name, L2_model_name, L3_model_name)
+    # L0_model_name = 'L0_Global'
+    # combine_panels_to_figure(config_dir, L0_model_name, L1_model_name, L2_model_name, L3_model_name)
 
 
 

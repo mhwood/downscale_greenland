@@ -106,7 +106,7 @@ def stitch_grid_files(config_dir):
 
     model_name = 'L3_Scoresby_Sund'
     ordered_tiles = [[1,2],[3,4],[5,6]]
-    Nr = 90
+    Nr = 67
     sNx = 210
     sNy = 150
 
@@ -115,6 +115,14 @@ def stitch_grid_files(config_dir):
     write_grid_to_nc(config_dir, model_name,
                      XC, YC, DXC, DYC,
                      hFacC, hFacS, hFacW, DRF, Depth)
+
+    zero_rows = 0
+    for i in range(np.shape(hFacC)[0]):
+        if np.all(hFacC[i,:,:]==0):
+            zero_rows+=1
+
+    if zero_rows>1:
+        print('    - The grid has '+str(zero_rows)+' zero rows - consider chopping off some of them to reduce computational time')
 
 
 

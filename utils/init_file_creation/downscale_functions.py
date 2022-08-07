@@ -420,15 +420,15 @@ def downscale_3D_field(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
                        mean_vertical_difference=0,fill_downward=True,printing=False,remove_zeros=True):
 
     # full_grid = np.zeros_like(L1_wet_grid).astype(float)
-    full_grid = np.zeros((np.shape(L0_var)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
+    full_grid = np.zeros((np.shape(L1_wet_grid)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
 
-    for k in range(np.shape(L0_var)[0]):
+    for k in range(np.shape(L1_wet_grid)[0]):
 
         continue_to_interpolation = True
 
         if continue_to_interpolation:
             if printing:
-                print('    Working on level ' + str(k) + ' of ' + str(np.shape(L0_var)[0])+' ('+str(np.sum(L1_wet_grid[k, :, :] > 0))+' nonzero points found)')
+                print('                - Working on level ' + str(k) + ' of ' + str(np.shape(L1_wet_grid)[0])+' ('+str(np.sum(L1_wet_grid[k, :, :] > 0))+' nonzero points found)')
             if np.any(L1_wet_grid[k, :, :] > 0):
                 # take an initial stab at the interpolation
                 L0_points = np.hstack([np.reshape(L0_XC, (np.size(L0_XC), 1)),
@@ -501,7 +501,7 @@ def downscale_3D_points(L0_points, L0_var, L0_wet_grid, #L0_wet_grid_on_L1,
                        mean_vertical_difference=0,fill_downward=True,printing=False,remove_zeros=True):
 
     # full_grid = np.zeros_like(L1_wet_grid).astype(float)
-    full_grid = np.zeros((np.shape(L0_var)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
+    full_grid = np.zeros((np.shape(L1_wet_grid)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
     all_L0_points = np.copy(L0_points)
 
     for k in range(np.shape(L0_var)[0]):

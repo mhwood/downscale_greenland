@@ -119,7 +119,7 @@ def create_L2_diagnostic_vec_masks(config_dir, L2_config_name, L3_config_name):
         mask.ravel(order='C').astype('>f4').tofile(output_file)
 
     output_dir = os.path.join(config_dir, 'L2', L2_config_name, 'namelist')
-    output_file_name = 'L3_dv_mask_reference_dict.nc'
+    output_file_name = 'L2_dv_mask_reference_dict.nc'
     output_mask_dictionary_to_nc(output_dir, output_file_name, all_mask_dicts, mask_names_list)
 
 
