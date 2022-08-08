@@ -26,16 +26,13 @@ C Enable OB conditions following Stevens (1990)
 #undef ALLOW_OBCS_STEVENS
 
 C Allow sponge layer treatment of open boundary conditions
-#undef ALLOW_OBCS_SPONGE
+#define ALLOW_OBCS_SPONGE
 
 C Include hooks to sponge layer treatment of pkg/seaice variables
 #undef ALLOW_OBCS_SEAICE_SPONGE
 
 C balance barotropic velocity
 #define ALLOW_OBCS_BALANCE
-
-C balance barotropic velocity using smoothed imbalance
-#define ALLOW_OBCS_SMOOTH_BALANCE
 
 C add tidal contributions to normal OB flow
 C NOTE that at the moment tidal forcing is applied

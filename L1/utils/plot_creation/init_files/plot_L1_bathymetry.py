@@ -18,8 +18,6 @@ def create_bathymetry_plot(config_dir, L1_model_name, sNx, sNy, faces, face_size
     n_rows = int(np.size(bathy_compact)/sNx)
     bathy_compact = np.reshape(bathy_compact,(n_rows,sNx))
 
-    print(np.shape(bathy_compact))
-
     bathy_grid = Lf.read_compact_grid_to_stitched_grid(bathy_compact, sNx, sNy, faces, face_size_dict)
     depth = -1*bathy_grid
 

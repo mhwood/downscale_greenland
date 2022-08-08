@@ -2,10 +2,11 @@
  &PACKAGES
  useCAL         = .TRUE.,
  useKPP         = .TRUE.,
-# useEXF         = .TRUE.,
+ useEXF         = .TRUE.,
  useDiagnostics = .TRUE.,
  useMNC = .TRUE.,
-# useDiagnostics_vec = .TRUE.,
+ useDiagnostics_vec = .TRUE.,
  useSALT_PLUME  = .TRUE.,
-# useObcs=.TRUE.,
+ useObcs=.TRUE.,
+ useSeaice=.TRUE.,
  &

@@ -4,36 +4,33 @@ import argparse
 import sys
 
 
-def create_pickup_file(config_dir):
+def create_seaice_pickup_file(config_dir, model_name,
+                       sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict, face_size_dict,
+                       ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
+                       parent_model_pickup_iteration, print_level):
 
     sys.path.insert(1, os.path.join(config_dir,'L1','utils','init_file_creation'))
-    import create_L1_ASTE_seaice_pickup as casp
+    source = 'ECCO'
+    import create_L1_ECCO_seaice_pickup as cesp
 
-    model_name = 'L1_CE_Greenland'
-    llc = 1080
+    ###################################################################
+    # these are the ecco functions
 
-    sNx = 180
-    sNy = 180
+    cesp.create_L1_ECCO_seaice_pickup_file(config_dir, model_name,
+                                           sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict, face_size_dict,
+                                           ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
+                                           parent_model_pickup_iteration, print_level)
 
-    tile_face_index_dict = {1: [1, 0, 0],
-                            2: [1, 0, sNx],
-                            3: [1, 0, 2 * sNx],
-                            4: [3, 0, 0],
-                            5: [3, sNy, 0],
-                            6: [3, 2 * sNy, 0]}
-
-    ordered_nonblank_tiles = [[1, 2, 3], [6, 5, 4]]
-
-    ordered_aste_tiles = [[5,6],[14,11]]
-    ordered_aste_tile_rotations = [[0,0],[3,3]] # rotations are counter-clockwise
-
-    casp.create_L1_ASTE_seaice_pickup_file(config_dir,model_name,
-                                   sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict,
-                                   ordered_aste_tiles, ordered_aste_tile_rotations)
-
-
-
-
+    # ###################################################################
+    # # these are the aste functions
+    # import create_L1_ASTE_pickup as cap
+    #
+    # ordered_aste_tiles = [[27, 5, 6], [27, 14, 11]]
+    # ordered_aste_tile_rotations = [[1, 0, 0], [2, 3, 3]]  # rotations are counter-clockwise
+    #
+    # cap.create_L1_ASTE_seaice_pickup_file(config_dir,model_name,
+    #                                sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict,
+    #                                ordered_aste_tiles, ordered_aste_tile_rotations)
 
 
 if __name__ == '__main__':

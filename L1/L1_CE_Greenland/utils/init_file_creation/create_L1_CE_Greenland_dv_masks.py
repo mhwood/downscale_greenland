@@ -71,26 +71,26 @@ def read_parent_XC_YC(config_dir,model_name,faces,size_dict):
 
     return(XC_faces, YC_faces, Bathy_faces)
 
+def read_grid_geometry_from_nc(config_dir, model_name):
+    file_path = os.path.join(config_dir, 'nc_grids', model_name + '_grid.nc')
+    ds = nc4.Dataset(file_path)
+    XC = ds.variables['XC'][:,:]
+    YC = ds.variables['YC'][:,:]
+    ds.close()
+    return(XC, YC)
 
-def read_child_XC_YC(config_dir, model_name, n_cols, n_rows):
-    mitgrid_file = os.path.join(config_dir,'mitgrids', model_name+'.mitgrid')
-    grid_dict = sg.gridio.read_mitgridfile(mitgrid_file, n_cols, n_rows)
-    XC = grid_dict['XC'].T
-    YC = grid_dict['YC'].T
-    return(XC,YC)
-
-
-def create_mask_faces(faces, resolution, XC_faces, YC_faces, XC_boundary, YC_boundary):
+def create_mask_faces(faces, resolution, XC_faces, YC_faces, Bathy_faces, XC_boundary, YC_boundary):
     mask_faces = {}
     mask_indices = []
     counter = 1
     for face in faces:
         mask_face = np.zeros_like(XC_faces[face])
+        bathy_face = Bathy_faces[face]
         for i in range(len(XC_boundary)):
             dist = ((XC_faces[face]-XC_boundary[i])**2 + (YC_faces[face]-YC_boundary[i])**2)**0.5
             rows, cols = np.where(dist<resolution*np.sqrt(2))
             for i in range(len(rows)):
-                if mask_face[rows[i],cols[i]]==0:
+                if mask_face[rows[i],cols[i]]==0 and bathy_face[rows[i],cols[i]]<0:
                     mask_face[rows[i],cols[i]] = counter
                     mask_indices.append([face,rows[i],cols[i]])
                     counter +=1
@@ -119,92 +119,75 @@ def output_mask_dictionary_to_nc(output_dir,output_file_name,all_mask_dicts,mask
 
 ########################################################################################################################
 
-def create_dv_masks(config_dir):
+def create_dv_masks(config_dir, L1_model_name, L2_model_name,
+                    sNx, sNy, face_size_dict, print_level):
 
-    print_status = True
-
-    parent_model_name = 'L1_CE_Greenland'
-    child_model_name = 'L2_CE_Greenland'
-
-    if print_status:
-        print('Creating the diagnostics_vec masks to use in the L0 domain')
-    #
     # if 'input' not in os.listdir('..'):
     #     os.mkdir(os.path.join('..','input'))
-    if 'dv' not in os.listdir(os.path.join(config_dir,'L1',parent_model_name,'input')):
-        os.mkdir(os.path.join(config_dir,'L1',parent_model_name,'input','dv'))
-
-    ###############################################################################################
-    # Read in the grid geometries from dictionaries
-
-    faces_dim_file = os.path.join(config_dir, 'L1', parent_model_name, 'namelist', 'face_dimensions.txt')
-    f = open(faces_dim_file)
-    dict_str = f.read()
-    f.close()
-    L1_size_dict = ast.literal_eval(dict_str)
-    L1_faces = list(L1_size_dict.keys())
-
-    f = open(os.path.join(config_dir, 'domain_sizes.txt'))
-    dict_str = f.read()
-    f.close()
-    size_dict = ast.literal_eval(dict_str)
-    L2_size = size_dict['L2_CE_Greenland']
-    L2_n_rows = L2_size[0]
-    L2_n_cols = L2_size[1]
-    dtype = '>f4'
+    if 'dv' not in os.listdir(os.path.join(config_dir,'L1',L1_model_name,'input')):
+        os.mkdir(os.path.join(config_dir,'L1',L1_model_name,'input','dv'))
 
     ###############################################################################################
     # Read in the grids
 
-    if print_status:
-        print('    Reading in the L0 domain files over the Pacific')
+    L1_size_dict = face_size_dict
+    L1_faces = list(L1_size_dict.keys())
 
-    # read the main ECCO grid XC and YC as compacts
-
-    XC_faces, YC_faces, Bathy_faces = read_parent_XC_YC(config_dir,parent_model_name,L1_faces,L1_size_dict)
+    if print_level>=1:
+        print('    - Reading in the L1 face geometry')
+    XC_faces, YC_faces, Bathy_faces = read_parent_XC_YC(config_dir,L1_model_name,L1_faces,L1_size_dict)
 
     # read the extended subset of the XC and YC grids
-    child_XC, child_YC = read_child_XC_YC(config_dir, child_model_name, L2_n_cols, L2_n_rows)
-    if print_status:
-        print('    The subdomain has shape '+str(np.shape(child_XC)))
+    L2_XC, L2_YC = read_grid_geometry_from_nc(config_dir, L2_model_name)
+    if print_level>=1:
+        print('    - The subdomain has shape '+str(np.shape(L2_XC)))
 
     ###############################################################################################
     # Create the masks
 
     resolution = 1/12
-    sNx = 180
 
     mask_names_list = []
     all_mask_dicts = []
 
-    for boundary in ['north','south','east']:
+    for boundary in ['north','south','east','surface']:
+        if print_level >= 1:
+            print('    - Creating the ' + boundary +' mask')
+
         if boundary == 'south':
-            XC_boundary = child_XC[0,:]
-            YC_boundary = child_YC[0,:]
+            XC_boundary = L2_XC[0,:]
+            YC_boundary = L2_YC[0,:]
 
         if boundary == 'north':
-            XC_boundary = child_XC[-1,:]
-            YC_boundary = child_YC[-1,:]
+            XC_boundary = L2_XC[-1,:]
+            YC_boundary = L2_YC[-1,:]
 
         if boundary == 'east':
-            XC_boundary = child_XC[:,-1]
-            YC_boundary = child_YC[:,-1]
+            XC_boundary = L2_XC[:,-1]
+            YC_boundary = L2_YC[:,-1]
 
         if boundary == 'west':
-            XC_boundary = child_XC[:,0]
-            YC_boundary = child_YC[:,0]
+            XC_boundary = L2_XC[:,0]
+            YC_boundary = L2_YC[:,0]
 
-        mask_faces, mask_indices = create_mask_faces(L1_faces, resolution, XC_faces, YC_faces, XC_boundary, YC_boundary)
+        if boundary == 'surface':
+            XC_boundary = L2_XC.ravel()
+            YC_boundary = L2_YC.ravel()
+
+        mask_faces, mask_indices = create_mask_faces(L1_faces, resolution, XC_faces, YC_faces, Bathy_faces, XC_boundary, YC_boundary)
         all_mask_dicts.append(mask_indices)
         mask_names_list.append(boundary)
 
-        plt.subplot(1, 2, 1)
-        C = plt.imshow(mask_faces[1],origin='lower')
-        plt.colorbar(C)
-        plt.subplot(1, 2, 2)
-        C = plt.imshow(mask_faces[3], origin='lower')
-        plt.colorbar(C)
-        plt.show()
+        if print_level>=2:
+            print('        - The '+boundary+' mask has '+str(np.shape(mask_indices)[0])+' points')
+
+        # plt.subplot(1, 2, 1)
+        # C = plt.imshow(mask_faces[1],origin='lower')
+        # plt.colorbar(C)
+        # plt.subplot(1, 2, 2)
+        # C = plt.imshow(mask_faces[3], origin='lower')
+        # plt.colorbar(C)
+        # plt.show()
 
         for f in range(len(L1_faces)):
             face = L1_faces[f]
@@ -216,10 +199,13 @@ def create_dv_masks(config_dir):
             else:
                 compact_stack = np.concatenate([compact_stack, grid], axis=0)
 
-        output_file = os.path.join(config_dir, 'L1', parent_model_name, 'input', 'dv', 'L2_'+boundary+'_BC_mask.bin')
+        if boundary!='surface':
+            output_file = os.path.join(config_dir, 'L1', L1_model_name, 'input', 'dv', 'L2_'+boundary+'_BC_mask.bin')
+        else:
+            output_file = os.path.join(config_dir, 'L1', L1_model_name, 'input', 'dv', 'L2_surface_mask.bin')
         compact_stack.ravel(order='C').astype('>f4').tofile(output_file)
 
-    output_dir = os.path.join(config_dir,'L1',parent_model_name,'namelist')
+    output_dir = os.path.join(config_dir,'L1',L1_model_name,'input')
     output_file_name = 'L1_dv_mask_reference_dict.nc'
     output_mask_dictionary_to_nc(output_dir,output_file_name,all_mask_dicts,mask_names_list)
 

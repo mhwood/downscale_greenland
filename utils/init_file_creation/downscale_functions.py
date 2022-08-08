@@ -496,6 +496,92 @@ def downscale_3D_field(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
 
     return(full_grid)
 
+def downscale_3D_field_with_zeros(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
+                                   XC_subset, YC_subset, L1_wet_grid,
+                                   mean_vertical_difference=0,fill_downward=True,printing=False,remove_zeros=True):
+
+    # full_grid = np.zeros_like(L1_wet_grid).astype(float)
+    full_grid = np.zeros((np.shape(L1_wet_grid)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
+
+    for k in range(np.shape(L1_wet_grid)[0]):
+
+        continue_to_interpolation = True
+
+        tiny_value = 1e-14
+
+        if continue_to_interpolation:
+            if printing:
+                print('                - Working on level ' + str(k) + ' of ' + str(np.shape(L1_wet_grid)[0])+' ('+str(np.sum(L1_wet_grid[k, :, :] > 0))+' nonzero points found)')
+            if np.any(L1_wet_grid[k, :, :] > 0):
+                # take an initial stab at the interpolation
+                L0_points = np.hstack([np.reshape(L0_XC, (np.size(L0_XC), 1)),
+                                       np.reshape(L0_YC, (np.size(L0_YC), 1))])
+                L0_values = np.reshape(L0_var[k, :, :], (np.size(L0_var[k, :, :]), 1))
+                L0_wet_grid_vert = np.reshape(L0_wet_grid[k, :, :], (np.size(L0_wet_grid[k, :, :]), 1))
+                L0_points = L0_points[L0_wet_grid_vert[:,0] != 0, :]
+                L0_values = L0_values[L0_wet_grid_vert[:,0] != 0, :]
+
+                # fill the zeros with a very tiny value
+                L0_values[L0_values[:, 0] == 0, :] = tiny_value
+
+                if len(L0_points)>4:
+                    grid = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='linear',fill_value=0)
+                    grid = grid[:, :, 0]
+                    # grid_nearest = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                    # grid_nearest[:,:,0]
+                    if not np.any(grid!=0):
+                        grid = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                        grid = grid[:, :, 0]
+                else:
+                    grid = np.zeros_like(XC_subset).astype(float)
+
+                # if k==0:
+                #     plt.imshow(grid,origin='lower')
+                #     plt.show()
+
+                # mask out any values which should be 0'd based on the old bathy
+                grid[L0_wet_grid_on_L1[k, :, :] == 0] = 0
+
+                # mask out any values which should be 0'd based on the new bathy
+                grid[L1_wet_grid[k, :, :] == 0] = 0
+
+                # spread the the variable outward to new wet cells
+                grid, n_remaining = spread_var_horizontally_in_wet_grid(grid, L1_wet_grid[k, :, :])
+
+                # if there are still values which need to be filled, spread downward
+                if n_remaining > 0 and fill_downward and k>0:
+                    grid = spread_var_vertically_in_wet_grid(full_grid, grid, L1_wet_grid[k, :, :], k, mean_vertical_difference)
+
+                # if, for whatever reason, there are still values to be filled, then fill em with the nearest neighbor
+                if n_remaining>0:
+                    if len(L0_points) > 0:
+                        grid_nearest = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                        grid_nearest = grid_nearest[:, :, 0]
+                        indices = np.logical_and(grid==0,L1_wet_grid[k, :, :] != 0)
+                        grid[indices] = grid_nearest[indices]
+
+                # now, add the end of it, make all of the tiny values actually 0
+                grid[np.abs(grid)<=2*tiny_value] = 0
+
+                # # if there are any issues in the surface layer, then fill with a close point
+                # if n_remaining > 0 and fill_downward and k == 0:
+                #     bad_row, bad_col = np.where(np.logical_and(grid == 0, L1_wet_grid[0,:,:] == 1))
+                #     good_row, good_col = np.where(np.logical_and(grid > 0, L1_wet_grid[0,:,:] == 1))
+                #     for ri in range(len(bad_row)):
+                #         dist = (bad_row[ri]-good_row)**2 + (bad_col[ri]-good_col)**2
+                #         fill_index = np.argmin(dist)
+                #         fill_val = grid[good_row[fill_index],good_col[fill_index]]
+                #         # print('Filling row '+str(bad_row[ri])+', col '+str(bad_col[ri])+
+                #         #       ' with value = '+str(fill_val)+' from row '+str(good_row[fill_index])+
+                #         #       ', col '+str(good_col[fill_index]))
+                #         grid[bad_row[ri],bad_col[ri]] = fill_val
+            else:
+                grid = np.zeros_like(XC_subset).astype(float)
+
+        full_grid[k, :, :] = grid[:, :]
+
+    return(full_grid)
+
 def downscale_3D_points(L0_points, L0_var, L0_wet_grid, #L0_wet_grid_on_L1,
                        XC_subset, YC_subset, L1_wet_grid,
                        mean_vertical_difference=0,fill_downward=True,printing=False,remove_zeros=True):
@@ -558,18 +644,80 @@ def downscale_3D_points(L0_points, L0_var, L0_wet_grid, #L0_wet_grid_on_L1,
                         indices = np.logical_and(grid==0,L1_wet_grid[k, :, :] != 0)
                         grid[indices] = grid_nearest[indices]
 
-                # # if there are any issues in the surface layer, then fill with a close point
-                # if n_remaining > 0 and fill_downward and k == 0:
-                #     bad_row, bad_col = np.where(np.logical_and(grid == 0, L1_wet_grid[0,:,:] == 1))
-                #     good_row, good_col = np.where(np.logical_and(grid > 0, L1_wet_grid[0,:,:] == 1))
-                #     for ri in range(len(bad_row)):
-                #         dist = (bad_row[ri]-good_row)**2 + (bad_col[ri]-good_col)**2
-                #         fill_index = np.argmin(dist)
-                #         fill_val = grid[good_row[fill_index],good_col[fill_index]]
-                #         # print('Filling row '+str(bad_row[ri])+', col '+str(bad_col[ri])+
-                #         #       ' with value = '+str(fill_val)+' from row '+str(good_row[fill_index])+
-                #         #       ', col '+str(good_col[fill_index]))
-                #         grid[bad_row[ri],bad_col[ri]] = fill_val
+            else:
+                grid = np.zeros_like(XC_subset).astype(float)
+
+        full_grid[k, :, :] = grid[:, :]
+
+    return(full_grid)
+
+def downscale_3D_points_with_zeros(L0_points, L0_var, L0_wet_grid, #L0_wet_grid_on_L1,
+                       XC_subset, YC_subset, L1_wet_grid,
+                       mean_vertical_difference=0,fill_downward=True,printing=False):
+
+    # full_grid = np.zeros_like(L1_wet_grid).astype(float)
+    full_grid = np.zeros((np.shape(L1_wet_grid)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
+    all_L0_points = np.copy(L0_points)
+
+    tiny_value = 1e-14
+
+    for k in range(np.shape(L0_var)[0]):
+
+        continue_to_interpolation = True
+
+        if continue_to_interpolation:
+            if printing:
+                print('    Working on level ' + str(k) + ' of ' + str(np.shape(L0_var)[0])+' ('+str(np.sum(L1_wet_grid[k, :, :] > 0))+' nonzero points found)')
+            if np.any(L1_wet_grid[k, :, :] > 0):
+                # take an initial stab at the interpolation
+                L0_points = np.copy(all_L0_points)
+                L0_values = np.reshape(L0_var[k, :], (np.size(L0_var[k, :]), ))
+                L0_wet_grid_vert = np.reshape(L0_wet_grid[k, :], (np.size(L0_wet_grid[k, :]), ))
+                L0_points = L0_points[L0_wet_grid_vert != 0, :]
+                L0_values = L0_values[L0_wet_grid_vert != 0]
+
+                # fill the zeros with a very tiny value
+                L0_values[L0_values == 0] = tiny_value
+
+                if len(L0_points)>4:
+                    grid = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='linear',fill_value=0)
+                    # grid = grid[:, :, 0]
+                    # grid_nearest = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                    # grid_nearest[:,:,0]
+                    if not np.any(grid!=0):
+                        grid = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                        # grid = grid[:, :, 0]
+                else:
+                    grid = np.zeros_like(XC_subset).astype(float)
+
+                # if k==0:
+                #     plt.imshow(grid,origin='lower')
+                #     plt.show()
+
+                # mask out any values which should be 0'd based on the old bathy
+                #grid[L0_wet_grid_on_L1[k, :, :] == 0] = 0
+
+                # mask out any values which should be 0'd based on the new bathy
+                grid[L1_wet_grid[k, :, :] == 0] = 0
+
+                # spread the the variable outward to new wet cells
+                grid, n_remaining = spread_var_horizontally_in_wet_grid(grid, L1_wet_grid[k, :, :])
+
+                # if there are still values which need to be filled, spread downward
+                if n_remaining > 0 and fill_downward and k>0:
+                    grid = spread_var_vertically_in_wet_grid(full_grid, grid, L1_wet_grid[k, :, :], k, mean_vertical_difference)
+
+                # if, for whatever reason, there are still values to be filled, then fill em with the nearest neighbor
+                if n_remaining>0:
+                    if len(L0_points) > 0:
+                        grid_nearest = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                        # grid_nearest = grid_nearest[:, :, 0]
+                        indices = np.logical_and(grid==0,L1_wet_grid[k, :, :] != 0)
+                        grid[indices] = grid_nearest[indices]
+
+                # now, add the end of it, make all of the tiny values actually 0
+                grid[np.abs(grid) <= 2 * tiny_value] = 0
+
             else:
                 grid = np.zeros_like(XC_subset).astype(float)
 

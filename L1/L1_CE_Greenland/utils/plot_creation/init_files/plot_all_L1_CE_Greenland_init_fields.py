@@ -7,9 +7,15 @@ import numpy as np
 def plot_L1_CE_Greenland_init_fields(config_dir):
 
     L1_model_name = 'L1_CE_Greenland'
-    pickup_iteration = 2
+    pickup_iteration = 526032
+
+    L2_model_name = 'L2_CE_Greenland'
+
+    if 'init_files' not in os.listdir(os.path.join(config_dir,'L1',L1_model_name,'plots')):
+        os.mkdir(os.path.join(config_dir,'L1',L1_model_name,'plots','init_files'))
 
     sys.path.insert(1, os.path.join(config_dir, 'L1', L1_model_name, 'utils', 'plot_creation','init_files'))
+    sys.path.insert(1, os.path.join(config_dir, 'L1', 'utils', 'plot_creation', 'init_files'))
 
     print_level = 3
 
@@ -19,7 +25,9 @@ def plot_L1_CE_Greenland_init_fields(config_dir):
     faces = [1,3]
     face_size_dict = {1:(sNy,3*sNx),3:(3*sNy,sNx)}
 
-    steps = [2]
+    exf_shape = (29, 87)
+
+    steps = [6]
 
     # step 1: plot the mitgrid components
     if 1 in steps:
@@ -33,37 +41,38 @@ def plot_L1_CE_Greenland_init_fields(config_dir):
         import plot_L1_CE_Greenland_bathymetry as pb
         pb.plot_L1_CE_Greenland_bathymetry(config_dir, L1_model_name, sNx, sNy, faces, face_size_dict)
 
-    # # step 3: make the diff_kr file
-
-    # step 4: plot the initial conditions
-    if 4 in steps:
-        print('Step 4: Plotting the pickup (initial conditions) fields for the ' + L1_model_name + ' model')
+    # step 3: plot the initial conditions
+    if 3 in steps:
+        print('Step 3: Plotting the pickup (initial conditions) fields for the ' + L1_model_name + ' model')
         import plot_L1_CE_Greenland_pickup_fields as cp
-        cp.plot_L1_CE_Greenland_pickup(config_dir, pickup_iteration)
+        cp.plot_L1_CE_Greenland_pickup(config_dir, L1_model_name, pickup_iteration,
+                                       sNx, sNy, faces, face_size_dict)
 
-    # step 5: plot the seaice initial conditions
-    if 5 in steps:
-        print('Step 5: Plotting the seaice pickup (initial conditions) fields for the ' + L1_model_name + ' model')
+    # step 4: plot the seaice initial conditions
+    if 4 in steps:
+        print('Step 4: Plotting the seaice pickup (initial conditions) fields for the ' + L1_model_name + ' model')
         import plot_L1_CE_Greenland_seaice_pickup_fields as csp
-        csp.plot_L1_CE_Greenland_seaice_pickup(config_dir, pickup_iteration)
+        csp.plot_L1_CE_Greenland_seaice_pickup(config_dir, L1_model_name, pickup_iteration,
+                                               sNx, sNy, faces, face_size_dict)
 
-    # step 6: plot the external forcing fields at a random time step
-    if 6 in steps:
-        print('Step 6: Plotting the external forcing conditions for the ' + L1_model_name + ' model at a random timestep')
+    # step 5: plot the external forcing fields at a random time step
+    if 5 in steps:
+        print('Step 5: Plotting the external forcing conditions for the ' + L1_model_name + ' model at a random timestep')
         import plot_L1_CE_Greenland_exf_fields as cef
-        cef.plot_L1_CE_Greenland_exfs(config_dir)
+        cef.plot_L1_CE_Greenland_exfs(config_dir, L1_model_name, exf_shape,
+                                      sNx, sNy, faces, face_size_dict)
 
-    # # step 6: make the external forcing conditions
-    # if 6 in steps:
-    #     print('Step 6: Creating the external forcing conditions for the ' + L1_model_name + ' model')
-    #     import create_L1_CE_Greenland_exf as ce
-    #     ce.create_exf_files(config_dir, L1_model_name, parent_model, print_level)
-    #
-    # # step 7: make the boundary conditions
-    # if 7 in steps:
-    #     print('Step 7: Creating the boundary conditions for the ' + L1_model_name + ' model')
-    #     import create_L1_CE_Greenland_BCs as cbc
-    #     cbc.create_BCs(config_dir, L1_model_name, parent_model, print_level)
+    # step 6: plot the boundary conditions at a random time step
+    if 6 in steps:
+        print('Step 6: Plotting the boundary conditions for the ' + L1_model_name + ' model')
+        import plot_L1_CE_Greenland_BC_fields as pbc
+        pbc.plot_L1_CE_Greenland_BCs(config_dir, L1_model_name, sNx, sNy)
+
+    # step 7: plot the dv mask locations
+    if 7 in steps:
+        print('Step 7: Plotting the diagnostics_vec mask locations for the ' + L1_model_name + ' model')
+        import plot_L1_dv_masks as pdv
+        pdv.plot_dv_masks(config_dir, L1_model_name, L2_model_name, sNx, sNy, faces, face_size_dict, print_level)
 
 
 

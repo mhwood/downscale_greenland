@@ -225,6 +225,76 @@ def read_ecco_grid_geometry(ecco_dir,llc,ordered_ecco_tiles,ordered_ecco_tile_ro
 #################################################################################################
 # exf functions
 
+def read_ecco_runoff_file(ecco_dir, file_name, ordered_ecco_tiles, ordered_ecco_tile_rotations, llc):
+
+    print('      - Reading from '+file_name)
+
+    timesteps = 12
+    file_path = os.path.join(ecco_dir, 'LLC' + str(llc) + '_Files', 'exf', file_name)
+    grid_array = np.fromfile(file_path, '>f4')
+    N = 13 * llc * llc
+
+    runoff_faces = {}
+
+    for i in range(1, 6):
+        if i < 3:
+            face_grid = np.zeros((timesteps, 3 * llc, llc))
+        elif i == 3:
+            face_grid = np.zeros((timesteps, llc, llc))
+        if i > 3:
+            face_grid = np.zeros((timesteps, llc, 3 * llc))
+        runoff_faces[i] = face_grid
+
+    for nr in range(timesteps):
+        points_counted = 0
+        level_grid = grid_array[nr * N:(nr + 1) * N]
+        for i in range(1, 6):
+            if i < 3:
+                n_points = 3 * llc * llc
+                grid = level_grid[points_counted:points_counted + n_points]
+                grid = np.reshape(grid, (3 * llc, llc))
+            if i == 3:
+                n_points = llc * llc
+                grid = level_grid[points_counted:points_counted + n_points]
+                grid = np.reshape(grid, (llc, llc))
+            if i > 3:
+                n_points = 3 * llc * llc
+                grid = level_grid[points_counted:points_counted + n_points]
+                grid = np.reshape(grid, (llc, 3 * llc))
+            runoff_faces[i][nr, :, :] = grid
+
+            points_counted += n_points
+
+    # for face in range(1,6):
+    #     plt.imshow(field_faces[face][0,:,:],origin='lower')
+    #     plt.show()
+
+    ecco_sNx = 90
+    ecco_sNy = 90
+
+    ecco_Runoff = np.zeros((timesteps, ecco_sNy * len(ordered_ecco_tiles), ecco_sNx * len(ordered_ecco_tiles[0])))
+
+    for r in range(len(ordered_ecco_tiles)):
+        for c in range(len(ordered_ecco_tiles[r])):
+            ecco_tile_number = ordered_ecco_tiles[r][c]
+            face, min_row, min_col = ecco_tile_face_row_col_bounds(ecco_tile_number, llc, ecco_sNx,
+                                                                   ecco_sNy)
+
+            # print('  - Reading tile '+str(ecco_tile_number)+' from face '+str(face)+' (rows '+str(min_row)+' to '+str(min_row+ecco_sNy) + \
+            #       ', cols '+str(min_col)+', '+str(min_col+ecco_sNx)+')')
+
+            # print(ecco_tile_number,face,min_row,min_col)
+            Runoff = runoff_faces[face][:, min_row:min_row + ecco_sNy, min_col:min_col + ecco_sNx]
+
+            # rotate things as necessary
+            for n in range(ordered_ecco_tile_rotations[r][c]):
+                Runoff = np.rot90(Runoff,axes=(1,2))
+
+            # put it into the big grid
+            ecco_Runoff[:, r * ecco_sNy:(r + 1) * ecco_sNy, c * ecco_sNx:(c + 1) * ecco_sNx] = Runoff
+
+    return(ecco_Runoff)
+
 def read_ecco_exf_file(ecco_dir, file_prefix, year, llc):
 
     print('      - Reading from '+file_prefix+'_'+str(year))
