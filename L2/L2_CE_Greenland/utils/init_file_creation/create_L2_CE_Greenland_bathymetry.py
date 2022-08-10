@@ -4,15 +4,15 @@ import argparse
 import sys
 
 
-def create_bathy_file(config_dir):
+def create_bathy_file(config_dir, model_name, central_wet_row, central_wet_col, hFacMinDr, hFacMin, delR, print_level):
 
     sys.path.insert(1, os.path.join(config_dir,'utils','init_file_creation'))
     import create_bathymetry as cb
 
-    model_name = 'L2_CE_Greenland'
     level_name = 'L2'
 
-    cb.create_bathymetry_file(config_dir, level_name, model_name)
+    cb.create_bathymetry_file(config_dir, level_name, model_name,
+                              central_wet_row, central_wet_col, hFacMinDr, hFacMin, delR, print_level)
 
 
 

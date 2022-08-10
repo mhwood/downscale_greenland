@@ -7,30 +7,19 @@ from pyproj import Transformer
 import sys
 
 
-def create_pickup_file(config_dir):
+def create_seaice_pickup_file(config_dir, parent_model, parent_model_pickup_iteration, L2_model_name,
+                       sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+                       faces, ordered_tiles_faces_dict, print_level):
 
     sys.path.insert(1, os.path.join(config_dir,'L2', 'utils','init_file_creation'))
-    import create_L2_seaice_pickup_from_L05 as csp
-
-    L05_model_name = 'L05_CE_Greenland'
-    L05_iteration = 1008
-    L2_model_name = 'L2_CE_Greenland'
-
-    sNx = 90
-    sNy = 90
-    ordered_nonblank_tiles = [[1, 2, 3], [6, 5, 4]]
-    ordered_nonblank_rotations = [[0, 0, 0], [3, 3, 3]]
-
-    faces = [1,3]
-    ordered_tiles_faces_dict = {1:[[1,2,3]],
-                                3:[[4],[5],[6]]}
+    import create_L2_seaice_pickup_from_L1 as csp
 
     print('Creating the pickup for the '+L2_model_name+' model')
 
     # pass to general function to generate mitgrid
-    csp.create_seaice_pickup_from_L05(config_dir, L05_model_name, L05_iteration, L2_model_name,
-                      sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
-                      faces, ordered_tiles_faces_dict)
+    csp.create_seaice_pickup_from_L1(config_dir, parent_model, parent_model_pickup_iteration, L2_model_name,
+                                     sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+                                     faces, ordered_tiles_faces_dict, print_level)
 
 
 
@@ -45,6 +34,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     config_dir = args.config_dir
 
-    create_pickup_file(config_dir)
+    create_seaice_pickup_file(config_dir)
    
 

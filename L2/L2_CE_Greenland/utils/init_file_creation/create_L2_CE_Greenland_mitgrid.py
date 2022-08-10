@@ -7,19 +7,18 @@ from pyproj import Transformer
 import sys
 
 
-def create_mitgrid(config_dir):
+def create_mitgrid(config_dir, print_level):
 
     sys.path.insert(1, os.path.join(config_dir,'L2', 'utils','init_file_creation'))
     import create_L2_mitgrid as cm
 
     model_name = 'L2_CE_Greenland'
 
-    # pass this a grid on the subdomain in EPSG 3413 coordinates
-    print('Creating the mitgrid file for the '+model_name+' model')
-
-    print('    - Generating the grid in polar coordinates')
+    if print_level>=1:
+        print('    - Generating the grid in polar coordinates')
 
     # make the point grid in polar coordinates
+    # these were the original L3 coords
     min_x = 543736
     max_x = 897457
     max_y = -1873700
@@ -57,11 +56,13 @@ def create_mitgrid(config_dir):
                   resolution)
     XG, YG = np.meshgrid(x-resolution/2,y-resolution/2)
 
-    print('    - The C grid has '+str(np.shape(XC)[0])+' rows and '+str(np.shape(XC)[1])+' cols')
-    print('    - The G grid has ' + str(np.shape(XG)[0]) + ' rows and ' + str(np.shape(XG)[1]) + ' cols')
+    if print_level >= 2:
+        print('    - The C grid has '+str(np.shape(XC)[0])+' rows and '+str(np.shape(XC)[1])+' cols')
+        print('    - The G grid has ' + str(np.shape(XG)[0]) + ' rows and ' + str(np.shape(XG)[1]) + ' cols')
 
     # reproject the grid to lon, lat
-    print('    - Reprojecting the grid to lat/lon')
+    if print_level >= 2:
+        print('        - Reprojecting the grid to lat/lon')
     transformer = Transformer.from_crs('EPSG:' + str(3413), 'EPSG:' + str(4326))
 
     Lat_C, Lon_C = transformer.transform(XC.ravel(), YC.ravel())
@@ -86,7 +87,7 @@ def create_mitgrid(config_dir):
     # plt.show()
 
     # pass to general function to generate mitgrid
-    cm.create_L2_mitgrid_file(config_dir,model_name,Lat_C, Lon_C,Lat_G, Lon_G)
+    cm.create_L2_mitgrid_file(config_dir, model_name, Lat_C, Lon_C, Lat_G, Lon_G, print_level)
 
 
 

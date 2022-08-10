@@ -8,7 +8,7 @@ import os
 def copy_files(github_dir, local):
 
     level_names = ['L1','L2','L3','L05','L0']
-    # level_names = ['L05']
+    level_names = ['L1']
 
     for level_name in level_names:
         if level_name not in os.listdir(local):

@@ -417,12 +417,18 @@ def downscale_2D_field(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
 
 def downscale_3D_field(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
                        XC_subset, YC_subset, L1_wet_grid,
-                       mean_vertical_difference=0,fill_downward=True,printing=False,remove_zeros=True):
+                       mean_vertical_difference=0,fill_downward=True,
+                       printing=False,remove_zeros=True, testing = False):
 
     # full_grid = np.zeros_like(L1_wet_grid).astype(float)
     full_grid = np.zeros((np.shape(L1_wet_grid)[0],np.shape(XC_subset)[0],np.shape(XC_subset)[1]))
 
-    for k in range(np.shape(L1_wet_grid)[0]):
+    if testing:
+        K=1
+    else:
+        K=np.shape(L1_wet_grid)[0]
+
+    for k in range(K):
 
         continue_to_interpolation = True
 
