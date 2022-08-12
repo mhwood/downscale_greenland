@@ -71,7 +71,7 @@ def create_seaice_pickup_plot(config_dir, L1_model_name, pickup_iteration,
     stitched_var_grids = []
     for var_grid in var_grids:
         var_grid_compact = var_grid[0, :, :]
-        var_grid_subset = Lf.read_compact_grid_to_stitched_grid(var_grid_compact, sNx, sNy, faces, face_size_dict)
+        var_grid_subset = Lf.read_compact_grid_to_stitched_grid(var_grid_compact, sNx, sNy, faces, face_size_dict,dim=2)
         stitched_var_grids.append(var_grid_subset)
 
     if rotate:

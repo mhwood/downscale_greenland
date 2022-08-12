@@ -40,7 +40,7 @@
  rhonil=1027.5,
  rhoConstFresh=999.8,
  eosType='JMD95Z',
- hFacMinDr=10.,
+# hFacMinDr=10.,
  hFacMin=0.3,
  hFacInf=0.1,
  hFacSup=5.,
@@ -78,10 +78,10 @@
 
 # Time stepping parameters
  &PARM03
- niter0=4032,
+ niter0=2104704,
 # timesteps for testing
-# nTimeSteps = 25,
- nTimeSteps = 29952,
+ nTimeSteps = 1152,
+# nTimeSteps = 29952,
 # nTimeSteps = 3360,
  doAB_onGtGs=.FALSE.,
  alph_AB=0.5,
@@ -93,7 +93,7 @@
  deltaTClock =150.,
  cAdjFreq=0.,
 # pChkptFreq=2592000.,
- pChkptFreq=604800.,
+ pChkptFreq=86400.,
 # chkptFreq=2592000.,
 # pChkptFreq=0.,
  chkptFreq=0.,
@@ -137,12 +137,4 @@
 # Input datasets
  &PARM05
  bathyFile      = 'L2_CE_Greenland_bathymetry.bin',
-# uVelInitFile = 'L05_IC_UVEL.bin',
-# vVelInitFile = 'L05_IC_VVEL.bin',
-# pSurfInitFile = 'L05_IC_ETAN.bin',
-# hydrogThetaFile = 'L05_IC_THETA.bin',
-# checkIniTemp=.FALSE.,
-# hydrogSaltFile = 'L05_IC_SALT.bin',
-# checkIniSalt=.FALSE.,
-# diffKrFile     = 'diff_kr.bin',
  &

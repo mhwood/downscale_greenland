@@ -14,6 +14,8 @@ def create_L1_CE_Greenland_files(config_dir):
 
     parent_model = 'L0'
     parent_model_pickup_iteration = 263016
+    parent_llc = 270
+    llc = 1080
 
     sNx = 180
     sNy = 180
@@ -40,7 +42,7 @@ def create_L1_CE_Greenland_files(config_dir):
     ordered_ecco_tiles = [[109, 25, 26], [109, 61, 58]]
     ordered_ecco_tile_rotations = [[1, 0, 0], [2, 3, 3]]  # rotations are counter-clockwise
     ecco_dir = '/Users/michwood/Documents/Research/Projects/Ocean_Modeling/ECCO'
-    llc = 270
+
 
     # ordered_aste_tiles = [[27, 5, 6], [27, 14, 11]]
     # ordered_aste_tile_rotations = [[1, 0, 0], [2, 3, 3]]  # rotations are counter-clockwise
@@ -66,7 +68,7 @@ def create_L1_CE_Greenland_files(config_dir):
     if 2 in steps:
         print('Step 2: Creating the bathymetry file for the ' + L1_model_name + ' model')
         import create_L1_CE_Greenland_bathymetry as cb
-        cb.create_L1_CE_Greenland_bathymetry(config_dir, L1_model_name, ecco_dir, sNx, sNy, print_level)
+        cb.create_L1_CE_Greenland_bathymetry(config_dir, L1_model_name, ecco_dir, sNx, sNy, face_size_dict, llc, print_level)
 
     #########################################################################################################
     # After the bathymetry is made, the *_for_grid model should be run to make the grid
@@ -86,7 +88,7 @@ def create_L1_CE_Greenland_files(config_dir):
         import create_L1_CE_Greenland_pickup as cp
         cp.create_pickup_file(config_dir, L1_model_name,
                               sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict, face_size_dict,
-                              ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
+                              ecco_dir, parent_llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
                               parent_model_pickup_iteration, print_level)
 
     # step 4: make the seaice initial conditions
@@ -95,14 +97,14 @@ def create_L1_CE_Greenland_files(config_dir):
         import create_L1_CE_Greenland_seaice_pickup as cp
         cp.create_seaice_pickup_file(config_dir, L1_model_name,
                                      sNx,sNy,ordered_nonblank_tiles,tile_face_index_dict, face_size_dict,
-                                     ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
+                                     ecco_dir, parent_llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
                                      parent_model_pickup_iteration, print_level)
 
     # step 5: make the external forcing conditions
     if 5 in steps:
         print('Step 5: Creating the external forcing conditions for the ' + L1_model_name + ' model')
         import create_L1_CE_Greenland_exf as ce
-        ce.create_exf_files(config_dir, L1_model_name, ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
+        ce.create_exf_files(config_dir, L1_model_name, ecco_dir, parent_llc, ordered_ecco_tiles, ordered_ecco_tile_rotations,
                             sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations, print_level)
 
     # step 6: make the boundary conditions
@@ -111,7 +113,7 @@ def create_L1_CE_Greenland_files(config_dir):
         import create_L1_CE_Greenland_BCs as cbc
         cbc.create_BCs(config_dir, L1_model_name,
                        sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict,
-                       ecco_dir, llc, print_level)
+                       ecco_dir, parent_llc, print_level)
 
     # step 7: make the dv masks for constructing the L2 model
     if 7 in steps:

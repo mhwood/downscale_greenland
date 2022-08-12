@@ -68,9 +68,9 @@ def create_mitgrids(config_dir, config_name, ecco_dir, llc,
             if print_level >= 2:
                 print('      - Reading in rows ' + str(extents[2]) + ' to ' + str(extents[3]+1) + ' (' + str(extents[3] - extents[2]+1) + ' total)')
                 print('      - Reading in cols ' + str(extents[0]) + ' to ' + str(extents[1]+1) + ' (' + str(extents[1] - extents[0]+1) + ' total)')
-            grid = grid[:, extents[2]:extents[3]+1, extents[0]:extents[1]+1]
 
-            grid.ravel(order='C').astype('>f8').tofile(output_file)
+            sub_grid = grid[:, extents[2]:extents[3]+1, extents[0]:extents[1]+1]
+            sub_grid.ravel(order='C').astype('>f8').tofile(output_file)
 
     # dict_file = os.path.join(config_dir, 'L1', config_name, 'namelist', 'face_dimensions.txt')
     # f = open(dict_file,'w')

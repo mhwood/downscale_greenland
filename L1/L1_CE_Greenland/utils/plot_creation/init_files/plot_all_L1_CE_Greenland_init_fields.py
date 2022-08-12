@@ -27,7 +27,7 @@ def plot_L1_CE_Greenland_init_fields(config_dir):
 
     exf_shape = (29, 87)
 
-    steps = [6]
+    steps = [3,4,5,6]
 
     # step 1: plot the mitgrid components
     if 1 in steps:

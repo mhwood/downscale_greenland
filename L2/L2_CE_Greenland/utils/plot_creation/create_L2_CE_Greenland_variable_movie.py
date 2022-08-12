@@ -29,7 +29,7 @@ def read_mnc_field(run_dir, field_name, sNx, sNy,
     for r in range(len(ordered_nonblank_tiles)):
         for c in range(len(ordered_nonblank_tiles[0])):
             tile_number = ordered_nonblank_tiles[r][c]
-            file_name = file_prefix+'.'+ '{:010d}'.format(4032) +'.t' + '{:03d}'.format(tile_number) + '.nc'
+            file_name = file_prefix+'.'+ '{:010d}'.format(2104704) +'.t' + '{:03d}'.format(tile_number) + '.nc'
             for n in range(N):
                 if file_name in os.listdir(os.path.join(run_dir, 'mnc_' + '{:04d}'.format(n + 1))):
                     print(file_name)
@@ -135,7 +135,7 @@ def plot_mnc_fields(config_dir,field_name,remove_old,skip):
 
     if field_name == 'THETA' or field_name == 'THETA_AW':
         vmin = -1.9
-        vmax = 8
+        vmax = 3.5
         cmap = cm.thermal
     if field_name == 'THETA_AW':
         vmin = -0
@@ -150,8 +150,8 @@ def plot_mnc_fields(config_dir,field_name,remove_old,skip):
         vmax = 1
         cmap = cm.balance
     if field_name == 'ETAN':
-        vmin = -1.9
-        vmax = -0.4
+        vmin = -0.4
+        vmax = 2
         cmap = 'viridis'
     if field_name == 'SPEED':
         vmin = 0

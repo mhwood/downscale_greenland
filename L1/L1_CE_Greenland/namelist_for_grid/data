@@ -90,6 +90,5 @@
 
 # Input datasets
  &PARM05
- bathyFile      = 'bathymetry.bin',
-# diffKrFile     = 'diff_kr.bin',
+ bathyFile      = 'L1_CE_Greenland_bathymetry.bin',
  &

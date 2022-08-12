@@ -7,7 +7,7 @@ import argparse
 import sys
 import ast
 
-def find_dv_files_to_read(config_dir, var_name, averaging_period, seconds_per_iter, points_per_output):
+def find_dv_files_to_read(config_dir, parent_model, var_name, boundary, Nr, averaging_period, seconds_per_iter, points_per_output):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils','init_file_creation'))
     import time_functions as tf
@@ -18,11 +18,11 @@ def find_dv_files_to_read(config_dir, var_name, averaging_period, seconds_per_it
     file_names = []
     file_iters = []
     n_files_in_files = []
-    dv_dir = os.path.join(config_dir, 'L0', 'run', 'dv')
+    dv_dir = os.path.join(config_dir, 'L1', parent_model, 'run', 'dv')
     for file_name in os.listdir(dv_dir):
-        if 'south' in file_name and var_name in file_name:
+        if boundary in file_name and var_name in file_name:
             file_iter = int(file_name.split('.')[-2])
-            iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(points_per_output))
+            iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(Nr*points_per_output))
             # iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
             file_iters.append(file_iter)
             file_names.append(file_name)
@@ -64,7 +64,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
     # create a list of daily bounds
     date_bounds = []
     for year in range(2002, 2003):
-        for month in range(1, 4):
+        for month in range(1, 3):
             if month in [1, 3, 5, 7, 8, 10, 12]:
                 nDays = 31
             elif month in [4, 6, 9, 11]:
@@ -88,7 +88,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
         date_1 = (date_set[1] - datetime(1992, 1, 1)).total_seconds()
         iter_0 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_0)
         iter_1 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_1)
-        dest_file = 'L1_BC_'+str(var_name)+'.'+str(date_set[0].year)+'{:02d}'.format(date_set[0].month)+'{:02d}'.format(date_set[0].day)+'.bin'
+        dest_file = 'L2_BC_'+str(var_name)+'.'+str(date_set[0].year)+'{:02d}'.format(date_set[0].month)+'{:02d}'.format(date_set[0].day)+'.bin'
         dest_files.append(dest_file)
         dest_file_iter_bounds[dest_file] = [iter_0,iter_1]
 
@@ -145,8 +145,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
                 max_dest_iter_index = len(source_file_names) - 1 - source_file_names[::-1].index(file_name)
                 min_dest_iter = dest_file_iters[min_dest_iter_index]
                 max_dest_iter = dest_file_iters[max_dest_iter_index]
-                if print_level >= 5:
-                    print('        - The file ' + file_name+ ' will cover iters '+str(min_dest_iter)+' to '+str(max_dest_iter))
+                # print('        - The file ' + file_name+ ' will cover iters '+str(min_dest_iter)+' to '+str(max_dest_iter))
                 source_file_iters = iter_midpoint_dict[file_name]
                 # print('            - This file has iters '+str(np.min(source_file_iters))+' to '+str(np.max(source_file_iters)))
                 # try:
@@ -166,27 +165,31 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
 ########################################################################################################################
 
 
-def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
+def create_L2_BC_ref_file(config_dir, L2_model_name, parent_model, print_level):
 
     if print_level>1:
-        print('    - Creating the BC field reference for the '+L1_model_name)
+        print('    - Creating the BC field reference for the '+L2_model_name)
 
     var_name = 'THETA'
-    boundary = 'south'
+    boundary = 'north'
 
     averaging_period = 3600
-    seconds_per_iter = 1200
-    Nr = 50
+    seconds_per_iter = 300
+
+    ds = nc4.Dataset(os.path.join(config_dir,'nc_grids',parent_model+'_grid.nc'))
+    drF = ds.variables['drF'][:]
+    ds.close()
+    Nr = len(drF)
 
     # first read how many points are expected in each iter (read from the mask reference)
-    mask_ref_file = os.path.join(config_dir,'L0','input','L0_dv_mask_reference_dict.nc')
+    mask_ref_file = os.path.join(config_dir,'L1',parent_model,'input','L1_dv_mask_reference_dict.nc')
     ds = nc4.Dataset(mask_ref_file)
-    points_per_output = Nr*len(ds.groups['south'].variables['source_rows'][:])
+    points_per_output = len(ds.groups[boundary].variables['source_rows'][:])
     ds.close()
 
     # calculate the file name iterations to read from
     #     along with the iterations these files cover
-    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, var_name, averaging_period, seconds_per_iter, points_per_output)
+    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, parent_model, var_name, boundary, Nr, averaging_period, seconds_per_iter, points_per_output)
     if print_level>=2:
         print('    - Source file summary:')
     output = '{\n'
@@ -197,7 +200,7 @@ def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
                   ', '+str(np.max(iter_midpoint_dict[file_name]))+'],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L0','run','dv','BC_source_ref.txt')
+    output_file = os.path.join(config_dir,'L1',parent_model,'run','dv','BC_source_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -235,7 +238,7 @@ def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
         output+='],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L0','run','dv','BC_dest_ref.txt')
+    output_file = os.path.join(config_dir,'L1',parent_model,'run','dv','BC_dest_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -247,7 +250,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-d", "--config_dir", action="store",
-                        help="The directory where the L1`, L2, and L1 configurations are stored.", dest="config_dir",
+                        help="The directory where the L1`, L2, and L2 configurations are stored.", dest="config_dir",
                         type=str, required=True)
 
     args = parser.parse_args()

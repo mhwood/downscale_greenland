@@ -360,127 +360,127 @@ def create_L1_BCs(config_dir,model_name,var_name,
             # Loop through the destination files
 
             for dest_file in dest_files:
-                # if dest_file not in os.listdir(os.path.join(output_dir, boundary, boundary_var_name)):
-                if print_level >= 3:
-                    print('            - Downscaling the timesteps to be stored in file ' + str(dest_file))
-                source_files = source_file_read_dict[dest_file]
-                source_file_read_indices = source_file_read_index_sets[dest_file]
+                if dest_file not in os.listdir(os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name)):
+                    if print_level >= 3:
+                        print('            - Downscaling the timesteps to be stored in file ' + str(dest_file))
+                    source_files = source_file_read_dict[dest_file]
+                    source_file_read_indices = source_file_read_index_sets[dest_file]
 
-                if print_level >= 3:
-                    print('            - Reading in the L0 diagnostics_vec output')
-                L0_boundary_points, L0_boundary_values, L0_boundary_point_hFacC = \
-                    read_L0_boundary_variable_points(L0_run_dir, boundary, var_name,
-                                                     source_files, source_file_read_indices,
-                                                     llc, Nr, faces, rows, cols,
-                                                     ecco_XC_faces, ecco_YC_faces, ecco_AngleCS_faces, ecco_AngleSN_faces, ecco_hFacC_faces,
-                                                     print_level)
+                    if print_level >= 3:
+                        print('            - Reading in the L0 diagnostics_vec output')
+                    L0_boundary_points, L0_boundary_values, L0_boundary_point_hFacC = \
+                        read_L0_boundary_variable_points(L0_run_dir, boundary, var_name,
+                                                         source_files, source_file_read_indices,
+                                                         llc, Nr, faces, rows, cols,
+                                                         ecco_XC_faces, ecco_YC_faces, ecco_AngleCS_faces, ecco_AngleSN_faces, ecco_hFacC_faces,
+                                                         print_level)
 
-                if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
-                    if boundary in ['north', 'south']:
-                        output_grid = np.zeros((n_timesteps, sNx * len(tile_numbers)))
+                    if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
+                        if boundary in ['north', 'south']:
+                            output_grid = np.zeros((n_timesteps, sNx * len(tile_numbers)))
+                        else:
+                            output_grid = np.zeros((n_timesteps, sNy * len(tile_numbers)))
                     else:
-                        output_grid = np.zeros((n_timesteps, sNy * len(tile_numbers)))
-                else:
-                    if boundary in ['north', 'south']:
-                        output_grid = np.zeros((n_timesteps, Nr, sNx * len(tile_numbers)))
+                        if boundary in ['north', 'south']:
+                            output_grid = np.zeros((n_timesteps, Nr, sNx * len(tile_numbers)))
+                        else:
+                            output_grid = np.zeros((n_timesteps, Nr, sNy * len(tile_numbers)))
+
+                    if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
+                        L0_boundary_values = L0_boundary_values[:, L0_boundary_points[:, 0] != 0]
+                        L0_boundary_values = np.reshape(L0_boundary_values, (
+                        np.shape(L0_boundary_values)[0], 1, np.shape(L0_boundary_values)[1]))
+                        L0_boundary_point_hFacC = L0_boundary_point_hFacC[:1, :]
                     else:
-                        output_grid = np.zeros((n_timesteps, Nr, sNy * len(tile_numbers)))
+                        L0_boundary_values = L0_boundary_values[:, :, L0_boundary_points[:, 0] != 0]
+                    L0_boundary_point_hFacC = L0_boundary_point_hFacC[:, L0_boundary_points[:, 0] != 0]
+                    L0_boundary_points = L0_boundary_points[L0_boundary_points[:, 0] != 0, :]
 
-                if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
-                    L0_boundary_values = L0_boundary_values[:, L0_boundary_points[:, 0] != 0]
-                    L0_boundary_values = np.reshape(L0_boundary_values, (
-                    np.shape(L0_boundary_values)[0], 1, np.shape(L0_boundary_values)[1]))
-                    L0_boundary_point_hFacC = L0_boundary_point_hFacC[:1, :]
-                else:
-                    L0_boundary_values = L0_boundary_values[:, :, L0_boundary_points[:, 0] != 0]
-                L0_boundary_point_hFacC = L0_boundary_point_hFacC[:, L0_boundary_points[:, 0] != 0]
-                L0_boundary_points = L0_boundary_points[L0_boundary_points[:, 0] != 0, :]
+                    L0_boundary_point_mask = np.copy(L0_boundary_point_hFacC)
+                    L0_boundary_point_mask[L0_boundary_point_mask > 0] = 1
 
-                L0_boundary_point_mask = np.copy(L0_boundary_point_hFacC)
-                L0_boundary_point_mask[L0_boundary_point_mask > 0] = 1
+                    for tn in range(len(tile_numbers)):
+                        tile_number = tile_numbers[tn]
+                        if tile_number>0:
+                            if print_level >= 4:
+                                print('                - Downscaling data for tile number '+str(tile_number))
 
-                for tn in range(len(tile_numbers)):
-                    tile_number = tile_numbers[tn]
-                    if tile_number>0:
-                        if print_level >= 4:
-                            print('                - Downscaling data for tile number '+str(tile_number))
+                            XC_subset, YC_subset, AngleCS_subset, AngleSN_subset, hFac_subset = \
+                                subset_tile_geometry_to_boundary(boundary, tile_number, ordered_nonblank_tiles,
+                                                                 ordered_XC_tiles, ordered_YC_tiles,
+                                                                 ordered_AngleCS_tiles, ordered_AngleSN_tiles, ordered_hfac_tiles)
 
-                        XC_subset, YC_subset, AngleCS_subset, AngleSN_subset, hFac_subset = \
-                            subset_tile_geometry_to_boundary(boundary, tile_number, ordered_nonblank_tiles,
-                                                             ordered_XC_tiles, ordered_YC_tiles,
-                                                             ordered_AngleCS_tiles, ordered_AngleSN_tiles, ordered_hfac_tiles)
-
-                        mask_subset = np.copy(hFac_subset)
-                        mask_subset[mask_subset>0]=1
-                        if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
-                            mask_subset = mask_subset[:1, :, :]
-
-                        # plt.plot(L0_boundary_points[:, 0], L0_boundary_points[:, 1], 'g.')
-                        # plt.plot(XC_subset.ravel(),YC_subset.ravel(),'k-')
-                        # plt.show()
-
-                        for timestep in range(np.shape(L0_boundary_values)[0]):
-                            # if timestep%50 == 0:
-                            #     print('        - Downscaling timestep '+str(timestep))
-
-                            if print_level >= 5:
-                                if timestep == 0:
-                                    print('                - L0_boundary_points shape: '+str(np.shape(L0_boundary_points)))
-                                    print('                - L0_boundary_values shape: ' + str(np.shape(L0_boundary_values)))
-                                    print('                - L0_boundary_point_mask shape: ' + str(np.shape(L0_boundary_point_mask)))
-                                    print('                - XC_subset shape: ' + str(np.shape(XC_subset)))
-                                    print('                - YC_subset shape: ' + str(np.shape(YC_subset)))
-                                    print('                - mask_subset shape: ' + str(np.shape(mask_subset)))
-
-                            # interp_field = df.downscale_3D_boundary_points(L0_boundary_points, L0_boundary_values[timestep,:,:], L0_boundary_point_mask,
-                            #                              XC_subset, YC_subset, mask_subset,
-                            #                              mean_vertical_difference=0, fill_downward=True,
-                            #                              printing=False, remove_zeros=remove_zeros)
-
-                            interp_field = df.downscale_3D_points_with_zeros(L0_boundary_points,
-                                                                              L0_boundary_values[timestep, :, :],
-                                                                              L0_boundary_point_mask,
-                                                                              XC_subset, YC_subset, mask_subset,
-                                                                              mean_vertical_difference=0,
-                                                                              fill_downward=True,
-                                                                              printing=False)
-
+                            mask_subset = np.copy(hFac_subset)
+                            mask_subset[mask_subset>0]=1
                             if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
-                                if boundary in ['north', 'south']:
-                                    output_grid[timestep, tn * sNx:(tn + 1) * sNx] = interp_field[0, 0, :]
+                                mask_subset = mask_subset[:1, :, :]
+
+                            # plt.plot(L0_boundary_points[:, 0], L0_boundary_points[:, 1], 'g.')
+                            # plt.plot(XC_subset.ravel(),YC_subset.ravel(),'k-')
+                            # plt.show()
+
+                            for timestep in range(np.shape(L0_boundary_values)[0]):
+                                # if timestep%50 == 0:
+                                #     print('        - Downscaling timestep '+str(timestep))
+
+                                if print_level >= 5:
+                                    if timestep == 0:
+                                        print('                - L0_boundary_points shape: '+str(np.shape(L0_boundary_points)))
+                                        print('                - L0_boundary_values shape: ' + str(np.shape(L0_boundary_values)))
+                                        print('                - L0_boundary_point_mask shape: ' + str(np.shape(L0_boundary_point_mask)))
+                                        print('                - XC_subset shape: ' + str(np.shape(XC_subset)))
+                                        print('                - YC_subset shape: ' + str(np.shape(YC_subset)))
+                                        print('                - mask_subset shape: ' + str(np.shape(mask_subset)))
+
+                                # interp_field = df.downscale_3D_boundary_points(L0_boundary_points, L0_boundary_values[timestep,:,:], L0_boundary_point_mask,
+                                #                              XC_subset, YC_subset, mask_subset,
+                                #                              mean_vertical_difference=0, fill_downward=True,
+                                #                              printing=False, remove_zeros=remove_zeros)
+
+                                interp_field = df.downscale_3D_points_with_zeros(L0_boundary_points,
+                                                                                  L0_boundary_values[timestep, :, :],
+                                                                                  L0_boundary_point_mask,
+                                                                                  XC_subset, YC_subset, mask_subset,
+                                                                                  mean_vertical_difference=0,
+                                                                                  fill_downward=True,
+                                                                                  printing=False)
+
+                                if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
+                                    if boundary in ['north', 'south']:
+                                        output_grid[timestep, tn * sNx:(tn + 1) * sNx] = interp_field[0, 0, :]
+                                    else:
+                                        output_grid[timestep, tn * sNy:(tn + 1) * sNy] = interp_field[0, :, 0]
                                 else:
-                                    output_grid[timestep, tn * sNy:(tn + 1) * sNy] = interp_field[0, :, 0]
-                            else:
-                                if boundary in ['north', 'south']:
-                                    output_grid[timestep, :, tn * sNx:(tn + 1) * sNx] = interp_field[:,0,:]
-                                else:
-                                    output_grid[timestep, :, tn * sNy:(tn + 1) * sNy] = interp_field[:,:,0]
+                                    if boundary in ['north', 'south']:
+                                        output_grid[timestep, :, tn * sNx:(tn + 1) * sNx] = interp_field[:,0,:]
+                                    else:
+                                        output_grid[timestep, :, tn * sNy:(tn + 1) * sNy] = interp_field[:,:,0]
 
-                        # if timestep==0 and tile_number == 4:
-                        #     if boundary in ['north', 'south']:
-                        #         plt.subplot(1,2,1)
-                        #         plt.imshow(mask_subset[:,0,:])
-                        #         plt.subplot(1, 2, 2)
-                        #         plt.imshow(interp_field[:,0,:])
-                        #     else:
-                        #         plt.subplot(1, 2, 1)
-                        #         plt.imshow(mask_subset[:, :, 0])
-                        #         plt.subplot(1, 2, 2)
-                        #         plt.imshow(interp_field[:, :, 0])
-                        #     plt.show()
+                            # if timestep==0 and tile_number == 4:
+                            #     if boundary in ['north', 'south']:
+                            #         plt.subplot(1,2,1)
+                            #         plt.imshow(mask_subset[:,0,:])
+                            #         plt.subplot(1, 2, 2)
+                            #         plt.imshow(interp_field[:,0,:])
+                            #     else:
+                            #         plt.subplot(1, 2, 1)
+                            #         plt.imshow(mask_subset[:, :, 0])
+                            #         plt.subplot(1, 2, 2)
+                            #         plt.imshow(interp_field[:, :, 0])
+                            #     plt.show()
 
-                # if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
-                #     plt.plot(output_grid[0, :])
-                #     plt.show()
-                # else:
-                #     plt.imshow(output_grid[0, :, :],vmin=-0.1,vmax=0.1,cmap='seismic')
-                #     plt.show()
+                    # if var_name in ['AREA', 'HEFF', 'HSNOW', 'UICE', 'VICE', 'ETAN']:
+                    #     plt.plot(output_grid[0, :])
+                    #     plt.show()
+                    # else:
+                    #     plt.imshow(output_grid[0, :, :],vmin=-0.1,vmax=0.1,cmap='seismic')
+                    #     plt.show()
 
-                if var_name in ['UVEL','VVEL','UICE','VICE']:
-                    output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name,dest_file[:-4]+'_rotated.bin')
-                else:
-                    output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name, dest_file)
-                output_grid.ravel(order='C').astype('>f4').tofile(output_file)
+                    if var_name in ['UVEL','VVEL','UICE','VICE']:
+                        output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name,dest_file[:-4]+'_rotated.bin')
+                    else:
+                        output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name, dest_file)
+                    output_grid.ravel(order='C').astype('>f4').tofile(output_file)
 
 
 

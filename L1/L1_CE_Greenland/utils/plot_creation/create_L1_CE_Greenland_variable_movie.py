@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import netCDF4 as nc4
 from matplotlib.gridspec import GridSpec
 import shutil
+import cmocean.cm as cm
 import argparse
 import sys
 
@@ -14,6 +15,10 @@ def read_mnc_field(run_dir, field_name, sNx, sNy,
 
     if field_name == 'ETAN':
         file_prefix = 'surfDiag'
+    elif field_name in ['SIarea','SIheff','SIhsnow','SIuice','SIvice']:
+        file_prefix = 'seaiceDiag'
+    elif field_name in ['THETA_AW']:
+        file_prefix = 'awDiag'
     else:
         file_prefix = 'dynDiag'
 
@@ -24,7 +29,7 @@ def read_mnc_field(run_dir, field_name, sNx, sNy,
     for r in range(len(ordered_nonblank_tiles)):
         for c in range(len(ordered_nonblank_tiles[0])):
             tile_number = ordered_nonblank_tiles[r][c]
-            file_name = file_prefix+'.'+ '{:010d}'.format(1) +'.t' + '{:03d}'.format(tile_number) + '.nc'
+            file_name = file_prefix+'.'+ '{:010d}'.format(1052064) +'.t' + '{:03d}'.format(tile_number) + '.nc'
             for n in range(N):
                 if file_name in os.listdir(os.path.join(run_dir, 'mnc_' + '{:04d}'.format(n + 1))):
 
@@ -74,7 +79,8 @@ def compile_panels_to_movie(config_dir,config_name,field_name):
 
     os.chdir(pwd)
 
-def plot_mnc_fields(config_dir,config_name,field_name,remove_old,skip):
+def plot_mnc_fields(config_dir,field_name,remove_old,skip):
+    config_name = 'L1_CE_Greenland'
 
     ordered_nonblank_tiles = [[1,2,3], [6,5,4]]
     ordered_nonblack_rotations = [[0, 0, 0], [3, 3, 3]]
@@ -96,29 +102,36 @@ def plot_mnc_fields(config_dir,config_name,field_name,remove_old,skip):
 
     if field_name == 'THETA':
         vmin = -1.9
-        vmax = 8
-        cmap = 'viridis'
+        vmax = 7.5
+        cmap = cm.thermal
     if field_name == 'SALT':
         vmin = 33
         vmax = 35.2
-        cmap = 'viridis'
+        cmap = cm.haline
     if field_name == 'UVEL' or field_name == 'VVEL':
         vmin = -1
         vmax = 1
-        cmap = 'seismic'
+        cmap = cm.balance
     if field_name == 'ETAN':
-        vmin = -0.5
-        vmax = 0.2
+        vmin = -2
+        vmax = 0.4
         cmap = 'viridis'
     if field_name == 'SPEED':
         vmin = 0
         vmax = 1
         cmap = 'viridis'
+    if field_name == 'SIarea':
+        vmin = 0
+        vmax = 1
+        cmap = cm.ice
 
     panel_numbers = np.arange(0,np.shape(field_grid)[0],skip)
 
     counter = 0
     for i in panel_numbers:
+
+        field_subset = field_grid[i,:,:]
+        print('Timestep '+str(i)+' data range: '+str(np.min(field_subset[field_subset!=0]))+' to '+str(np.max(field_subset[field_subset!=0])))
 
         fig = plt.figure(figsize=(8,6))
         plt.style.use('dark_background')
@@ -145,10 +158,6 @@ if __name__ == '__main__':
                         help="The directory where the L1, L1, and L3 configurations are stored.", dest="config_dir",
                         type=str, required=True)
 
-    parser.add_argument("-c", "--config_name", action="store",
-                        help="The name of the configuration.", dest="config_name",
-                        type=str, required=True)
-
     parser.add_argument("-f", "--field_name", action="store",
                         help="The name of the field to plot.", dest="field_name",
                         type=str, required=True)
@@ -163,7 +172,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     config_dir = args.config_dir
-    config_name = args.config_name
     field_name = args.field_name
     remove_old = args.remove_old
     skip = args.skip
@@ -173,6 +181,6 @@ if __name__ == '__main__':
     else:
         remove_old = True
 
-    plot_mnc_fields(config_dir,config_name,field_name,remove_old,skip)
+    plot_mnc_fields(config_dir,field_name,remove_old,skip)
    
 

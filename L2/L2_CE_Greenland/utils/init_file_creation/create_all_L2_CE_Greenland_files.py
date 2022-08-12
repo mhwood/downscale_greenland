@@ -6,13 +6,18 @@ import numpy as np
 
 def create_L2_CE_Greenland_files(config_dir):
 
+    ####################################################################################################################
+    # model metadata
+
     L2_model_name = 'L2_CE_Greenland'
 
     parent_model = 'L1_CE_Greenland'
     parent_model_pickup_iteration = 1052352
 
+    L3_model_name = 'L3_Scoresby_Sund'
+
     central_wet_row = 120
-    central_wet_col = 240
+    central_wet_col = 239
     hFacMinDr = 1
     hFacMin = 0.1
     delR = np.array([1.00, 1.14])
@@ -26,12 +31,14 @@ def create_L2_CE_Greenland_files(config_dir):
     ordered_tiles_faces_dict = {1: [[1, 2, 3]],
                                 3: [[4], [5], [6]]}
 
+    ####################################################################################################################
+
     sys.path.insert(1, os.path.join(config_dir, 'L2', 'utils', 'init_file_creation'))
     sys.path.insert(1, os.path.join(config_dir, 'L2', L2_model_name, 'utils', 'init_file_creation'))
 
     print_level = 3
 
-    steps = [5]
+    steps = [3]
 
     # step 1: make the grid
     if 1 in steps:
@@ -53,40 +60,47 @@ def create_L2_CE_Greenland_files(config_dir):
         grid_path = os.path.join(config_dir, 'nc_grids', L2_model_name+'_grid.nc')
         if not os.path.exists(grid_path):
             sys.exit("Need to make the grid netcdf file for this model for reference\n"
-                     "   - Run the stitch_L2_CE_Greenland_nc_grid_files_for_ref.py script with the -f 1 flag (and -r 150 -c 210)\n"
+                     "   - ln -s the bathymetry and tile into input_for_grid\n"
                      "   - Run the *for_grid model\n"
-                     "   - Run the stitch_L2_CE_Greenland_nc_grid_files_for_ref.py script")
+                     "   - ln -s the nc_grid to config_dir/nc_grids")
 
-    # step 3: make the diff_kr file
-
-    # step 4: make the initial conditions
-    if 4 in steps:
-        print('Step 4: Creating the pickup (initial conditions) file for the ' + L2_model_name + ' model')
+    # step 3: make the initial conditions
+    if 3 in steps:
+        print('Step 3: Creating the pickup (initial conditions) file for the ' + L2_model_name + ' model')
         import create_L2_CE_Greenland_pickup as cp
         cp.create_pickup_file(config_dir, parent_model, parent_model_pickup_iteration, L2_model_name,
                               sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
                               faces, ordered_tiles_faces_dict, print_level)
 
-    # step 5: make the seaice initial conditions
-    if 5 in steps:
-        print('Step 5: Creating the seaice pickup (initial conditions) file for the ' + L2_model_name + ' model')
+    # step 4: make the seaice initial conditions
+    if 4 in steps:
+        print('Step 4: Creating the seaice pickup (initial conditions) file for the ' + L2_model_name + ' model')
         import create_L2_CE_Greenland_seaice_pickup as cp
         cp.create_seaice_pickup_file(config_dir, parent_model, parent_model_pickup_iteration, L2_model_name,
                                      sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
                                      faces, ordered_tiles_faces_dict, print_level)
 
-    # step 6: make the external forcing conditions
-    if 6 in steps:
-        print('Step 6: Creating the external forcing conditions for the ' + L2_model_name + ' model')
+    # step 5: make the external forcing conditions
+    if 5 in steps:
+        print('Step 5: Creating the external forcing conditions for the ' + L2_model_name + ' model')
         import create_L2_CE_Greenland_exf as ce
-        ce.create_exf_files(config_dir, L2_model_name, parent_model, print_level)
+        ce.create_exf_files(config_dir, L2_model_name, parent_model,
+                            sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+                            faces, ordered_tiles_faces_dict, print_level)
 
-    # step 7: make the boundary conditions
-    if 7 in steps:
-        print('Step 7: Creating the boundary conditions for the ' + L2_model_name + ' model')
+    # step 6: make the boundary conditions
+    if 6 in steps:
+        print('Step 6: Creating the boundary conditions for the ' + L2_model_name + ' model')
         import create_L2_CE_Greenland_BCs as cbc
-        cbc.create_BCs(config_dir, L2_model_name, parent_model, print_level)
+        cbc.create_BCs(config_dir, L2_model_name, parent_model,
+                       sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+                       faces, ordered_tiles_faces_dict, print_level)
 
+    # step 7: make the diagnostics_vec masks
+    if 7 in steps:
+        print('Step 7: Creating the diagnostics_vec masks for the ' + L2_model_name + ' model')
+        import create_L2_CE_Greenland_dv_masks as cdvm
+        cdvm.create_dv_masks(config_dir, L2_model_name, L3_model_name, print_level)
 
 
 

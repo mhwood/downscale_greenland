@@ -33,7 +33,7 @@
  &DIAG_VEC_INPUT_VARS
 #
  nml_startTime = 0,
- nml_endTime = 189216000.,
+ nml_endTime = 3153600000.,
 #
 # lateral BC's are averaged hourly and dumped monthly
 #
@@ -65,15 +65,15 @@
 
  nml_sfFiles(1) = 'dv/L3_surface_mask.bin',
 
-# surface bc's have 720 iterations per file (30*24)
+# surface bc's have 180 iterations per file (30*6)
 
- nml_sf_iters_per_file(1) = 720,
+ nml_sf_iters_per_file(1) = 180,
 
-# surface bc's have an averaging period of 1 hour (60*60)
+# surface bc's have an averaging period of 6 hour (6*60*60)
 
- nml_sf_avg_periods(1) = 3600.,
+ nml_sf_avg_periods(1) = 21600.,
 #
- nml_fieldsSF(1:7,1) = 'UWIND   ','VWIND  ','PRECIP ','SWDOWN  ','LWDOWN  ','ATEMP   ','AQH     '
+ nml_fieldsSF(1:8,1) = 'UWIND   ','VWIND  ','PRECIP ','SWDOWN  ','LWDOWN  ','ATEMP   ','AQH     ','RUNOFF  ',
 #
  nml_filePrec = 32,
  &

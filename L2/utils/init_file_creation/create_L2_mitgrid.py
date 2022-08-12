@@ -34,7 +34,7 @@ def create_L2_mitgrid_file(config_dir, model_name, Lat_C, Lon_C, Lat_G, Lon_G, p
                          lon2=Lon_G[-1, -1], lat2=Lat_G[-1, -1],
                          verbose=False, outfile=output_file)
     if print_level >= 1:
-        print('    - THe output grid has shape '+str(np.shape(mitgrid)))
+        print('    - THe output grid has '+str(n_rows)+' rows and '+str(n_cols)+' cols')
 
     # mitgrid, n_rows, n_cols = sg.mkgrid.mkgrid(
     #     lon1=Lon_G[0, 0], lat1=Lat_G[0, 0],

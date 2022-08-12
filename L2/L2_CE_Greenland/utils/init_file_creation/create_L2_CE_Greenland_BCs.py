@@ -7,54 +7,42 @@ from pyproj import Transformer
 import sys
 
 
-def create_BCs(config_dir, L1_model_name,
-               sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict,
-               ecco_dir, llc, print_level):
+def create_BCs(config_dir, L2_model_name, parent_model,
+               sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+               faces, ordered_tiles_faces_dict,  print_level):
 
-    sys.path.insert(1, os.path.join(config_dir, 'L1', 'utils','init_file_creation'))
+    sys.path.insert(1, os.path.join(config_dir, 'L2', 'utils','init_file_creation'))
 
     start_year = 2002
     start_month = 1
     start_day = 1
 
     final_year = 2002
-    final_month = 2
-    final_day = 28
-
-    # tile, row, col
-    northern_tiles = []
-    southern_tiles = [1, 2, 3, 4]
-    eastern_tiles = [3, 4, 5, 6]
-    western_tiles = [1, 0, 0, 0]  # put the 0's to have 0'd BCs where model expects it
-
-    Nr = 50
+    final_month = 1
+    final_day = 3
 
     ###################################################################################
     # The BC fields are created in 3 steps
 
-    # step 1: make a reference whereby the diagnostics_vec files are organized in a dictionary
-    import create_L1_BC_field_ref as ebcr
-    ebcr.create_L1_BC_ref_file(config_dir, L1_model_name, print_level)
-
-    var_names = ['THETA','SALT','UVEL','VVEL','AREA','HEFF','HSNOW','UICE','VICE']
+    # # step 1: make a reference whereby the diagnostics_vec files are organized in a dictionary
+    # import create_L2_BC_field_ref as ebcr
+    # ebcr.create_L2_BC_ref_file(config_dir, L2_model_name, parent_model, print_level)
 
     # step 2: using the reference dict, organize downscaled BC into daily files
-    import create_L1_ECCO_BCs_from_ref as cef
-    for var_name in var_names:
-        cef.create_L1_BCs(config_dir, L1_model_name, var_name,
-                          Nr, sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict,
-                          ecco_dir, llc,
-                          northern_tiles, southern_tiles, eastern_tiles, western_tiles,
-                          start_year, final_year, start_month, final_month, start_day, final_day, print_level)
+    import create_L2_daily_bcs_from_ref as cef
+    for proc_id in range(12,18):  # 7
+        cef.create_bc_fields_via_interpolation(config_dir, L2_model_name, parent_model, proc_id,
+                                               sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+                                               faces, ordered_tiles_faces_dict,
+                                               start_year, final_year,
+                                               start_month, final_month,
+                                               start_day, final_day, print_level)
 
     # step 3: combine all of the BC fields into a single file
-    import combine_and_rotate_L1_daily_BC_files as com
-    for var_name in var_names:
-        com.combine_L1_daily_BC_files(config_dir, L1_model_name, var_name,
-                                      Nr, sNx, sNy, ordered_nonblank_tiles,
-                                      northern_tiles, southern_tiles, eastern_tiles, western_tiles,
-                                      start_year, final_year, start_month, final_month, start_day, final_day,
-                                      print_level)
+    import combine_and_rotate_L2_daily_BC_files as com
+    for proc_id in range(12,18):
+        com.combine_and_rotate_L2_daily_bcs(config_dir, L2_model_name, proc_id,
+                                            start_year, final_year, start_month, final_month, start_day, final_day, print_level)
 
 
 
@@ -62,7 +50,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-d", "--config_dir", action="store",
-                        help="The directory where the L1, L2, and L3 configurations are stored.", dest="config_dir",
+                        help="The directory where the L1, L1, and L2 configurations are stored.", dest="config_dir",
                         type=str, required=True)
 
     parser.add_argument("-i", "--proc_id", action="store",

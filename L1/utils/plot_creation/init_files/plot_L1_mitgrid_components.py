@@ -22,7 +22,10 @@ def create_mitgrid_plot(config_dir, L1_model_name, faces, face_size_dict):
         entire_grid = np.fromfile(file_path, dtype='>f8')
         entire_grid = np.reshape(entire_grid, (16, face_size_dict[face][0] + 1, face_size_dict[face][1] + 1))
         entire_grid = entire_grid[:,:-1,:-1]
+
+
         face_grids[face] = entire_grid
+
 
     stitched_entire_grid = Lf.read_grid_faces_to_stitched_grid(face_grids, dim=3)
 

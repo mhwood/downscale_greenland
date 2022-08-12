@@ -27,7 +27,7 @@
  precipfile        = 'exf/L2_exf_PRECIP.bin',
  swdownfile        = 'exf/L2_exf_SWDOWN.bin',
  lwdownfile        = 'exf/L2_exf_LWDOWN.bin',
-# runofffile        = 'exf/L2_exf_RUNOFF.bin',
+ runofffile        = 'exf/L2_exf_RUNOFF.bin',
 #
  atempstartdate1   = 20011231,
  atempstartdate2   = 210000,
@@ -41,8 +41,9 @@
  precipstartdate2  = 210000,
  precipperiod      = 21600.0,
 #
-# runofffile        = 'runoff-2d-Fekete-1deg-mon-V4-SMOOTH.bin',
-# runoffperiod      = -12,
+ runoffstartdate1  = 20011231,
+ runoffstartdate2  = 210000,
+ runoffperiod      = 21600.0,
 #
  uwindstartdate1   = 20011231,
  uwindstartdate2   = 210000,
@@ -81,15 +82,15 @@
  /
 
  &EXF_NML_OBCS
- obcsNstartdate1     = 20020106,
+ obcsNstartdate1     = 20011231,
  obcsNstartdate2     = 233000,
  obcsNperiod         = 3600.0,
 #
- obcsSstartdate1     = 20020106,
+ obcsSstartdate1     = 20011231,
  obcsSstartdate2     = 233000,
  obcsSperiod         = 3600.0,
 #
- obcsEstartdate1     = 20020106,
+ obcsEstartdate1     = 20011231,
  obcsEstartdate2     = 233000,
  obcsEperiod         = 3600.0,
 #

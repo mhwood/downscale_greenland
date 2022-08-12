@@ -59,7 +59,7 @@
  &PARM03
  niter0=1052064,
 # timesteps for testing
- nTimeSteps = 864,
+ nTimeSteps = 2016,
 # nTimeSteps = 1402560,
  doAB_onGtGs=.FALSE.,
  alph_AB=0.5,
@@ -101,5 +101,5 @@
 
 # Input datasets
  &PARM05
- bathyFile      = 'bathymetry.bin',
+ bathyFile      = 'L1_CE_Greenland_bathymetry.bin',
  &

@@ -64,7 +64,7 @@ def create_mitgrid_plot(config_dir, L2_model_name):
 
     plt.suptitle('mitgrid file components: '+field_name+' ('+str(n_rows)+' rows by '+str(n_cols)+' columns)')
 
-    output_file = os.path.join(config_dir, 'L2', L2_model_name, 'plots','init_files', L2_model_name+'mitgrid_components.png')
+    output_file = os.path.join(config_dir, 'L2', L2_model_name, 'plots','init_files', L2_model_name+'_mitgrid_components.png')
     plt.savefig(output_file,bbox_inches = 'tight')
     plt.close(fig)
 

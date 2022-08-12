@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 def read_grid_faces_to_stitched_grid(face_grids, dim):
 
     if dim==3:
-        # stitched_grid = np.concatenate([face_grids[1], np.transpose(face_grids[3],axes=(0,2,1))],axis=1)
-        stitched_grid = np.concatenate([face_grids[1],
-                                        np.flip(np.flip(np.rot90(face_grids[3], axes=(1,2)),axis=2), axis=1)], axis=1)
+        stitched_grid = np.concatenate([face_grids[1], np.rot90(face_grids[3],axes=(1,2), k=3)],axis=1)
+        # stitched_grid = np.concatenate([face_grids[1],
+        #                                 np.flip(np.flip(np.rot90(face_grids[3], axes=(1,2)),axis=2), axis=1)], axis=1)
         # stitched_grid = np.concatenate([np.flip(np.rot90(face_grids[3], axes=(1, 2)), axis=2),
         #                                 face_grids[1]], axis=1)
 

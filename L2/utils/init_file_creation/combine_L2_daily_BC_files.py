@@ -2,6 +2,7 @@
 import os
 from datetime import datetime
 import numpy as np
+import netCDF4 as nc4
 import matplotlib.pyplot as plt
 import argparse
 import ast
@@ -75,8 +76,8 @@ def stack_daily_bc_files_to_one(config_dir, config_name, mask_name, var_name, de
     return (output_grid)
 
 
-def combine_L2_daily_BC_files(config_dir, config_name, Nr, n_rows_L2, n_cols_L2,
-                               proc_id, start_year, final_year, start_month, final_month, start_day, final_day):
+def combine_L2_daily_BC_files(config_dir, config_name,
+                              proc_id, start_year, final_year, start_month, final_month, start_day, final_day, print_level):
 
     var_name_list = ['THETA', 'THETA', 'THETA',
                      'SALT', 'SALT', 'SALT',
@@ -103,6 +104,16 @@ def combine_L2_daily_BC_files(config_dir, config_name, Nr, n_rows_L2, n_cols_L2,
     mask_name = mask_name_list[proc_id % len(var_name_list)]
 
     print('  Combining the daily files for ' + var_name)
+
+    grid_file = os.path.join(config_dir, 'nc_grids', config_name + '_grid.nc')
+    ds = nc4.Dataset(grid_file)
+    AngleCS = ds.variables['AngleCS'][:, :]
+    AngleSN = ds.variables['AngleSN'][:, :]
+    drF = ds.variables['drF'][:]
+    n_rows_L2 = np.shape(AngleCS)[0]
+    n_cols_L2 = np.shape(AngleCS)[1]
+    Nr = len(drF)
+    ds.close()
 
     dest_files, dest_file_shapes, total_timesteps = get_dest_file_list(mask_name, var_name, Nr, n_rows_L2, n_cols_L2,
                                                                        start_year, final_year, start_month, final_month, start_day, final_day)

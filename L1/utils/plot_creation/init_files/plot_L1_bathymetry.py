@@ -13,12 +13,12 @@ def create_bathymetry_plot(config_dir, L1_model_name, sNx, sNy, faces, face_size
     sys.path.insert(1, os.path.join(config_dir, 'L1', L1_model_name, 'utils'))
     import L1_CE_Greenland_functions as Lf
 
-    bathy_file = os.path.join(config_dir,'L1',L1_model_name,'input','bathymetry.bin')
+    bathy_file = os.path.join(config_dir,'L1',L1_model_name,'input',L1_model_name+'_bathymetry.bin')
     bathy_compact = np.fromfile(bathy_file,'>f4')
     n_rows = int(np.size(bathy_compact)/sNx)
     bathy_compact = np.reshape(bathy_compact,(n_rows,sNx))
 
-    bathy_grid = Lf.read_compact_grid_to_stitched_grid(bathy_compact, sNx, sNy, faces, face_size_dict)
+    bathy_grid = Lf.read_compact_grid_to_stitched_grid(bathy_compact, sNx, sNy, faces, face_size_dict,dim=2)
     depth = -1*bathy_grid
 
     fig = plt.figure(figsize=(8, 6))

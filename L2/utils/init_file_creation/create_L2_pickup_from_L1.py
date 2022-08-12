@@ -392,7 +392,7 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
                                                  L1_wet_cells_on_domain_3D,
                                                  L2_XC, L2_YC, domain_wet_cells_3D,
                                                  mean_vertical_difference=0, fill_downward=True, remove_zeros=True,
-                                                 printing=True, testing = True)
+                                                 printing=True)
             if print_level >= 3:
                 print('            - Field output shape: '+str(np.shape(interp_field)))
 
@@ -418,6 +418,9 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
                 interp_field = np.zeros((len(delR_out), np.shape(L2_XC)[0], np.shape(L2_XC)[1]))
             else:
                 interp_field = np.zeros((1, np.shape(L2_XC)[0], np.shape(L2_XC)[1]))
+
+        if var_name.lower() in ['etan','etah']:
+            interp_field[interp_field!=0]+=2
 
         interp_grids.append(interp_field)
 

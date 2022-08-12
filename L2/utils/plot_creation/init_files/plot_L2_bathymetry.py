@@ -19,9 +19,10 @@ def read_L2_bathy_and_wetgrid_from_grid(config_dir, model_name):
 
 def create_bathymetry_plot(config_dir, L2_model_name):
 
+    print('    - Reading the bathymetry and wet mask from the stiched nc grid')
     depth, wet_grid = read_L2_bathy_and_wetgrid_from_grid(config_dir, L2_model_name)
 
-
+    print('    - Plotting the bathymetry and wet mask')
     fig = plt.figure(figsize=(12, 6))
     plt.style.use('dark_background')
 

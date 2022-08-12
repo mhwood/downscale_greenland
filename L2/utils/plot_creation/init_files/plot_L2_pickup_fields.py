@@ -103,7 +103,7 @@ def create_pickup_plot(config_dir, L2_model_name, pickup_iteration):
         plt.title(var_names[ff])
         counter += 1
 
-    plt.savefig(os.path.join(output_dir, 'L2_model_name_pickup_fields.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(output_dir, L2_model_name+'_pickup_fields.png'), bbox_inches='tight')
     plt.close(fig)
 
 

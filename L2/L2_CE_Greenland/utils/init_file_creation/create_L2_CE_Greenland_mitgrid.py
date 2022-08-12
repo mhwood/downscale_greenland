@@ -44,9 +44,9 @@ def create_mitgrid(config_dir, print_level):
     extra_bottom_rows = 9
     extra_right_cols = 2
 
-    x = np.arange(min_x,max_x+resolution+extra_right_cols*resolution,resolution)
+    x = np.arange(min_x,max_x+2*resolution+extra_right_cols*resolution,resolution)
     y = np.arange(min_y-extra_bottom_rows*resolution,
-                  max_y+resolution+extra_top_rows*resolution,
+                  max_y+2*resolution+extra_top_rows*resolution,
                   resolution)
     XC, YC = np.meshgrid(x,y)
 

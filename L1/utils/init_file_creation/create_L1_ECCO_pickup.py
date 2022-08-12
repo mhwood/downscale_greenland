@@ -393,7 +393,7 @@ def create_L1_ECCO_pickup_file(config_dir, model_name,
         print('    - Outputting the compact pickup grid to the input directory')
     pickup_metadata = dict(global_metadata)
     output_dir = os.path.join(config_dir, 'L1', model_name, 'input')
-    output_file = os.path.join(output_dir, 'pickup.' + '{:010d}'.format(2*parent_model_pickup_iteration))
+    output_file = os.path.join(output_dir, 'pickup.' + '{:010d}'.format(4*parent_model_pickup_iteration))
     dtype = '>f8'
     pickup_metadata['timestepnumber'] = [4*int(pickup_metadata['timestepnumber'][0])]
     # pickup_metadata['nrecords'] = [np.shape(pickup_grid)[0]]

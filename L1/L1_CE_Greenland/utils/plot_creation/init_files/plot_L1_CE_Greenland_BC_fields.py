@@ -60,26 +60,47 @@ def create_2D_BC_plot(config_dir, L1_model_name, var_name, timestep,
     #                   np.max(east_boundary[east_boundary != 0]),
     #                   np.max(west_boundary[west_boundary != 0])])
 
+    vmin = -0.5
+    vmax = 0.5
+
+    if var_name=='AREA':
+        vmin=-0.05
+        vmax=1.05
+    if var_name=='HEFF':
+        vmin = -0.05
+        vmax = 3
+    if var_name=='HSNOW':
+        vmin = -0.05
+        vmax = 2
+
     fig = plt.figure(figsize=(8, 10))
     plt.style.use('dark_background')
 
     plt.subplot(4, 1, 1)
     C = plt.plot(north_boundary.ravel())
+    plt.grid(linestyle='--',alpha=0.5)
     plt.ylabel('North')
     plt.title(var_name+' Boundary Conditions at timestep = '+str(timestep))
+    plt.gca().set_ylim([vmin,vmax])
 
     plt.subplot(4, 1, 2)
     C = plt.plot(south_boundary.ravel())
+    plt.grid(linestyle='--', alpha=0.5)
     plt.ylabel('South')
+    plt.gca().set_ylim([vmin, vmax])
 
     plt.subplot(4, 1, 3)
     C = plt.plot(west_boundary.ravel())
+    plt.grid(linestyle='--', alpha=0.5)
     plt.ylabel('West')
+    plt.gca().set_ylim([vmin, vmax])
 
     plt.subplot(4, 1, 4)
     C = plt.plot(east_boundary.ravel())
+    plt.grid(linestyle='--', alpha=0.5)
     plt.ylabel('East')
     plt.xlabel('Points Along Boundary')
+    plt.gca().set_ylim([vmin, vmax])
 
     output_file = os.path.join(config_dir,'L1',L1_model_name,'plots','init_files',L1_model_name+'_BC_'+var_name+'_'+str(timestep)+'.png')
     plt.savefig(output_file)
@@ -164,11 +185,10 @@ def plot_L1_CE_Greenland_BCs(config_dir, L1_model_name, sNx, sNy):
 
     sys.path.insert(1, os.path.join(config_dir, 'L1', 'utils', 'plot_creation','init_files'))
 
-    n_timesteps = 72 + 2
+    n_timesteps = 7*24 + 2
     timestep = 31
 
-    var_names = ['THETA', 'SALT', 'UVEL', 'VVEL']
-    var_names = ['AREA','HEFF','HSNOW','UICE','VICE']
+    var_names = ['THETA', 'SALT', 'UVEL', 'VVEL','AREA','HEFF','HSNOW','UICE','VICE']
 
     for var_name in var_names:
         if var_name in ['THETA','SALT','UVEL','VVEL']:
