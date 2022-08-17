@@ -136,16 +136,6 @@ and
 445 #endif
 ```
 
-5. `packages_check.F`: This file is inside the `model/src` directory. For this file, we will add the `diagnostics_vec` package after the block for the `diagnostics` package:
-```
-440 #ifdef ALLOW_DIAGNOSTICS_VEC
-441       IF (useDiagnostics_vec) CALL DIAGNOSTICS_VEC_CHECK( myThid )
-442 #else
-443       IF (useDiagnostics_vec)
-444      &   CALL PACKAGES_ERROR_MSG( 'Diagnostics_vec', ' ', myThid )
-445 #endif
-```
-
 6. `do_the_model_io.F`: This file is inside the `model/src` directory. For this file, we will add the `diagnostics_vec` package before the block for the `diagnostics` package:
 ```
 #ifdef ALLOW_DIAGNOSTICS_VEC
