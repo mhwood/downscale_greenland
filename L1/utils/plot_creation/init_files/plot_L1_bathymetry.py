@@ -9,9 +9,7 @@ import ast
 import sys
 
 
-def create_bathymetry_plot(config_dir, L1_model_name, sNx, sNy, faces, face_size_dict):
-    sys.path.insert(1, os.path.join(config_dir, 'L1', L1_model_name, 'utils'))
-    import L1_CE_Greenland_functions as Lf
+def create_bathymetry_plot(Lf, config_dir, L1_model_name, sNx, sNy, faces, face_size_dict):
 
     bathy_file = os.path.join(config_dir,'L1',L1_model_name,'input',L1_model_name+'_bathymetry.bin')
     bathy_compact = np.fromfile(bathy_file,'>f4')
@@ -29,6 +27,8 @@ def create_bathymetry_plot(config_dir, L1_model_name, sNx, sNy, faces, face_size
     C = plt.imshow(depth,origin='lower',cmap = cm.deep)#,vmin=vmin,vmax=vmax)
     plt.colorbar(C)
     plt.title('Bathymetry (500m Contours)')
+    plt.gca().set_xticks(np.arange(0, np.shape(depth)[1],90))
+    plt.gca().set_yticks(np.arange(0, np.shape(depth)[0], 90))
     plt.gca().set_xticklabels([])
     plt.gca().set_yticklabels([])
 
@@ -38,6 +38,8 @@ def create_bathymetry_plot(config_dir, L1_model_name, sNx, sNy, faces, face_size
     # plt.title('Wet Grid')
     # plt.gca().set_xticklabels([])
     # plt.gca().set_yticklabels([])
+
+    plt.grid(linestyle='--',alpha=0.5,color='silver')
 
     output_file = os.path.join(config_dir, 'L1', L1_model_name, 'plots', 'init_files', L1_model_name+'_bathymetry.png')
     plt.savefig(output_file,bbox_inches = 'tight')

@@ -7,13 +7,13 @@ import numpy as np
 def plot_L3_Scoresby_Sund_init_fields(config_dir):
 
     L3_model_name = 'L3_Scoresby_Sund'
-    pickup_iteration = 16128
+    pickup_iteration = 5304960
 
     sys.path.insert(1, os.path.join(config_dir, 'L3', L3_model_name, 'utils', 'plot_creation','init_files'))
 
     print_level = 3
 
-    steps = [6]
+    steps = [3,4]
 
     # step 1: plot the mitgrid components
     if 1 in steps:
@@ -27,37 +27,29 @@ def plot_L3_Scoresby_Sund_init_fields(config_dir):
         import plot_L3_Scoresby_Sund_bathymetry as pb
         pb.plot_L3_Scoresby_Sund_bathymetry(config_dir)
 
-    # # step 3: make the diff_kr file
-
-    # step 4: plot the initial conditions
-    if 4 in steps:
-        print('Step 4: Plotting the pickup (initial conditions) fields for the ' + L3_model_name + ' model')
+    # step 3: plot the initial conditions
+    if 3 in steps:
+        print('Step 3: Plotting the pickup (initial conditions) fields for the ' + L3_model_name + ' model')
         import plot_L3_Scoresby_Sund_pickup_fields as cp
         cp.plot_L3_Scoresby_Sund_pickup(config_dir, pickup_iteration)
 
-    # step 5: plot the seaice initial conditions
-    if 5 in steps:
-        print('Step 5: Plotting the seaice pickup (initial conditions) fields for the ' + L3_model_name + ' model')
+    # step 4: plot the seaice initial conditions
+    if 4 in steps:
+        print('Step 4: Plotting the seaice pickup (initial conditions) fields for the ' + L3_model_name + ' model')
         import plot_L3_Scoresby_Sund_seaice_pickup_fields as csp
         csp.plot_L3_Scoresby_Sund_seaice_pickup(config_dir, pickup_iteration)
 
-    # step 6: plot the external forcing fields at a random time step
-    if 6 in steps:
-        print('Step 6: Plotting the external forcing conditions for the ' + L3_model_name + ' model at a random timestep')
+    # step 5: plot the external forcing fields at a random time step
+    if 5 in steps:
+        print('Step 5: Plotting the external forcing conditions for the ' + L3_model_name + ' model at a random timestep')
         import plot_L3_Scoresby_Sund_exf_fields as cef
         cef.plot_L3_Scoresby_Sund_exfs(config_dir)
 
-    # # step 6: make the external forcing conditions
-    # if 6 in steps:
-    #     print('Step 6: Creating the external forcing conditions for the ' + L3_model_name + ' model')
-    #     import create_L3_Scoresby_Sund_exf as ce
-    #     ce.create_exf_files(config_dir, L3_model_name, parent_model, print_level)
-    #
-    # # step 7: make the boundary conditions
-    # if 7 in steps:
-    #     print('Step 7: Creating the boundary conditions for the ' + L3_model_name + ' model')
-    #     import create_L3_Scoresby_Sund_BCs as cbc
-    #     cbc.create_BCs(config_dir, L3_model_name, parent_model, print_level)
+    # step 6: plot the boundary conditions
+    if 6 in steps:
+        print('Step 6: Plotting the boundary conditions for the ' + L3_model_name + ' model')
+        import plot_L3_Scoresby_Sund_BC_fields as pbc
+        pbc.plot_L3_Scoresby_Sund_BCs(config_dir, L3_model_name, print_level)
 
 
 

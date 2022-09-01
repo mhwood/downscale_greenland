@@ -149,7 +149,7 @@ def plot_L2_CE_Greenland_BCs(config_dir, L2_model_name, print_level):
 
     sys.path.insert(1, os.path.join(config_dir, 'L2', 'utils', 'plot_creation','init_files'))
 
-    n_timesteps = 72 + 2
+    n_timesteps = 7*24 + 2
     timestep = 31
 
     grid_file = os.path.join(config_dir, 'nc_grids', L2_model_name + '_grid.nc')
@@ -161,7 +161,6 @@ def plot_L2_CE_Greenland_BCs(config_dir, L2_model_name, print_level):
     ds.close()
 
     var_names = ['THETA', 'SALT', 'UVEL', 'VVEL','AREA','HEFF','HSNOW','UICE','VICE']
-    var_names = ['AREA','HEFF','HSNOW','UICE','VICE']
 
     for var_name in var_names:
         if var_name in ['THETA','SALT','UVEL','VVEL']:

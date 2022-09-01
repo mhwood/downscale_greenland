@@ -119,21 +119,23 @@
  vwind_lat_inc     = 29*0.7017418,
  vwind_nlon        = 87,
  vwind_nlat        = 29,
+#
+ 
  /
 
  &EXF_NML_OBCS
- obcsNstartdate1     = 20011231,
-# obcsNstartdate1     = 19911231,
+# obcsNstartdate1     = 20011231,
+ obcsNstartdate1     = 19911231,
  obcsNstartdate2     = 233000,
  obcsNperiod         = 3600.0,
 #
- obcsSstartdate1     = 20011231,
-# obcsSstartdate1     = 19911231,
+# obcsSstartdate1     = 20011231,
+ obcsSstartdate1     = 19911231,
  obcsSstartdate2     = 233000,
  obcsSperiod         = 3600.0,
 #
- obcsWstartdate1     = 20011231,
-# obcsWstartdate1     = 19911231,
+# obcsWstartdate1     = 20011231,
+ obcsWstartdate1     = 19911231,
  obcsWstartdate2     = 233000,
  obcsWperiod         = 3600.0,
 #

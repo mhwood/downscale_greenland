@@ -18,8 +18,8 @@ def create_BCs(config_dir, L1_model_name,
     start_day = 1
 
     final_year = 2002
-    final_month = 2
-    final_day = 28
+    final_month = 12
+    final_day = 31
 
     # tile, row, col
     northern_tiles = []
@@ -36,19 +36,21 @@ def create_BCs(config_dir, L1_model_name,
     import create_L1_BC_field_ref as ebcr
     ebcr.create_L1_BC_ref_file(config_dir, L1_model_name, print_level)
 
-    var_names = ['THETA','SALT','UVEL','VVEL','AREA','HEFF','HSNOW','UICE','VICE']
+    var_names = ['UVEL','VVEL','AREA','HEFF','HSNOW','UICE','VICE']#'THETA','SALT',
 
     # step 2: using the reference dict, organize downscaled BC into daily files
+    # step 3: combine all of the BC fields into a single file
     import create_L1_ECCO_BCs_from_ref as cef
+    import combine_and_rotate_L1_daily_BC_files as com
+
     for var_name in var_names:
+
         cef.create_L1_BCs(config_dir, L1_model_name, var_name,
                           Nr, sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict,
                           ecco_dir, llc,
                           northern_tiles, southern_tiles, eastern_tiles, western_tiles,
                           start_year, final_year, start_month, final_month, start_day, final_day, print_level)
 
-    # step 3: combine all of the BC fields into a single file
-    import combine_and_rotate_L1_daily_BC_files as com
     for var_name in var_names:
         com.combine_L1_daily_BC_files(config_dir, L1_model_name, var_name,
                                       Nr, sNx, sNy, ordered_nonblank_tiles,

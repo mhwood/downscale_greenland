@@ -7,7 +7,7 @@ import numpy as np
 def plot_L1_CE_Greenland_init_fields(config_dir):
 
     L1_model_name = 'L1_CE_Greenland'
-    pickup_iteration = 526032
+    pickup_iteration = 228
 
     L2_model_name = 'L2_CE_Greenland'
 
@@ -27,7 +27,7 @@ def plot_L1_CE_Greenland_init_fields(config_dir):
 
     exf_shape = (29, 87)
 
-    steps = [3,4,5,6]
+    steps = [7]
 
     # step 1: plot the mitgrid components
     if 1 in steps:

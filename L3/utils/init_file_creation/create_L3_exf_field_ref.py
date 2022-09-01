@@ -7,7 +7,7 @@ import argparse
 import sys
 import ast
 
-def find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, seconds_per_iter, points_per_output):
+def find_dv_files_to_read(config_dir, parent_model_level, parent_model_name, var_name, averaging_period, seconds_per_iter, points_per_output):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils','init_file_creation'))
     import time_functions as tf
@@ -18,9 +18,9 @@ def find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, 
     file_names = []
     file_iters = []
     n_files_in_files = []
-    dv_dir = os.path.join(config_dir, 'L2', parent_model, 'run', 'dv')
+    dv_dir = os.path.join(config_dir, parent_model_level, parent_model_name, 'run', 'dv')
     for file_name in os.listdir(dv_dir):
-        if 'surface' in file_name and var_name in file_name:
+        if 'L3_surface' in file_name and var_name in file_name:
             file_iter = int(file_name.split('.')[-2])
             iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(points_per_output))
             # iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
@@ -84,8 +84,8 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
     dest_file_iter_bounds = {}
     # convert these to iteration numbers
     for date_set in date_bounds:
-        date_0 = (date_set[0] - datetime(2002, 1, 1)).total_seconds()
-        date_1 = (date_set[1] - datetime(2002, 1, 1)).total_seconds()
+        date_0 = (date_set[0] - datetime(1992, 1, 1)).total_seconds()
+        date_1 = (date_set[1] - datetime(1992, 1, 1)).total_seconds()
         iter_0 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_0)
         iter_1 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_1)
         dest_file = 'L3_exf_'+str(var_name)+'.'+str(date_set[0].year)+'{:02d}'.format(date_set[0].month)+'{:02d}'.format(date_set[0].day)+'.bin'
@@ -165,24 +165,28 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
 ########################################################################################################################
 
 
-def create_L3_exf_ref_file(config_dir, L3_model_name, parent_model, print_level):
+def create_L3_exf_ref_file(config_dir, L3_model_name, parent_model_level, parent_model_name, print_level):
 
     if print_level>1:
         print('    - Creating the exf field reference for the '+L3_model_name)
 
     var_name = 'ATEMP'
-    averaging_period = 3600
-    seconds_per_iter = 150
+    averaging_period = 21600
+    if parent_model_level == 'L1':
+        seconds_per_iter = 300
+    if parent_model_level == 'L2':
+        seconds_per_iter = 150
 
     # first read how many points are expected in each iter (read from the mask reference)
-    mask_ref_file = os.path.join(config_dir,'L2',parent_model,'namelist','L3_dv_mask_reference_dict.nc')
+    mask_ref_file = os.path.join(config_dir,parent_model_level,parent_model_name,'input','L1_dv_mask_reference_dict.nc')
     ds = nc4.Dataset(mask_ref_file)
-    points_per_output = len(ds.groups['surface'].variables['source_rows'][:])
+    points_per_output = len(ds.groups['L3_surface'].variables['source_rows'][:])
     ds.close()
 
     # calculate the file name iterations to read from
     #     along with the iterations these files cover
-    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, seconds_per_iter, points_per_output)
+    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, parent_model_level, parent_model_name, var_name,
+                                                           averaging_period, seconds_per_iter, points_per_output)
     if print_level>=2:
         print('    - Source file summary:')
     output = '{\n'
@@ -193,7 +197,7 @@ def create_L3_exf_ref_file(config_dir, L3_model_name, parent_model, print_level)
                   ', '+str(np.max(iter_midpoint_dict[file_name]))+'],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L2',parent_model,'run','dv','exf_source_ref.txt')
+    output_file = os.path.join(config_dir,parent_model_level,parent_model_name,'run','dv','L3_exf_source_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -222,16 +226,16 @@ def create_L3_exf_ref_file(config_dir, L3_model_name, parent_model, print_level)
                 iter_count += index_sets[s][1] - index_sets[s][0] + 1
 
                 add_line += '[\'' + source_files[s].split('.')[-2] + '\', ' + '[' + str(index_sets[s][0]) + ', ' + str(index_sets[s][1]) + ']], '
-        if int(iter_count / 24) == 1:
+        if int(iter_count / 4) == 1:
             output += add_line[:-2]
         else:
             output += ''
         if print_level >= 2:
-            print('        - Total iterations for this file: '+str(iter_count)+' (= '+str(iter_count/24)+' days)')
+            print('        - Total iterations for this file: '+str(iter_count)+' (= '+str(iter_count/4)+' days)')
         output+='],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L2',parent_model,'run','dv','exf_dest_ref.txt')
+    output_file = os.path.join(config_dir,parent_model_level,parent_model_name,'run','dv','L3_exf_dest_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -243,7 +247,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-d", "--config_dir", action="store",
-                        help="The directory where the L2, L2, and L3 configurations are stored.", dest="config_dir",
+                        help="The directory where the L1, L2, and L3 configurations are stored.", dest="config_dir",
                         type=str, required=True)
 
     args = parser.parse_args()

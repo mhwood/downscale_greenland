@@ -18,7 +18,7 @@ def find_dv_files_to_read(config_dir, parent_model, var_name, boundary, Nr, aver
     file_names = []
     file_iters = []
     n_files_in_files = []
-    dv_dir = os.path.join(config_dir, 'L1', parent_model, 'run', 'dv')
+    dv_dir = os.path.join(config_dir, 'L1', parent_model, 'run_pleiades', 'dv')
     for file_name in os.listdir(dv_dir):
         if boundary in file_name and var_name in file_name:
             file_iter = int(file_name.split('.')[-2])
@@ -64,7 +64,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
     # create a list of daily bounds
     date_bounds = []
     for year in range(2002, 2003):
-        for month in range(1, 3):
+        for month in range(1, 13):
             if month in [1, 3, 5, 7, 8, 10, 12]:
                 nDays = 31
             elif month in [4, 6, 9, 11]:
@@ -200,7 +200,7 @@ def create_L2_BC_ref_file(config_dir, L2_model_name, parent_model, print_level):
                   ', '+str(np.max(iter_midpoint_dict[file_name]))+'],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L1',parent_model,'run','dv','BC_source_ref.txt')
+    output_file = os.path.join(config_dir,'L1',parent_model,'run_pleiades','dv','BC_source_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -238,7 +238,7 @@ def create_L2_BC_ref_file(config_dir, L2_model_name, parent_model, print_level):
         output+='],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L1',parent_model,'run','dv','BC_dest_ref.txt')
+    output_file = os.path.join(config_dir,'L1',parent_model,'run_pleiades','dv','BC_dest_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()

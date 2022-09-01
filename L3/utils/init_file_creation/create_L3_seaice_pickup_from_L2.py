@@ -63,7 +63,7 @@ def stack_grids_to_pickup(interp_grids):
         counter += 1
     return(pickup_grid)
 
-def write_pickup_file(output_file,dtype,pickup_grid,subset_metadata):
+def write_seaice_pickup_file(output_file,dtype,pickup_grid,subset_metadata):
 
     # output the data subset
     pickup_grid.ravel(order='C').astype(dtype).tofile(output_file+'.data')
@@ -75,12 +75,12 @@ def write_pickup_file(output_file,dtype,pickup_grid,subset_metadata):
     output += " "+"{:5d}".format(np.shape(pickup_grid)[1])+",    1,"+"{:5d}".format(np.shape(pickup_grid)[1])+"\n"
     output += " ];\n"
     output += " dataprec = [ '"+subset_metadata['dataprec'][0]+"' ];\n"
-    output += " nrecords = [   "+str(subset_metadata['nrecords'][0])+" ];\n"
+    output += " nrecords = [    "+str(subset_metadata['nrecords'][0])+" ];\n"
     output += " timeStepNumber = [ "+"{:10d}".format(subset_metadata['timestepnumber'][0])+" ];\n"
     time_interval_exponent = int(np.log10(subset_metadata['timeinterval'][0][0]))
     time_interval_base = subset_metadata['timeinterval'][0][0] / (10 ** time_interval_exponent)
     output += " timeInterval = [  "+"{:.12f}".format(time_interval_base) + "E+" + "{:02d}".format(time_interval_exponent)+  " ];\n"
-    output += " nFlds = [   "+str(subset_metadata['nflds'][0])+" ];\n"
+    output += " nFlds = [    "+str(subset_metadata['nflds'][0])+" ];\n"
     output += " fldList = {\n "
     for var_name in subset_metadata['fldlist']:
         output += "'"+var_name
@@ -227,7 +227,7 @@ def create_L3_seaice_pickup_file(config_dir, L3_model_name, L2_model_name, iter_
     output_file = os.path.join(output_dir, 'pickup_seaice.'+'{:010d}'.format(2*iter_number))
     pickup_metadata['timestepnumber'] = [2 * iter_number]
     dtype = '>f8'
-    write_pickup_file(output_file, dtype, pickup_grid, pickup_metadata)
+    write_seaice_pickup_file(output_file, dtype, pickup_grid, pickup_metadata)
 
 
 

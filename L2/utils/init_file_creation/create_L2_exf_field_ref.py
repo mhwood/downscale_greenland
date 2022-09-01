@@ -20,7 +20,7 @@ def find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, 
     n_files_in_files = []
     dv_dir = os.path.join(config_dir, 'L1', parent_model, 'run', 'dv')
     for file_name in os.listdir(dv_dir):
-        if 'surface' in file_name and var_name in file_name:
+        if 'L2_surface' in file_name and var_name in file_name:
             file_iter = int(file_name.split('.')[-2])
             iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(points_per_output))
             # iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
@@ -64,7 +64,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
     # create a list of daily bounds
     date_bounds = []
     for year in range(2002, 2003):
-        for month in range(1, 3):
+        for month in range(1, 13):
             if month in [1, 3, 5, 7, 8, 10, 12]:
                 nDays = 31
             elif month in [4, 6, 9, 11]:
@@ -177,12 +177,13 @@ def create_L2_exf_ref_file(config_dir, L2_model_name, parent_model, print_level)
     # first read how many points are expected in each iter (read from the mask reference)
     mask_ref_file = os.path.join(config_dir,'L1',parent_model,'input','L1_dv_mask_reference_dict.nc')
     ds = nc4.Dataset(mask_ref_file)
-    points_per_output = len(ds.groups['surface'].variables['source_rows'][:])
+    points_per_output = len(ds.groups['L2_surface'].variables['source_rows'][:])
     ds.close()
 
     # calculate the file name iterations to read from
     #     along with the iterations these files cover
     file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, seconds_per_iter, points_per_output)
+    print(iter_midpoint_dict)
     if print_level>=2:
         print('    - Source file summary:')
     output = '{\n'

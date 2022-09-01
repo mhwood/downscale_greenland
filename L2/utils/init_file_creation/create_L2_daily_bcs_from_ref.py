@@ -29,7 +29,7 @@ def create_src_dest_dicts_from_ref(config_dir, L1_model_name, mask_name,var_name
                 if test_date >= start_date and test_date <= final_date:
                     dest_files.append(str(year) + '{:02d}'.format(month) + '{:02d}'.format(day))
 
-    f = open(os.path.join(config_dir,'L1', L1_model_name, 'run','dv', 'BC_dest_ref.txt'))
+    f = open(os.path.join(config_dir,'L1', L1_model_name, 'run_pleiades','dv', 'BC_dest_ref.txt'))
     dict_str = f.read()
     f.close()
     size_dict = ast.literal_eval(dict_str)
@@ -408,14 +408,14 @@ def create_bc_field(config_dir, L1_model_name, L2_model_name, mask_name,
     source_faces,source_rows,source_cols = read_mask_reference_from_nc_dict(nc_dict_file, mask_name)
 
     for dest_file in dest_files:
-        if dest_file not in []:#os.listdir(os.path.join(output_dir,mask_name,boundary_var_name)):
+        if dest_file not in os.listdir(os.path.join(output_dir,mask_name,boundary_var_name)):
             # try:
             print('    - Downscaling the timesteps to be stored in file ' + str(dest_file))
             source_files = source_file_read_dict[dest_file]
             source_file_read_indices = source_file_read_index_sets[dest_file]
 
             print('    - Reading in the L1 diagnostics_vec output')
-            L1_run_dir = os.path.join(config_dir,'L1',L1_model_name,'run')
+            L1_run_dir = os.path.join(config_dir,'L1',L1_model_name,'run_pleiades')
             L1_points, L1_values, L1_wet_grid_3D_points = \
                 read_boundary_variable_to_L1_points(L1_run_dir, mask_name, boundary_var_name,
                                                     source_files, source_file_read_indices,
@@ -428,8 +428,9 @@ def create_bc_field(config_dir, L1_model_name, L2_model_name, mask_name,
             # plt.show()
 
             if boundary_var_name in ['THETA', 'SALT', 'UVEL', 'VVEL']:
-                L1_values, L1_wet_grid_3D_points = df.interpolate_var_points_timeseries_to_new_depth_levels(
-                    L1_values, L1_wet_grid_3D_points, delR_in, delR_out)
+                if Nr_out!=Nr_in:
+                    L1_values, L1_wet_grid_3D_points = df.interpolate_var_points_timeseries_to_new_depth_levels(
+                        L1_values, L1_wet_grid_3D_points, delR_in, delR_out)
 
             L1_wet_grid_on_L2_3D_points = np.copy(L1_wet_grid_3D_points)
 

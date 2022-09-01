@@ -36,14 +36,14 @@ def create_exf_plot(config_dir, L3_model_name):
     n_rows, n_cols = read_L3_rows_cols_from_grid(config_dir, L3_model_name)
     print(n_rows, n_cols)
 
-    var_names = ['UWIND','VWIND','ATEMP','AQH','PRECIP','SWDOWN','LWDOWN']#,'RUNOFF']
-    var_names = ['ATEMP']
+    var_names = ['UWIND','VWIND','ATEMP','AQH','PRECIP','SWDOWN','LWDOWN','RUNOFF']
+    # var_names = ['ATEMP']
 
     fig = plt.figure(figsize=(20, 12))
     plt.style.use("dark_background")
 
     timestep = randint(0,72)
-    timestep = 17
+    timestep = 7
 
     counter = 1
     exf_dir = os.path.join(config_dir,'L3',L3_model_name,'input','exf')
@@ -55,17 +55,19 @@ def create_exf_plot(config_dir, L3_model_name):
 
     for ff in range(len(var_names)):
 
+        var_grid_subset = var_grids[ff]
+
         plt.subplot(2, 4, counter)
         cmap = 'viridis'
 
         if var_names[ff] in ['UWIND','VWIND']:
             cmap = cm.balance
-            vmin = -0.15
-            vmax = 0.15
+            vmin = -10
+            vmax = 10
         else:
-            if np.any(var_grids[ff][ :, :])>0:
-                vmin = np.min(var_grid_subset[var_grids[ff][ :, :] != 0])
-                vmax = np.max(var_grid_subset[var_grids[ff][ :, :] != 0])
+            if np.any(var_grid_subset)>0:
+                vmin = np.min(var_grid_subset[var_grid_subset != 0])
+                vmax = np.max(var_grid_subset[var_grid_subset != 0])
             else:
                 vmin=-0.1
                 vmax=0.1

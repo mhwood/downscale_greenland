@@ -7,22 +7,23 @@ import argparse
 import sys
 import ast
 
-def find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, seconds_per_iter, points_per_output):
+def find_dv_files_to_read(config_dir, parent_model_level, parent_model_name, boundary, var_name, averaging_period, seconds_per_iter, points_per_output, Nr):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils','init_file_creation'))
     import time_functions as tf
 
     iters_per_output = averaging_period/seconds_per_iter
+    print(iters_per_output,averaging_period,seconds_per_iter)
 
     # loop through the dv files and mask a list of how many fields each file has
     file_names = []
     file_iters = []
     n_files_in_files = []
-    dv_dir = os.path.join(config_dir, 'L2', parent_model, 'run', 'dv')
+    dv_dir = os.path.join(config_dir, parent_model_level, parent_model_name, 'run', 'dv')
     for file_name in os.listdir(dv_dir):
-        if 'surface' in file_name and var_name in file_name:
+        if 'L3_' in file_name and var_name in file_name and boundary in file_name:
             file_iter = int(file_name.split('.')[-2])
-            iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(points_per_output))
+            iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(points_per_output*Nr))
             # iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
             file_iters.append(file_iter)
             file_names.append(file_name)
@@ -84,8 +85,8 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
     dest_file_iter_bounds = {}
     # convert these to iteration numbers
     for date_set in date_bounds:
-        date_0 = (date_set[0] - datetime(2002, 1, 1)).total_seconds()
-        date_1 = (date_set[1] - datetime(2002, 1, 1)).total_seconds()
+        date_0 = (date_set[0] - datetime(1992, 1, 1)).total_seconds()
+        date_1 = (date_set[1] - datetime(1992, 1, 1)).total_seconds()
         iter_0 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_0)
         iter_1 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_1)
         dest_file = 'L3_BC_'+str(var_name)+'.'+str(date_set[0].year)+'{:02d}'.format(date_set[0].month)+'{:02d}'.format(date_set[0].day)+'.bin'
@@ -165,7 +166,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
 ########################################################################################################################
 
 
-def create_L3_BC_ref_file(config_dir, L3_model_name, parent_model, print_level):
+def create_L3_BC_ref_file(config_dir, L3_model_name, parent_model_level, parent_model_name, print_level):
 
     if print_level>1:
         print('    - Creating the BC field reference for the '+L3_model_name)
@@ -174,17 +175,24 @@ def create_L3_BC_ref_file(config_dir, L3_model_name, parent_model, print_level):
     boundary = 'north'
 
     averaging_period = 3600
-    seconds_per_iter = 150
+    if parent_model_level=='L1':
+        seconds_per_iter = 300
+    if parent_model_level=='L2':
+        seconds_per_iter = 150
 
     # first read how many points are expected in each iter (read from the mask reference)
-    mask_ref_file = os.path.join(config_dir,'L2',parent_model,'namelist','L3_dv_mask_reference_dict.nc')
+    mask_ref_file = os.path.join(config_dir, parent_model_level, parent_model_name,'input',
+                                 parent_model_level+'_dv_mask_reference_dict.nc')
     ds = nc4.Dataset(mask_ref_file)
-    points_per_output = len(ds.groups['surface'].variables['source_rows'][:])
+    points_per_output = len(ds.groups['L3_'+boundary].variables['source_rows'][:])
     ds.close()
+
+    Nr = 50
 
     # calculate the file name iterations to read from
     #     along with the iterations these files cover
-    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, parent_model, var_name, averaging_period, seconds_per_iter, points_per_output)
+    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, parent_model_level, parent_model_name,
+                                                           boundary, var_name, averaging_period, seconds_per_iter, points_per_output, Nr)
     if print_level>=2:
         print('    - Source file summary:')
     output = '{\n'
@@ -195,7 +203,7 @@ def create_L3_BC_ref_file(config_dir, L3_model_name, parent_model, print_level):
                   ', '+str(np.max(iter_midpoint_dict[file_name]))+'],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L2',parent_model,'run','dv','BC_source_ref.txt')
+    output_file = os.path.join(config_dir,parent_model_level,parent_model_name,'run','dv','L3_BC_source_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -233,7 +241,7 @@ def create_L3_BC_ref_file(config_dir, L3_model_name, parent_model, print_level):
         output+='],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L2',parent_model,'run','dv','BC_dest_ref.txt')
+    output_file = os.path.join(config_dir,parent_model_level, parent_model_name,'run','dv','L3_BC_dest_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()

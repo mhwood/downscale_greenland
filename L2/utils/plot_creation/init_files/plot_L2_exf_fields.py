@@ -41,7 +41,7 @@ def create_exf_plot(config_dir, L2_model_name):
     plt.style.use("dark_background")
 
     timestep = randint(0,72)
-    timestep = 7
+    timestep = 4
 
     counter = 1
     exf_dir = os.path.join(config_dir,'L2',L2_model_name,'input','exf')

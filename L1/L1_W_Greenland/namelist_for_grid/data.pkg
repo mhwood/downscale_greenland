@@ -1,0 +1,7 @@
+# Packages
+ &PACKAGES
+ useCAL         = .TRUE.,
+ useKPP         = .TRUE.,
+ useMNC = .TRUE.,
+ useSALT_PLUME  = .TRUE.,
+ &

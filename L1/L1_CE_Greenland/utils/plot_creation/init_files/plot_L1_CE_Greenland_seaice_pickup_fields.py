@@ -9,8 +9,11 @@ def plot_L1_CE_Greenland_seaice_pickup(config_dir, L1_model_name, pickup_iterati
 
     sys.path.insert(1, os.path.join(config_dir, 'L1', 'utils', 'plot_creation','init_files'))
 
+    sys.path.insert(1, os.path.join(config_dir, 'L1', L1_model_name, 'utils'))
+    import L1_CE_Greenland_functions as Lf
+
     import plot_L1_seaice_pickup_fields as ppf
-    ppf.create_seaice_pickup_plot(config_dir, L1_model_name, pickup_iteration,
+    ppf.create_seaice_pickup_plot(Lf, config_dir, L1_model_name, pickup_iteration,
                            sNx, sNy, faces, face_size_dict)
 
 

@@ -81,12 +81,14 @@ def read_grid_tile_geometry(config_dir,model_name,var_name,ordered_nonblank_tile
 
     return(ordered_XC_tiles, ordered_YC_tiles, ordered_AngleCS_tiles, ordered_AngleSN_tiles, ordered_hfac_tiles, delR)
 
-def create_src_dest_dicts_from_ref(config_dir, boundary, var_name,
+def create_src_dest_dicts_from_ref(config_dir, model_name, boundary, var_name,
                                    start_year, final_year, start_month, final_month, start_day, final_day):
+    prefix = '_'.join(model_name.split('_')[:2])
+
     dest_files = []
     start_date = datetime(start_year, start_month, start_day)
     final_date = datetime(final_year, final_month, final_day)
-    for year in range(2002,2003):
+    for year in range(1992, 1993):
         for month in range(1, 13):
             if month in [1, 3, 5, 7, 8, 10, 12]:
                 nDays = 31
@@ -102,7 +104,7 @@ def create_src_dest_dicts_from_ref(config_dir, boundary, var_name,
                 if test_date >= start_date and test_date <= final_date:
                     dest_files.append(str(year) + '{:02d}'.format(month) + '{:02d}'.format(day))
 
-    f = open(os.path.join(config_dir,'L0', 'run','dv', 'BC_dest_ref.txt'))
+    f = open(os.path.join(config_dir,'L0', 'run','dv',prefix, model_name+'_BC_dest_ref.txt'))
     dict_str = f.read()
     f.close()
     size_dict = ast.literal_eval(dict_str)
@@ -111,19 +113,25 @@ def create_src_dest_dicts_from_ref(config_dir, boundary, var_name,
     source_file_read_dict = {}
     source_file_read_index_sets = {}
 
+    if var_name in ['UVEL','VVEL','UICE','VICE']:
+        suffix = '_rotated.bin'
+    else:
+        suffix = '.bin'
+
+
     for dest_file in dest_files:
-        dest_files_out.append('L1_BC_'+boundary+'_'+var_name+'.'+dest_file+'.bin')
+        dest_files_out.append(prefix+'_'+boundary+'_'+var_name+'.'+dest_file+suffix)
         source_files = []
         index_set = []
         for pair in size_dict[dest_file]:
-            source_files.append(boundary+'_'+var_name+'.'+pair[0]+'.bin')
+            source_files.append(prefix+'_'+boundary+'_'+var_name+'.'+pair[0]+'.bin')
             index_set.append(pair[1])
-        source_file_read_dict['L1_BC_'+boundary+'_'+var_name+'.'+dest_file+'.bin'] = source_files
-        source_file_read_index_sets['L1_BC_'+boundary+'_'+var_name+'.'+dest_file+'.bin'] = index_set
+        source_file_read_dict[prefix+'_'+boundary+'_'+var_name+'.'+dest_file+suffix] = source_files
+        source_file_read_index_sets[prefix+'_'+boundary+'_'+var_name+'.'+dest_file+suffix] = index_set
 
     return(dest_files_out, source_file_read_dict, source_file_read_index_sets)
 
-def read_L0_boundary_variable_points(L0_run_dir, boundary, var_name,
+def read_L0_boundary_variable_points(L0_run_dir, model_name, boundary, var_name,
                                      source_files,source_file_read_indices,
                                      llc, Nr, faces, rows, cols,
                                      ecco_XC_faces, ecco_YC_faces, ecco_AngleCS_faces, ecco_AngleSN_faces, ecco_hFacC_faces,
@@ -159,18 +167,19 @@ def read_L0_boundary_variable_points(L0_run_dir, boundary, var_name,
 
         N = len(faces)
 
+        prefix = '_'.join(model_name.split('_')[:2])
         if var_name in ['UVEL','VVEL']:
-            u_var_file = os.path.join(L0_run_dir, 'dv', 'L1_' + boundary + '_BC_mask_UVEL.' + file_suffix)
+            u_var_file = os.path.join(L0_run_dir, 'dv',prefix, prefix+'_' + boundary + '_mask_UVEL.' + file_suffix)
             u_var_grid = np.fromfile(u_var_file, dtype='>f4')
-            v_var_file = os.path.join(L0_run_dir, 'dv', 'L1_' + boundary + '_BC_mask_VVEL.' + file_suffix)
+            v_var_file = os.path.join(L0_run_dir, 'dv',prefix, prefix+'_' + boundary + '_mask_VVEL.' + file_suffix)
             v_var_grid = np.fromfile(v_var_file, dtype='>f4')
         elif var_name in ['UICE','VICE']:
-            u_var_file = os.path.join(L0_run_dir, 'dv', 'L1_' + boundary + '_BC_mask_UICE.' + file_suffix)
+            u_var_file = os.path.join(L0_run_dir, 'dv',prefix, prefix+'_' + boundary + '_mask_UICE.' + file_suffix)
             u_var_grid = np.fromfile(u_var_file, dtype='>f4')
-            v_var_file = os.path.join(L0_run_dir, 'dv', 'L1_' + boundary + '_BC_mask_VICE.' + file_suffix)
+            v_var_file = os.path.join(L0_run_dir, 'dv',prefix, prefix+'_' + boundary + '_mask_VICE.' + file_suffix)
             v_var_grid = np.fromfile(v_var_file, dtype='>f4')
         else:
-            var_file = os.path.join(L0_run_dir, 'dv','L1_'+ boundary + '_BC_mask_' + var_name +'.' + file_suffix)
+            var_file = os.path.join(L0_run_dir, 'dv',prefix,prefix+'_'+ boundary + '_mask_' + var_name +'.' + file_suffix)
             var_grid = np.fromfile(var_file, dtype='>f4')
 
         if var_name in ['ETAN','AREA','HEFF','HSNOW','UICE','VICE']:
@@ -283,10 +292,10 @@ def subset_tile_geometry_to_boundary(boundary, tile_number,ordered_nonblank_tile
     return(XC_subset, YC_subset, AngleCS_subset, AngleSN_subset, hFac_subset)
 
 def create_L1_BCs(config_dir,model_name,var_name,
-                   Nr, sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict,
+                  Nr, sNx, sNy, ordered_nonblank_tiles, tile_face_index_dict,
                   ecco_dir, llc,
-                   northern_tiles, southern_tiles, eastern_tiles, western_tiles,
-                   start_year, final_year, start_month,final_month, start_day, final_day, print_level):
+                  northern_tiles, southern_tiles, eastern_tiles, western_tiles,
+                  start_year, final_year, start_month,final_month, start_day, final_day, print_level):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils', 'init_file_creation'))
     import downscale_functions as df
@@ -343,14 +352,16 @@ def create_L1_BCs(config_dir,model_name,var_name,
                 os.mkdir(os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name))
 
             dest_files, source_file_read_dict, source_file_read_index_sets = \
-                create_src_dest_dicts_from_ref(config_dir, boundary, var_name,
+                create_src_dest_dicts_from_ref(config_dir, model_name, boundary, var_name,
                                                start_year, final_year, start_month,
                                                final_month, start_day, final_day)
+
             if print_level >= 3:
                 print('            - Reading the mask to reference the variable to the llc grid')
             nc_dict_file = os.path.join(config_dir, 'L0', 'input', 'L0_dv_mask_reference_dict.nc')
             ds = nc4.Dataset(nc_dict_file)
-            grp = ds.groups[boundary]
+            boundary_group = '_'.join(model_name.split('_')[:2]) + '_'+boundary
+            grp = ds.groups[boundary_group]
             faces = grp.variables['source_faces'][:]
             rows = grp.variables['source_rows'][:]
             cols = grp.variables['source_cols'][:]
@@ -369,7 +380,7 @@ def create_L1_BCs(config_dir,model_name,var_name,
                     if print_level >= 3:
                         print('            - Reading in the L0 diagnostics_vec output')
                     L0_boundary_points, L0_boundary_values, L0_boundary_point_hFacC = \
-                        read_L0_boundary_variable_points(L0_run_dir, boundary, var_name,
+                        read_L0_boundary_variable_points(L0_run_dir, model_name, boundary, var_name,
                                                          source_files, source_file_read_indices,
                                                          llc, Nr, faces, rows, cols,
                                                          ecco_XC_faces, ecco_YC_faces, ecco_AngleCS_faces, ecco_AngleSN_faces, ecco_hFacC_faces,
@@ -476,10 +487,10 @@ def create_L1_BCs(config_dir,model_name,var_name,
                     #     plt.imshow(output_grid[0, :, :],vmin=-0.1,vmax=0.1,cmap='seismic')
                     #     plt.show()
 
-                    if var_name in ['UVEL','VVEL','UICE','VICE']:
-                        output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name,dest_file[:-4]+'_rotated.bin')
-                    else:
-                        output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name, dest_file)
+                    # if var_name in ['UVEL','VVEL','UICE','VICE']:
+                    #     output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name,dest_file[:-4]+'_rotated.bin')
+                    # else:
+                    output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', boundary, var_name, dest_file)
                     output_grid.ravel(order='C').astype('>f4').tofile(output_file)
 
 

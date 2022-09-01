@@ -135,11 +135,13 @@ def plot_dv_masks(ecco_path,mask_names):
     for tile in tiles:
         tile[tile>0]=0
 
-    mask_dir = os.path.join('..','input')
-    mask_set = read_masks_to_tiles(mask_dir,llc,mask_names)
+    for mask_name in mask_names:
 
-    output_file = os.path.join('..', 'plots', 'diagnostics_vec_masks.png')
-    create_plot(output_file,tiles,llc,mask_names,mask_set)
+        mask_dir = os.path.join('..','input')
+        mask_set = read_masks_to_tiles(mask_dir,llc,[mask_name])
+
+        output_file = os.path.join('..', 'plots', mask_name+'_dv_mask.png')
+        create_plot(output_file,tiles,llc,[mask_name],mask_set)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -157,6 +159,9 @@ if __name__ == '__main__':
     masks = args.masks
 
     if masks=='':
-        masks = ['west_boundary_mask','south_boundary_mask','east_boundary_mask']
+        ce_masks = ['L1_CE_west_mask','L1_CE_east_mask','L1_CE_south_mask','L1_CE_surface_mask']
+        w_masks = ['L1_W_east_mask', 'L1_W_south_mask','L1_W_north_mask','L1_W_surface_mask']
+        se_masks = ['L1_SE_east_mask', 'L1_SE_south_mask', 'L1_SE_north_mask', 'L1_SE_surface_mask']
+        masks = se_masks+w_masks+ce_masks
 
     plot_dv_masks(ecco_path,masks)

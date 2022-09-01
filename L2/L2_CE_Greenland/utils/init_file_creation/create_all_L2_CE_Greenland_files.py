@@ -12,7 +12,7 @@ def create_L2_CE_Greenland_files(config_dir):
     L2_model_name = 'L2_CE_Greenland'
 
     parent_model = 'L1_CE_Greenland'
-    parent_model_pickup_iteration = 1052352
+    parent_model_pickup_iteration = 1077984
 
     L3_model_name = 'L3_Scoresby_Sund'
 
@@ -38,7 +38,7 @@ def create_L2_CE_Greenland_files(config_dir):
 
     print_level = 3
 
-    steps = [3]
+    steps = [5]
 
     # step 1: make the grid
     if 1 in steps:

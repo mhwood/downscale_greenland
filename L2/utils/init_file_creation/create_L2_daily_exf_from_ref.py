@@ -205,12 +205,16 @@ def read_exf_variable_to_L1_points(L1_run_dir, var_name,
             u_var_file = os.path.join(L1_run_dir, 'dv', 'L2_surface_mask_UWIND.' + file_suffix)
             u_var_grid = np.fromfile(u_var_file, dtype='>f4')
             timesteps_in_file = int(np.size(u_var_grid) / (N))
-            u_var_grid = np.reshape(u_var_grid, (timesteps_in_file, N))
+            # u_var_grid = np.reshape(u_var_grid, (timesteps_in_file, N))
+            u_var_grid = np.reshape(u_var_grid, (timesteps_in_file, N + 109))
+            u_var_grid = u_var_grid[:, :-109]
 
             v_var_file = os.path.join(L1_run_dir, 'dv', 'L2_surface_mask_VWIND.' + file_suffix)
             v_var_grid = np.fromfile(v_var_file, dtype='>f4')
             timesteps_in_file = int(np.size(v_var_grid) / (N))
-            v_var_grid = np.reshape(v_var_grid, (timesteps_in_file, N))
+            # v_var_grid = np.reshape(v_var_grid, (timesteps_in_file, N))
+            v_var_grid = np.reshape(v_var_grid, (timesteps_in_file, N + 109))
+            v_var_grid = v_var_grid[:, :-109]
 
             if print_level >= 3:
                 print('             - Rotating vectors to \"natural\" coords')
@@ -225,7 +229,14 @@ def read_exf_variable_to_L1_points(L1_run_dir, var_name,
             var_file = os.path.join(L1_run_dir, 'dv', 'L2_surface_mask_' + var_name + '.' + file_suffix)
             var_grid = np.fromfile(var_file, dtype='>f4')
             timesteps_in_file = int(np.size(var_grid) / (N))
-            var_grid = np.reshape(var_grid, (timesteps_in_file, N))
+            # var_grid = np.reshape(var_grid, (timesteps_in_file, N))
+            print(timesteps_in_file, N)
+            var_grid = np.reshape(var_grid, (timesteps_in_file, N+109))
+            var_grid = var_grid[:,:-109]
+
+            # plt.plot(var_grid[-1,:])
+            # plt.show()
+            # raise ValueError('Stop')
 
         values[index_counter:index_counter + (end_file_index-start_file_index)+1,0,:] = var_grid[start_file_index:end_file_index+1,:]
 
@@ -308,9 +319,9 @@ def create_exf_field(config_dir, L1_model_name, L2_model_name,
     if print_level >= 2:
         print('        - Reading the mask to reference the variable to the llc grid')
     nc_dict_file = os.path.join(config_dir,'L1',L1_model_name,'input','L1_dv_mask_reference_dict.nc')
-    source_faces,source_rows,source_cols = read_mask_reference_from_nc_dict(nc_dict_file, 'surface')
-
-
+    source_faces,source_rows,source_cols = read_mask_reference_from_nc_dict(nc_dict_file, 'L2_surface')
+    print(np.min(source_faces),np.min(source_rows),np.min(source_cols))
+    print(np.max(source_faces), np.max(source_rows), np.max(source_cols))
 
     for dest_file in dest_files:
         if dest_file not in []:#os.listdir(os.path.join(output_dir,var_name)):

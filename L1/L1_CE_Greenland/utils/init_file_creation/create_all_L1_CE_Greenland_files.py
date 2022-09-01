@@ -8,6 +8,7 @@ def create_L1_CE_Greenland_files(config_dir):
 
     L1_model_name = 'L1_CE_Greenland'
     L2_model_name = 'L2_CE_Greenland'
+    L3_model_name = 'L3_Scoresby_Sund'
 
     ##########################################################################################################
     # L1 model metadata
@@ -54,7 +55,7 @@ def create_L1_CE_Greenland_files(config_dir):
 
     print_level = 4
 
-    steps = [6]
+    steps = [7]
 
     # step 1: make the grid
     if 1 in steps:
@@ -119,7 +120,7 @@ def create_L1_CE_Greenland_files(config_dir):
     if 7 in steps:
         print('Step 7: Creating the diagnostics_vec masks for the ' + L1_model_name + ' model')
         import create_L1_CE_Greenland_dv_masks as cdv
-        cdv.create_dv_masks(config_dir, L1_model_name, L2_model_name, sNx, sNy, face_size_dict, print_level)
+        cdv.create_dv_masks(config_dir, L1_model_name, L2_model_name, L3_model_name, sNx, sNy, face_size_dict, print_level)
 
 
 

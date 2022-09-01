@@ -1,0 +1,10 @@
+ &W2_EXCH2_PARM01
+  W2_mapIO   = 1,
+  preDefTopol = 0,
+  dimsFacets = 0, 0, 0, 0, 540, 180, 0, 0, 540, 540, 0, 0,
+  facetEdgeLink(1,1)= 0. , 0. , 0. , 0. ,
+  facetEdgeLink(1,2)= 0. , 0. , 0. , 0. ,
+  facetEdgeLink(1,3)= 5.4, 0. , 0. , 0. ,
+  facetEdgeLink(1,4)= 0. , 0. , 0. , 0. ,
+  facetEdgeLink(1,5)= 0. , 0. , 0. , 3.1,
+ &

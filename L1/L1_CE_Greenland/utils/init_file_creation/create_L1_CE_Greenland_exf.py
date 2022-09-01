@@ -12,6 +12,9 @@ def create_exf_files(config_dir, L1_model_name, ecco_dir, llc, ordered_ecco_tile
     if 'exf' not in os.listdir(os.path.join(config_dir,'L1',L1_model_name,'input')):
         os.mkdir(os.path.join(config_dir,'L1',L1_model_name,'input','exf'))
 
+    sys.path.insert(1, os.path.join(config_dir, 'L1', model_name, 'utils'))
+    import L1_CE_Greenland_functions as Lf
+
     years = [2001,2002]
 
     var_names = ['ATEMP', 'AQH', 'LWDOWN', 'SWDOWN', 'UWIND', 'VWIND', 'PRECIP','RUNOFF']
@@ -29,13 +32,13 @@ def create_exf_files(config_dir, L1_model_name, ecco_dir, llc, ordered_ecco_tile
         file_prefix = file_prefixes[var_name]
         if var_name == 'RUNOFF':
             year = -12 # means nothing for runoff, just a filler
-            cexf.create_L1_exfs(config_dir, L1_model_name, var_name, ecco_dir, llc, ordered_ecco_tiles,
+            cexf.create_L1_exfs(Lf, config_dir, L1_model_name, var_name, ecco_dir, llc, ordered_ecco_tiles,
                                 ordered_ecco_tile_rotations, file_prefix, year,
                                 sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations, print_level,
                                 is_runoff=True)
         else:
             for year in years:
-                cexf.create_L1_exfs(config_dir, L1_model_name, var_name, ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations, file_prefix, year,
+                cexf.create_L1_exfs(Lf, config_dir, L1_model_name, var_name, ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations, file_prefix, year,
                                      sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations, print_level)
 
 

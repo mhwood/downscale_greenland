@@ -3,7 +3,8 @@
 # *********************
 
  &EXF_NML_01
- useAtmWind        = .FALSE.,
+ useAtmWind        = .TRUE.,
+#
  exf_albedo        = 0.1,
  useExfZenIncoming = .TRUE., 
  select_ZenAlbedo  = 1,
@@ -11,69 +12,55 @@
  ocean_emissivity = 0.97,
  ice_emissivity = 0.95,
  snow_emissivity = 0.95,
+#
  exf_iprec         = 32,
  exf_yftype        = 'RL',
  useExfYearlyFields= .FALSE.,
  useExfCheckRange  = .FALSE.,
-# useRelativeWind   = .FALSE.,
- readStressOnAgrid = .TRUE.,
- rotateStressOnAgrid = .TRUE.,
  /
 
  &EXF_NML_02
-# ustressfile       = 'exf/L3_exf_USTRESS.bin',
-# vstressfile       = 'exf/L3_exf_VSTRESS.bin',
-# atempfile         = 'exf/L3_exf_ATEMP.bin',
-# aqhfile           = 'exf/L3_exf_AQH.bin',
-# precipfile        = 'exf/L3_exf_PRECIP.bin',
-# wspeedfile        = 'exf/L3_exf_WSPEED.bin',
-# swdownfile        = 'exf/L3_exf_SWDOWN.bin',
-# lwdownfile        = 'exf/L3_exf_LWDOWN.bin',
-# apressurefile     = 'exf/L3_exf_APRESS.bin',
-# runofffile        = 'exf/L3_exf_RUNOFF.bin',
-
-# ustressstartdate1   = 19920101,
-# ustressstartdate2   = 000130,
-# ustressperiod       = 45.0,
-
-# vstressstartdate1   = 19920101,
-# vstressstartdate2   = 000130,
-# vstressperiod       = 45.0,
-
-# atempstartdate1   = 19920101,
-# atempstartdate2   = 000130,
-# atempperiod       = 45.0,
-
-# aqhstartdate1     = 19920101,
-# aqhstartdate2     = 000130,
-# aqhperiod         = 45.0,
-
-# precipstartdate1  = 19920101,
-# precipstartdate2  = 000130,
-# precipperiod      = 45.0,
-
-# runoffstartdate1   = 19920101,
-# runoffstartdate2   = 000130,
-# runoffperiod       = 45.0,
-
-# wspeedstartdate1   = 19920101,
-# wspeedstartdate2   = 000130,
-# wspeedperiod       = 45.0,
-
-# swdownstartdate1  = 19920101,
-# swdownstartdate2  = 000130,
-# swdownperiod      = 45.0,
-
-# lwdownstartdate1  = 19920101,
-# lwdownstartdate2  = 000130,
-# lwdownperiod      = 45.0,
-
-# apressurestartdate1   = 19920101,
-# apressurestartdate2   = 000130,
-# apressureperiod       = 45.0,
-
-# climsstperiod     = -12.,
-# climsssperiod     = -12.,
+ uwindfile       = 'exf/L3_exf_UWIND.bin',
+ vwindfile       = 'exf/L3_exf_VWIND.bin',
+ atempfile         = 'exf/L3_exf_ATEMP.bin',
+ aqhfile           = 'exf/L3_exf_AQH.bin',
+ precipfile        = 'exf/L3_exf_PRECIP.bin',
+ swdownfile        = 'exf/L3_exf_SWDOWN.bin',
+ lwdownfile        = 'exf/L3_exf_LWDOWN.bin',
+ runofffile        = 'exf/L3_exf_RUNOFF.bin',
+#
+ atempstartdate1   = 20011231,
+ atempstartdate2   = 210000,
+ atempperiod       = 21600.0,
+#
+ aqhstartdate1     = 20011231,
+ aqhstartdate2     = 210000,
+ aqhperiod         = 21600.0,
+#
+ precipstartdate1  = 20011231,
+ precipstartdate2  = 210000,
+ precipperiod      = 21600.0,
+#
+ runoffstartdate1  = 20011231,
+ runoffstartdate2  = 210000,
+ runoffperiod      = 21600.0,
+#
+ uwindstartdate1   = 20011231,
+ uwindstartdate2   = 210000,
+ uwindperiod       = 21600.0,
+#
+ vwindstartdate1   = 20011231,
+ vwindstartdate2   = 210000,
+ vwindperiod       = 21600.0,
+#
+ swdownstartdate1  = 20011231,
+ swdownstartdate2  = 210000,
+ swdownperiod      = 21600.0,
+#
+ lwdownstartdate1  = 20011231,
+ lwdownstartdate2  = 210000,
+ lwdownperiod      = 21600.0,
+#
  /
 
 
@@ -82,29 +69,27 @@
 
  &EXF_NML_04
  runoff_interpMethod = 0,
- climsss_interpMethod = 0,
- ustress_interpMethod = 0,
- vstress_interpMethod = 0,
+ uwind_interpMethod = 0,
+ vwind_interpMethod = 0,
  atemp_interpMethod = 0,
  aqh_interpMethod = 0,
  precip_interpMethod = 0,
- wspeed_interpMethod = 0,
  swdown_interpMethod = 0,
  lwdown_interpMethod = 0,
- apressure_interpMethod = 0,
  /
 
  &EXF_NML_OBCS
- obcsNstartdate1     = 20011216,
- obcsNstartdate2     = 000000,
- obcsNperiod         = 2592000.0,
 #
- obcsSstartdate1     = 20011216,
- obcsSstartdate2     = 000000,
- obcsSperiod         = 2592000.0,
+ obcsNstartdate1     = 20011231,
+ obcsNstartdate2     = 233000,
+ obcsNperiod         = 3600.0,
 #
- obcsWstartdate1     = 20011216,
- obcsWstartdate2     = 000000,
- obcsWperiod         = 2592000.0,
+ obcsSstartdate1     = 20011231,
+ obcsSstartdate2     = 233000,
+ obcsSperiod         = 3600.0,
+#
+ obcsEstartdate1     = 20011231,
+ obcsEstartdate2     = 233000,
+ obcsEperiod         = 3600.0,
 #
  &

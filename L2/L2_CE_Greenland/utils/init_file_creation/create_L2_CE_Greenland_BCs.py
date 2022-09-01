@@ -18,19 +18,19 @@ def create_BCs(config_dir, L2_model_name, parent_model,
     start_day = 1
 
     final_year = 2002
-    final_month = 1
-    final_day = 3
+    final_month = 12
+    final_day = 30
 
     ###################################################################################
     # The BC fields are created in 3 steps
 
     # # step 1: make a reference whereby the diagnostics_vec files are organized in a dictionary
-    # import create_L2_BC_field_ref as ebcr
-    # ebcr.create_L2_BC_ref_file(config_dir, L2_model_name, parent_model, print_level)
+    import create_L2_BC_field_ref as ebcr
+    ebcr.create_L2_BC_ref_file(config_dir, L2_model_name, parent_model, print_level)
 
     # step 2: using the reference dict, organize downscaled BC into daily files
     import create_L2_daily_bcs_from_ref as cef
-    for proc_id in range(12,18):  # 7
+    for proc_id in range(27):
         cef.create_bc_fields_via_interpolation(config_dir, L2_model_name, parent_model, proc_id,
                                                sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
                                                faces, ordered_tiles_faces_dict,
@@ -40,7 +40,7 @@ def create_BCs(config_dir, L2_model_name, parent_model,
 
     # step 3: combine all of the BC fields into a single file
     import combine_and_rotate_L2_daily_BC_files as com
-    for proc_id in range(12,18):
+    for proc_id in range(27):
         com.combine_and_rotate_L2_daily_bcs(config_dir, L2_model_name, proc_id,
                                             start_year, final_year, start_month, final_month, start_day, final_day, print_level)
 

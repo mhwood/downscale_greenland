@@ -8,11 +8,13 @@ import argparse
 import ast
 import sys
 
-def get_dest_file_list(boundary, var_name, Nr, sNx, sNy, tile_numbers,
+def get_dest_file_list(model_name, boundary, var_name, Nr, sNx, sNy, tile_numbers,
                        start_year, final_year, start_month, final_month, start_day, final_day):
 
     start_date = datetime(start_year, start_month, start_day)
     final_date = datetime(final_year, final_month, final_day)
+
+    prefix = '_'.join(model_name.split('_')[:2])
 
     dest_files = []
     dest_file_shapes = {}
@@ -35,7 +37,7 @@ def get_dest_file_list(boundary, var_name, Nr, sNx, sNy, tile_numbers,
                     depth_levels = Nr
                 test_date = datetime(year, month, day)
                 if test_date >= start_date and test_date <= final_date:
-                    dest_file = 'L1_BC_' + boundary + '_' + var_name + '.' + str(year) + '{:02d}'.format(
+                    dest_file = prefix+'_' + boundary + '_' + var_name + '.' + str(year) + '{:02d}'.format(
                         month) + '{:02d}'.format(day) + '.bin'
                     dest_files.append(dest_file)
                     nTimesteps = 24
@@ -231,7 +233,7 @@ def combine_L1_daily_BC_files(config_dir, model_name, var_name,
 
             if print_level >= 2:
                 print('        - Determining the size of the input/output files')
-            dest_files, dest_file_shapes, total_timesteps = get_dest_file_list(boundary, var_name, Nr, sNx, sNy, tile_numbers,
+            dest_files, dest_file_shapes, total_timesteps = get_dest_file_list(model_name, boundary, var_name, Nr, sNx, sNy, tile_numbers,
                                                                                start_year, final_year, start_month, final_month, start_day, final_day)
 
             if var_name in ['UVEL','VVEL','UICE','VICE']:
@@ -251,7 +253,7 @@ def combine_L1_daily_BC_files(config_dir, model_name, var_name,
                                                       AngleCS_subset, AngleSN_subset, print_level)
 
 
-            output_file = os.path.join(config_dir, 'L1',model_name, 'input', 'obcs', 'L1_BC_'+boundary+'_' + var_name + '.bin')
+            output_file = os.path.join(config_dir, 'L1', model_name, 'input', 'obcs', 'L1_BC_'+boundary+'_' + var_name + '.bin')
             if print_level >= 1:
                 print('    - Outputting to ' + output_file)
             output_grid.ravel('C').astype('>f4').tofile(output_file)

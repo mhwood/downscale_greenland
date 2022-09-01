@@ -131,16 +131,13 @@ def subset_ecco_exf_to_tile_domain(XC, YC, ecco_lon, ecco_lat, ecco_exf_Grid):
 
     return(ecco_grid_subset)
 
-def create_L1_exfs(config_dir, model_name, var_name,
+def create_L1_exfs(Lf, config_dir, model_name, var_name,
                    ecco_dir, llc, ordered_ecco_tiles, ordered_ecco_tile_rotations, file_prefix, year,
                    sNx, sNy, ordered_nonblank_tiles,ordered_nonblank_rotations, print_level, is_runoff=False):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils', 'init_file_creation'))
     import downscale_functions as df
     import ecco_functions as ec
-
-    sys.path.insert(1, os.path.join(config_dir, 'L1', model_name, 'utils'))
-    import L1_CE_Greenland_functions as Lf
 
     if print_level >= 1:
         print('    - Creating the '+var_name+' exf files in year '+str(year)+' for the '+model_name+' model from ECCOv5 data')
@@ -162,11 +159,14 @@ def create_L1_exfs(config_dir, model_name, var_name,
         ecco_Runoff_Grid = ec.read_ecco_runoff_file(ecco_dir, file_name, ordered_ecco_tiles, ordered_ecco_tile_rotations, llc=llc)
 
         # plt.subplot(1, 3, 1)
-        # plt.imshow(ecco_Lon,origin='lower')
+        # C = plt.imshow(ecco_Lon,origin='lower')
+        # plt.colorbar(C)
         # plt.subplot(1, 3, 2)
-        # plt.imshow(ecco_Lat, origin='lower')
+        # C = plt.imshow(ecco_Lat, origin='lower')
+        # plt.colorbar(C)
         # plt.subplot(1, 3, 3)
-        # plt.imshow(ecco_Runoff_Grid[0,:,:], origin='lower')
+        # C = plt.imshow(ecco_Runoff_Grid[0,:,:], origin='lower',vmax=1e-9)
+        # plt.colorbar(C)
         # plt.show()
 
         domain_surface_mask = np.copy(hFac[0, :, :])
@@ -190,7 +190,7 @@ def create_L1_exfs(config_dir, model_name, var_name,
         # plt.imshow(runoff_faces[1][0, :, :])
         # plt.show()
         #
-        # plt.imshow(runoff_faces[3][0, :, :])
+        # plt.imshow(runoff_faces[5][0, :, :])
         # plt.show()
 
         runoff_compact = Lf.read_faces_to_compact(runoff_faces, sNx, sNy)

@@ -282,32 +282,16 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
     # this is the dir where the output will be stored
     output_dir = os.path.join(config_dir,'L2',L2_model_name,'input')
 
-    delR_in = np.array([10.00, 10.00, 10.00, 10.00, 10.00, 10.00, 10.00, 10.01,
-                        10.03, 10.11, 10.32, 10.80, 11.76, 13.42, 16.04, 19.82, 24.85,
-                        31.10, 38.42, 46.50, 55.00, 63.50, 71.58, 78.90, 85.15, 90.18,
-                        93.96, 96.58, 98.25, 99.25, 100.01, 101.33, 104.56, 111.33, 122.83,
-                        139.09, 158.94, 180.83, 203.55, 226.50, 249.50, 272.50, 295.50, 318.50,
-                        341.50, 364.50, 387.50, 410.50, 433.50, 456.50])
+    grid_file = os.path.join(config_dir, 'nc_grids', L1_model_name + '_grid.nc')
+    ds = nc4.Dataset(grid_file)
+    delR_in = np.array(ds.variables['drF'][:])
+    ds.close()
     Nr_in = len(delR_in)
 
-    delR_out = np.array([1.00, 1.14, 1.30, 1.49, 1.70,
-                         1.93, 2.20, 2.50, 2.84, 3.21,
-                         3.63, 4.10, 4.61, 5.18, 5.79,
-                         6.47, 7.20, 7.98, 8.83, 9.73,
-                         10.69, 11.70, 12.76, 13.87, 15.03,
-                         16.22, 17.45, 18.70, 19.97, 21.27,
-                         22.56, 23.87, 25.17, 26.46, 27.74,
-                         29.00, 30.24, 31.45, 32.65, 33.82,
-                         34.97, 36.09, 37.20, 38.29, 39.37,
-                         40.45, 41.53, 42.62, 43.73, 44.87,
-                         46.05, 47.28, 48.56, 49.93, 51.38,
-                         52.93, 54.61, 56.42, 58.38, 60.53,
-                         62.87, 65.43, 68.24, 71.33, 74.73,
-                         78.47, 82.61, 87.17, 92.21, 97.79,
-                         103.96, 110.79, 118.35, 126.73, 136.01,
-                         146.30, 157.71, 170.35, 184.37, 199.89,
-                         217.09, 236.13, 257.21, 280.50, 306.24,
-                         334.64, 365.93, 400.38, 438.23, 479.74, ])
+    grid_file = os.path.join(config_dir, 'nc_grids', L2_model_name + '_grid.nc')
+    ds = nc4.Dataset(grid_file)
+    delR_out = np.array(ds.variables['drF'][:])
+    ds.close()
     Nr_out = len(delR_out)
 
     if print_level>=1:
@@ -365,8 +349,9 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
             L1_wet_cells[L1_wet_cells > 0] = 1
 
             if var_name.lower() not in ['etan', 'detahdt', 'etah']:
-                var_grid, L1_wet_cells = df.interpolate_var_grid_faces_to_new_depth_levels(
-                    var_grid, L1_wet_cells, delR_in, delR_out)
+                if Nr_in!=Nr_out:
+                    var_grid, L1_wet_cells = df.interpolate_var_grid_faces_to_new_depth_levels(
+                        var_grid, L1_wet_cells, delR_in, delR_out)
             else:
                 domain_wet_cells_3D = domain_wet_cells_3D[:1,:,:]
 
@@ -419,8 +404,8 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
             else:
                 interp_field = np.zeros((1, np.shape(L2_XC)[0], np.shape(L2_XC)[1]))
 
-        if var_name.lower() in ['etan','etah']:
-            interp_field[interp_field!=0]+=2
+        # if var_name.lower() in ['etan','etah']:
+        #     interp_field[interp_field!=0]+=2
 
         interp_grids.append(interp_field)
 
@@ -439,8 +424,6 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
     # plt.show()
 
     pickup_grid = stack_grids_to_pickup(interp_grids)
-
-    print(np.shape(pickup_grid))
 
     output_dir = os.path.join(config_dir, 'L2', L2_model_name, 'input')
     output_file = os.path.join(output_dir, 'pickup.' + '{:010d}'.format(L1_iteration*2))

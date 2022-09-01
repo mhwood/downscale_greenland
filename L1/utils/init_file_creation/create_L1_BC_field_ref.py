@@ -7,20 +7,22 @@ import argparse
 import sys
 import ast
 
-def find_dv_files_to_read(config_dir, var_name, averaging_period, seconds_per_iter, points_per_output):
+def find_dv_files_to_read(config_dir, L1_model_name, var_name, averaging_period, seconds_per_iter, points_per_output):
 
     sys.path.insert(1, os.path.join(config_dir, 'utils','init_file_creation'))
     import time_functions as tf
 
     iters_per_output = averaging_period/seconds_per_iter
+    model_prefix = '_'.join(L1_model_name.split('_')[:2])
 
     # loop through the dv files and mask a list of how many fields each file has
     file_names = []
     file_iters = []
     n_files_in_files = []
-    dv_dir = os.path.join(config_dir, 'L0', 'run', 'dv')
+    dv_dir = os.path.join(config_dir, 'L0', 'run', 'dv', model_prefix)
+    search_group = model_prefix + '_south'
     for file_name in os.listdir(dv_dir):
-        if 'south' in file_name and var_name in file_name:
+        if search_group in file_name and var_name in file_name:
             file_iter = int(file_name.split('.')[-2])
             iters_per_file = int(np.size(np.fromfile(os.path.join(dv_dir,file_name),'>f4'))/(points_per_output))
             # iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
@@ -45,8 +47,9 @@ def find_dv_files_to_read(config_dir, var_name, averaging_period, seconds_per_it
         file_name = file_names_sorted[i]
         iters_per_file = n_files_in_files_sorted[i]
 
-        file_endpoints = np.arange(file_iter - 1, file_iter - 1 + (iters_per_file + 1) * iters_per_output, iters_per_output)
+        file_endpoints = np.arange(file_iter, file_iter + (iters_per_file + 1) * iters_per_output, iters_per_output)
         file_midpoints = file_endpoints[:-1] + np.diff(file_endpoints) / 2
+        print(file_midpoints[0],file_midpoints[1],file_midpoints[2],file_midpoints[-1])
 
         # print(file_name,file_iter,iters_per_file)
         # iter_midpoints = tf.dv_file_name_iter_to_iter_midpoints(file_iter, iters_per_output, iters_per_file)
@@ -63,8 +66,8 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
 
     # create a list of daily bounds
     date_bounds = []
-    for year in range(2002, 2003):
-        for month in range(1, 4):
+    for year in range(1992,1993):
+        for month in range(1, 13):
             if month in [1, 3, 5, 7, 8, 10, 12]:
                 nDays = 31
             elif month in [4, 6, 9, 11]:
@@ -86,8 +89,8 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
     for date_set in date_bounds:
         date_0 = (date_set[0] - datetime(1992, 1, 1)).total_seconds()
         date_1 = (date_set[1] - datetime(1992, 1, 1)).total_seconds()
-        iter_0 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_0)
-        iter_1 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_1)
+        iter_0 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_0)+2
+        iter_1 = tf.elapsed_seconds_to_iters(start_seconds, seconds_per_iter, date_1)+2
         dest_file = 'L1_BC_'+str(var_name)+'.'+str(date_set[0].year)+'{:02d}'.format(date_set[0].month)+'{:02d}'.format(date_set[0].day)+'.bin'
         dest_files.append(dest_file)
         dest_file_iter_bounds[dest_file] = [iter_0,iter_1]
@@ -152,8 +155,8 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
                 # try:
                 index_0 = list(source_file_iters).index(min_dest_iter)
                 index_1 = list(source_file_iters).index(max_dest_iter)+1
-                if file_name == source_file_read_dict[dest_file][-1]:
-                    index_1 -= 1
+                # if file_name == source_file_read_dict[dest_file][-1]:
+                #     index_1 -= 1
                 # print('            - This corresponds to indices '+str(index_0)+' ('+str(source_file_iters[index_0]) +') through '+str(index_1-1)+' ('+str(source_file_iters[index_1-1]) +')')
                 source_file_read_index_sets[dest_file].append([index_0, index_1])
                 # except:
@@ -169,7 +172,7 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
 def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
 
     if print_level>1:
-        print('    - Creating the BC field reference for the '+L1_model_name)
+        print('    - Creating the BC field reference for the '+L1_model_name+' model')
 
     var_name = 'THETA'
     boundary = 'south'
@@ -178,15 +181,18 @@ def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
     seconds_per_iter = 1200
     Nr = 50
 
+    model_prefix = '_'.join(L1_model_name.split('_')[:2])
+
     # first read how many points are expected in each iter (read from the mask reference)
     mask_ref_file = os.path.join(config_dir,'L0','input','L0_dv_mask_reference_dict.nc')
     ds = nc4.Dataset(mask_ref_file)
-    points_per_output = Nr*len(ds.groups['south'].variables['source_rows'][:])
+    search_group = model_prefix+'_south'
+    points_per_output = Nr*len(ds.groups[search_group].variables['source_rows'][:])
     ds.close()
 
     # calculate the file name iterations to read from
     #     along with the iterations these files cover
-    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, var_name, averaging_period, seconds_per_iter, points_per_output)
+    file_names, iter_midpoint_dict = find_dv_files_to_read(config_dir, L1_model_name, var_name, averaging_period, seconds_per_iter, points_per_output)
     if print_level>=2:
         print('    - Source file summary:')
     output = '{\n'
@@ -197,7 +203,7 @@ def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
                   ', '+str(np.max(iter_midpoint_dict[file_name]))+'],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L0','run','dv','BC_source_ref.txt')
+    output_file = os.path.join(config_dir,'L0','run','dv', model_prefix, L1_model_name+'_BC_source_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()
@@ -235,7 +241,7 @@ def create_L1_BC_ref_file(config_dir, L1_model_name, print_level):
         output+='],\n'
     output += '}'
 
-    output_file = os.path.join(config_dir,'L0','run','dv','BC_dest_ref.txt')
+    output_file = os.path.join(config_dir,'L0','run','dv',model_prefix, L1_model_name+'_BC_dest_ref.txt')
     f = open(output_file,'w')
     f.write(output)
     f.close()

@@ -20,7 +20,7 @@ def read_L1_grid_geometry_to_faces(Lf, config_dir, model_name, sNx, sNy, faces, 
         L1_XC_Faces[face] = tile_grid[0, :, :]
         L1_YC_Faces[face] = tile_grid[1, :, :]
 
-    bathy_file = os.path.join(config_dir, 'L1', model_name, 'input', 'bathymetry.bin')
+    bathy_file = os.path.join(config_dir, 'L1', model_name, 'input', model_name+'_bathymetry.bin')
     bathy_compact = np.fromfile(bathy_file, '>f4')
     n_rows = int(np.size(bathy_compact) / sNx)
     bathy_compact = np.reshape(bathy_compact, (n_rows, sNx))
@@ -30,10 +30,12 @@ def read_L1_grid_geometry_to_faces(Lf, config_dir, model_name, sNx, sNy, faces, 
     return(L1_XC_Faces, L1_YC_Faces, depth)
 
 def read_mask_to_stitched_grid(Lf, config_dir, model_name, mask_name, sNx, sNy, faces, face_size_dict):
-    if mask_name!='surface':
-        mask_file = os.path.join(config_dir, 'L1', model_name, 'input', 'dv', 'L2_'+mask_name+'_BC_mask.bin')
+    if mask_name=='L2_surface':
+        mask_file = os.path.join(config_dir, 'L1', model_name, 'input', 'dv', mask_name+'_mask.bin')
+    elif mask_name=='L3_surface':
+        mask_file = os.path.join(config_dir, 'L1', model_name, 'input', 'dv', mask_name+'_mask.bin')
     else:
-        mask_file = os.path.join(config_dir, 'L1', model_name, 'input', 'dv', 'L2_' + mask_name + '_mask.bin')
+        mask_file = os.path.join(config_dir, 'L1', model_name, 'input', 'dv',  mask_name + '_BC_mask.bin')
     mask_compact = np.fromfile(mask_file, '>f4')
     n_rows = int(np.size(mask_compact) / sNx)
     mask_compact = np.reshape(mask_compact, (n_rows, sNx))
@@ -60,7 +62,7 @@ def plot_dv_masks(config_dir, L1_model_name, L2_model_name, sNx, sNy, faces, fac
     L2_XC, L2_YC, L2_Depth = read_L2_grid_geometry_from_nc(config_dir, L2_model_name)
 
 
-    for boundary in ['south','east','north','surface']:
+    for boundary in ['L2_south','L2_east','L2_north','L2_surface','L3_south','L3_east','L3_north','L3_surface']:
         mask_grid = read_mask_to_stitched_grid(Lf, config_dir, L1_model_name, boundary, sNx, sNy, faces, face_size_dict)
         mask_faces = Lf.read_stitched_grid_to_faces(mask_grid, sNx, sNy, dim=2)
 

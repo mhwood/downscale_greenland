@@ -54,11 +54,8 @@ def read_seaice_pickup_file(input_dir,pickup_iteration):
     return(var_names,row_bounds,var_grids,global_metadata)
 
 
-def create_seaice_pickup_plot(config_dir, L1_model_name, pickup_iteration,
+def create_seaice_pickup_plot(Lf, config_dir, L1_model_name, pickup_iteration,
                        sNx, sNy, faces, face_size_dict):
-
-    sys.path.insert(1, os.path.join(config_dir, 'L1', L1_model_name, 'utils'))
-    import L1_CE_Greenland_functions as Lf
 
     rotate = True
 

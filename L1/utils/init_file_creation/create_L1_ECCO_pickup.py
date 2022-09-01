@@ -170,19 +170,20 @@ def rotate_interpolated_faces_to_domain(var_names,tile_number, tile_face_index_d
 
 def stack_grids_to_compact_pickup(faces, interp_grids_faces, var_names, compact_tile_size):
 
-    for f in range(len(interp_grids_faces)):
-        print('       - Stacking field for '+var_names[f])
-        grid_faces = interp_grids_faces[f]
-        for face in faces:
+    for i in range(len(interp_grids_faces)):
+        print('       - Stacking field for '+var_names[i])
+        grid_faces = interp_grids_faces[i]
+        for f in range(len(faces)):
+            face = faces[f]
             grid = grid_faces[face]
             n_rows = int((np.shape(grid)[1]*np.shape(grid)[2])/compact_tile_size)
             grid = np.reshape(grid,(np.shape(grid)[0],n_rows,compact_tile_size))
-            if face==1:
+            if f==0:
                 compact_stack = grid
             else:
                 compact_stack = np.concatenate([compact_stack, grid], axis=1)
 
-        if f==0:
+        if i==0:
             pickup_grid = compact_stack
         else:
             pickup_grid = np.concatenate([pickup_grid, compact_stack], axis=0)

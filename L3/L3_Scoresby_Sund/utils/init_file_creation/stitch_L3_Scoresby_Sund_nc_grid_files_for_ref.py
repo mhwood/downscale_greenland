@@ -12,6 +12,9 @@ def read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_non
     stitched_XC = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
     stitched_YC = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
 
+    stitched_AngleCS = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
+    stitched_AngleSN = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
+
     stitched_DXC = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0]) + 1))
     stitched_DYC = np.zeros((sNy * len(ordered_nonblank_tiles) + 1, sNx * len(ordered_nonblank_tiles[0])))
     stitched_Depth = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
@@ -32,6 +35,8 @@ def read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_non
                     ds = nc4.Dataset(os.path.join(grid_dir,'mnc_'+'{:04d}'.format(n+1),'grid.t'+'{:03d}'.format(tile_number)+'.nc'))
                     XC = ds.variables['XC'][:, :]
                     YC = ds.variables['YC'][:, :]
+                    AngleCS = ds.variables['AngleCS'][:, :]
+                    AngleSN = ds.variables['AngleSN'][:, :]
                     DXC = ds.variables['dxC'][:, :]
                     DYC = ds.variables['dyC'][:, :]
                     hFacC = ds.variables['HFacC'][:, :, :]
@@ -44,6 +49,9 @@ def read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_non
                     stitched_XC[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = XC
                     stitched_YC[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = YC
 
+                    stitched_AngleCS[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = AngleCS
+                    stitched_AngleSN[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = AngleSN
+
                     stitched_DXC[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx+1] = DXC
                     stitched_DYC[r * sNy:(r + 1) * sNy+1, c * sNx:(c + 1) * sNx] = DYC
 
@@ -53,13 +61,13 @@ def read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_non
 
                     stitched_Depth[r * sNy:(r + 1) * sNy, c * sNx:(c + 1) * sNx] = Depth
 
-    return(stitched_XC, stitched_YC, stitched_DXC, stitched_DYC,
+    return(stitched_XC, stitched_YC, stitched_AngleCS, stitched_AngleSN, stitched_DXC, stitched_DYC,
            stitched_hFacC, stitched_hFacS, stitched_hFacW,
            stitched_Depth, DRF)
 
 
 def write_grid_to_nc(config_dir, model_name,
-                     XC, YC, DXC, DYC, hFacC, hFacS, hFacW, DRF, Depth):
+                     XC, YC, AngleCS, AngleSN, DXC, DYC, hFacC, hFacS, hFacW, DRF, Depth):
 
     output_path = os.path.join(config_dir, 'nc_grids', model_name+'_grid.nc')
 
@@ -76,6 +84,12 @@ def write_grid_to_nc(config_dir, model_name,
 
     var = ds.createVariable('YC', 'f4', ('Y', 'X'))
     var[:, :] = YC
+
+    var = ds.createVariable('AngleCS', 'f4', ('Y', 'X'))
+    var[:, :] = AngleCS
+
+    var = ds.createVariable('AngleSN', 'f4', ('Y', 'X'))
+    var[:, :] = AngleSN
 
     var = ds.createVariable('dxC', 'f4', ('Y', 'Xp1'))
     var[:, :] = DXC
@@ -106,14 +120,22 @@ def stitch_grid_files(config_dir):
 
     model_name = 'L3_Scoresby_Sund'
     ordered_tiles = [[1,2],[3,4],[5,6]]
-    Nr = 67
+    Nr = 50
     sNx = 210
     sNy = 150
 
-    XC, YC, DXC, DYC, hFacC, hFacS, hFacW, Depth, DRF = read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_tiles)
+    XC, YC, AngleCS, AngleSN, DXC, DYC, hFacC, hFacS, hFacW, Depth, DRF = read_L3_grid_tile_geometry(config_dir, model_name, Nr, sNx, sNy, ordered_tiles)
+
+    print('   - Copying interior AngleCS and AngleSN values to boundary because these values are messed up')
+    AngleCS[-1,:] = AngleCS[-2,:]
+    AngleCS[0, :] = AngleCS[1, :]
+    AngleCS[:,-1] = AngleCS[:,-2]
+    AngleSN[-1, :] = AngleSN[-2, :]
+    AngleSN[0, :] = AngleSN[1, :]
+    AngleSN[:, -1] = AngleSN[:, -2]
 
     write_grid_to_nc(config_dir, model_name,
-                     XC, YC, DXC, DYC,
+                     XC, YC, AngleCS, AngleSN, DXC, DYC,
                      hFacC, hFacS, hFacW, DRF, Depth)
 
     zero_rows = 0

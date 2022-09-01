@@ -7,7 +7,7 @@ import numpy as np
 def plot_L2_CE_Greenland_init_fields(config_dir):
 
     L2_model_name = 'L2_CE_Greenland'
-    pickup_iteration = 2104704
+    pickup_iteration = 2155968
     L3_model_name = 'L3_Scoresby_Sund'
 
     sys.path.insert(1, os.path.join(config_dir, 'L2', L2_model_name, 'utils', 'plot_creation','init_files'))
@@ -15,7 +15,7 @@ def plot_L2_CE_Greenland_init_fields(config_dir):
 
     print_level = 3
 
-    steps = [3]
+    steps = [5]
 
     if 'plots' not in os.listdir(os.path.join(config_dir,'L2',L2_model_name)):
         os.mkdir(os.path.join(config_dir,'L2',L2_model_name,'plots'))
@@ -48,7 +48,7 @@ def plot_L2_CE_Greenland_init_fields(config_dir):
 
     # step 6: plot the external forcing fields at a random time step
     if 5 in steps:
-        print('Step 6: Plotting the external forcing conditions for the ' + L2_model_name + ' model at a random timestep')
+        print('Step 5: Plotting the external forcing conditions for the ' + L2_model_name + ' model at a random timestep')
         import plot_L2_CE_Greenland_exf_fields as cef
         cef.plot_L2_CE_Greenland_exfs(config_dir)
 

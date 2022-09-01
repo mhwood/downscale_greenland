@@ -150,8 +150,8 @@ def plot_mnc_fields(config_dir,field_name,remove_old,skip):
         vmax = 1
         cmap = cm.balance
     if field_name == 'ETAN':
-        vmin = -0.4
-        vmax = 2
+        vmin = -2
+        vmax = 0
         cmap = 'viridis'
     if field_name == 'SPEED':
         vmin = 0

@@ -55,11 +55,11 @@
  nml_fields2D(1:6,3) = 'ETAN    ','UICE    ','VICE    ','AREA    ','HEFF    ','HSNOW   ',
 #
  nml_fields3D(1:4,1) = 'THETA   ','SALT   ','VVEL   ','UVEL    ',
- nml_levels3D(1:4,1) =   90, 90, 90, 90,
+ nml_levels3D(1:4,1) =   50, 50, 50, 50,
  nml_fields3D(1:4,2) = 'THETA   ','SALT   ','VVEL   ','UVEL    ',
- nml_levels3D(1:4,2) =   90, 90, 90, 90,
+ nml_levels3D(1:4,2) =   50, 50, 50, 50,
  nml_fields3D(1:4,3) = 'THETA   ','SALT   ','VVEL   ','UVEL    ',
- nml_levels3D(1:4,3) =   90, 90, 90, 90,
+ nml_levels3D(1:4,3) =   50, 50, 50, 50,
 #
 # surface bc's are averaged every hour and dumped every month
 

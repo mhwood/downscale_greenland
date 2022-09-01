@@ -7,10 +7,7 @@ import argparse
 import ast
 import sys
 
-def create_mitgrid_plot(config_dir, L1_model_name, faces, face_size_dict):
-
-    sys.path.insert(1, os.path.join(config_dir, 'L1', L1_model_name, 'utils'))
-    import L1_CE_Greenland_functions as Lf
+def create_mitgrid_plot(Lf, config_dir, L1_model_name, faces, face_size_dict):
 
     grid_keys = ['XC', 'YC', 'DXF', 'DYF', 'RAC', 'XG', 'YG', 'DXV', 'DYU',
                  'RAZ', 'DXC', 'DYC', 'RAW', 'RAS', 'DXG', 'DYG']

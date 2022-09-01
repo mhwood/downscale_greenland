@@ -2,6 +2,7 @@ import os
 import netCDF4 as nc4
 import numpy as np
 import matplotlib.pyplot as plt
+from math import radians, cos, sin, asin, sqrt
 import simplegrid as sg
 from scipy.interpolate import griddata
 from ecco_v4_py.llc_array_conversion import llc_faces_to_compact, llc_compact_to_faces
@@ -34,13 +35,98 @@ def read_global_XC_YC(ecco_dir,llc):
 
     return(XC_faces,YC_faces, bathy_faces)
 
+def L1_model_name_to_geometry(L1_model_name):
+    if L1_model_name == 'L1_CE_Greenland':
+        sNx = 180
+        sNy = 180
+        tile_face_index_dict = {1: [1, 0, 0],
+                                2: [1, 0, sNx],
+                                3: [1, 0, 2 * sNx],
+                                4: [3, 0, 0],
+                                5: [3, sNy, 0],
+                                6: [3, 2 * sNy, 0]}
+        ordered_nonblank_tiles = [[1, 2, 3], [6, 5, 4]]
+        northern_tiles = []
+        southern_tiles = [1, 2, 3, 4]
+        eastern_tiles = [3, 4, 5, 6]
+        western_tiles = [1]
+
+        ecco_sNx = 45
+        ecco_sNy = 45
+        ecco_surface_tile_faces = [5, 1, 1, 1, 3, 3, 3]
+        ecco_surface_tile_min_rows = [5 * ecco_sNy,
+                                      17 * ecco_sNy, 17 * ecco_sNy, 17 * ecco_sNy,
+                                      3 * ecco_sNy, 4 * ecco_sNy, 5 * ecco_sNy]
+        ecco_surface_tile_min_cols = [0, 0, 1 * ecco_sNx, 2 * ecco_sNx, 0, 0, 0]
+    if L1_model_name == 'L1_W_Greenland':
+        sNx = 180
+        sNy = 180
+        tile_face_index_dict = {1: [3, 0, 0],
+                                2: [3, 0, sNx],
+                                3: [3, 0, 2 * sNx],
+                                4: [5, 0, 0],
+                                5: [5, 0, sNx],
+                                6: [5, 0, 2 * sNx],
+                                7: [5, sNy, 0],
+                                8: [5, sNy, sNx],
+                                9: [5, sNy, 2 * sNx],
+                                10: [5, 2 * sNy, 0],
+                                11: [5, 2 * sNy, sNx],
+                                12: [5, 2 * sNy, 2 * sNx]}
+        ordered_nonblank_tiles = [[6, 9, 12], [5, 8, 11], [4, 7, 10], [3, 2, 1]]
+        northern_tiles = [10, 11, 12]
+        southern_tiles = [1, 2, 3]
+        eastern_tiles = [3, 9, 12]
+        western_tiles = []
+
+        ecco_sNx = 45
+        ecco_sNy = 45
+        ecco_surface_tile_faces = [3, 3, 3,
+                                   5, 5, 5,
+                                   5, 5, 5,
+                                   5, 5, 5]
+        ecco_surface_tile_min_rows = [5 * ecco_sNy, 5 * ecco_sNy, 5 * ecco_sNy,
+                                      3 * ecco_sNy, 3 * ecco_sNy, 3 * ecco_sNy,
+                                      4 * ecco_sNy, 4 * ecco_sNy, 4 * ecco_sNy,
+                                      5 * ecco_sNy, 5 * ecco_sNy, 5 * ecco_sNy]
+        ecco_surface_tile_min_cols = [0, 1 * ecco_sNx, 2 * ecco_sNx,
+                                      0, 1 * ecco_sNx, 2 * ecco_sNx,
+                                      0, 1 * ecco_sNx, 2 * ecco_sNx,
+                                      0, 1 * ecco_sNx, 2 * ecco_sNx]
+    if L1_model_name == 'L1_SE_Greenland':
+        sNx = 180
+        sNy = 180
+        tile_face_index_dict = {1: [1, 0, sNx],
+                                2: [1, 0, 2 * sNx],
+                                3: [1, sNy, sNx],
+                                4: [1, sNy, 2 * sNx],
+                                5: [5, sNy, 0],
+                                6: [5, 0, 0]}
+        ordered_nonblank_tiles = [[6, 1, 2], [5, 3, 4]]
+        northern_tiles = [3, 4]
+        southern_tiles = [1, 2, 5, 6]
+        eastern_tiles = [2, 4, 6]
+        western_tiles = []
+
+        ecco_sNx = 45
+        ecco_sNy = 45
+        ecco_surface_tile_faces = [1, 1, 1, 1, 5, 5]
+        ecco_surface_tile_min_rows = [16 * ecco_sNy,
+                                      16 * ecco_sNy, 17 * ecco_sNy, 17 * ecco_sNy,
+                                      5 * ecco_sNy, 5 * ecco_sNy]
+        ecco_surface_tile_min_cols = [0, 1 * ecco_sNx, 0, 1 * ecco_sNx, 1 * ecco_sNx, 0]
+
+    return(sNx, sNy, tile_face_index_dict, ordered_nonblank_tiles,
+           northern_tiles, southern_tiles, eastern_tiles, western_tiles,
+           ecco_sNx, ecco_sNy, ecco_surface_tile_faces, ecco_surface_tile_min_rows, ecco_surface_tile_min_cols)
+
 def read_grid_tile_geometry(config_dir,model_name,ordered_nonblank_tiles,tile_face_index_dict):
     ordered_XC_tiles = []
     ordered_YC_tiles = []
 
     N = len(ordered_nonblank_tiles) * len(ordered_nonblank_tiles[0])
 
-    grid_dir = os.path.join(config_dir, 'L05', model_name, 'run_for_grid')
+    grid_dir = os.path.join(config_dir, 'L1', model_name, 'run_for_grid')
 
     for r in range(len(ordered_nonblank_tiles)):
         row_XCs = []
@@ -61,9 +147,9 @@ def read_grid_tile_geometry(config_dir,model_name,ordered_nonblank_tiles,tile_fa
 
     return(ordered_XC_tiles, ordered_YC_tiles)
 
-def read_grid_tile_geometry_to_boundaries(ordered_nonblank_tiles, sNx, sNy,
-                                          ordered_XC_tiles, ordered_YC_tiles,
-                                          northern_tiles, southern_tiles, eastern_tiles, western_tiles):
+def read_grid_tile_geometry_to_mask_points(ordered_nonblank_tiles, sNx, sNy,
+                                           ordered_XC_tiles, ordered_YC_tiles,
+                                           northern_tiles, southern_tiles, eastern_tiles, western_tiles):
 
     if len(northern_tiles)>0:
         northern_points = np.zeros((len(northern_tiles)*sNx,2))
@@ -127,6 +213,32 @@ def read_grid_tile_geometry_to_boundaries(ordered_nonblank_tiles, sNx, sNy,
 
     return(northern_points, southern_points, eastern_points, western_points)
 
+def haversine(point1, point2):
+    AVG_EARTH_RADIUS = 6371
+    # unpack latitude/longitude
+    lat1, lng1 = point1
+    lat2, lng2 = point2
+    # convert all latitudes/longitudes from decimal degrees to radians
+    lat1, lng1, lat2, lng2 = map(radians, (lat1, lng1, lat2, lng2))
+    # calculate haversine
+    lat = lat2 - lat1
+    lng = lng2 - lng1
+    d = sin(lat * 0.5) ** 2 + cos(lat1) * cos(lat2) * sin(lng * 0.5) ** 2
+    h = 2 * AVG_EARTH_RADIUS * asin(sqrt(d))
+    return h # in kilometers
+
+def great_circle_distance(lon_ref, lat_ref, Lon, Lat):
+    earth_radius = 6371000
+    lon_ref_radians = np.radians(lon_ref)
+    lat_ref_radians = np.radians(lat_ref)
+    lons_radians = np.radians(Lon)
+    lats_radians = np.radians(Lat)
+    lat_diff = lats_radians - lat_ref_radians
+    lon_diff = lons_radians - lon_ref_radians
+    d = np.sin(lat_diff * 0.5) ** 2 + np.cos(lat_ref_radians) * np.cos(lats_radians) * np.sin(lon_diff * 0.5) ** 2
+    h = 2 * earth_radius * np.arcsin(np.sqrt(d))
+    return(h)
+
 
 def subset_tile_geometry_to_boundary(boundary, tile_number,ordered_nonblank_tiles,
                                      ordered_XC_tiles, ordered_YC_tiles):
@@ -162,9 +274,18 @@ def create_boundary_masks(llc, resolution, XC_faces, YC_faces, bathy_faces,
 
     all_masks = []
     mask_dicts = []
+    boundaries = ['north','south','east','west']
 
-    for points in [northern_points,southern_points,eastern_points,western_points]:
-
+    for b in range(len(boundaries)):
+        print('        - Generating the '+boundaries[b]+' mask')
+        if b==0:
+            points = northern_points
+        if b==1:
+            points = southern_points
+        if b ==2:
+            points = eastern_points
+        if b==3:
+            points = western_points
 
 
         if len(points)>0:
@@ -185,8 +306,30 @@ def create_boundary_masks(llc, resolution, XC_faces, YC_faces, bathy_faces,
                 for n in range(np.shape(points)[0]):
                     x = points[n,0]
                     y = points[n,1]
-                    dist = ((XC-x)**2 + (YC-y)**2)**0.5
-                    rows, cols = np.where(dist <= resolution)
+                    # if n == int(0.1*np.shape(points)[0]):
+                    #     print('            - face '+str(face)+' is 10% complete')
+                    if n == int(0.2*np.shape(points)[0]):
+                        print('            - face '+str(face)+' is 20% complete')
+                    # if n == int(0.3*np.shape(points)[0]):
+                    #     print('            - face '+str(face)+' is 30% complete')
+                    if n == int(0.4*np.shape(points)[0]):
+                        print('            - face '+str(face)+' is 40% complete')
+                    # if n == int(0.5*np.shape(points)[0]):
+                    #     print('            - face '+str(face)+' is 50% complete')
+                    if n == int(0.6*np.shape(points)[0]):
+                        print('            - face '+str(face)+' is 60% complete')
+                    # if n == int(0.7*np.shape(points)[0]):
+                    #     print('            - face '+str(face)+' is 70% complete')
+                    if n == int(0.8*np.shape(points)[0]):
+                        print('            - face '+str(face)+' is 80% complete')
+                    # if n == int(0.9*np.shape(points)[0]):
+                    #     print('            - face '+str(face)+' is 90% complete')
+                    if boundaries[b]=='surface':
+                        dist = ((XC-x)**2 + (YC-y)**2)**0.5
+                    else:
+                        dist = great_circle_distance(x, y, XC, YC)
+                    # print('using the new formula')
+                    rows, cols = np.where(dist <= resolution*np.sqrt(2))
                     if len(rows)>0:
                         for i in range(len(rows)):
                             row = rows[i]
@@ -194,12 +337,14 @@ def create_boundary_masks(llc, resolution, XC_faces, YC_faces, bathy_faces,
                             if bathy[row,col]<0:
                                 if mask_faces[face][row,col]==0:
                                     mask_faces[face][row,col] = counter
-                                    counter += 1
                                     mask_dict[counter-1,0] = face
                                     mask_dict[counter-1,1] = row
                                     mask_dict[counter-1,2] = col
+                                    counter += 1
             # print(counter-1)
             mask_dict = mask_dict[:np.sum(mask_dict[:, 0] != 0), :]
+
+            print('            - This mask will have '+str(counter)+' points')
 
             all_masks.append(mask_faces)
             mask_dicts.append(mask_dict)
@@ -208,6 +353,45 @@ def create_boundary_masks(llc, resolution, XC_faces, YC_faces, bathy_faces,
             mask_dicts.append([])
 
     return(all_masks, mask_dicts)
+
+def create_surface_mask(llc, XC_faces, YC_faces, bathy_faces, ecco_sNx, ecco_sNy,
+                       ecco_surface_tile_faces, ecco_surface_tile_min_rows, ecco_surface_tile_min_cols):
+
+    mask_faces = {}
+    mask_faces[1] = np.zeros((3 * llc, llc))
+    mask_faces[2] = np.zeros((3 * llc, llc))
+    mask_faces[3] = np.zeros((llc, llc))
+    mask_faces[4] = np.zeros((llc,3 * llc))
+    mask_faces[5] = np.zeros((llc,3 * llc))
+
+    point_buffer = 2
+
+    mask_dict = np.zeros((ecco_sNx * ecco_sNy * len(ecco_surface_tile_faces), 3))
+
+    counter = 1
+    for f in range(len(ecco_surface_tile_faces)):
+        face = ecco_surface_tile_faces[f]
+        XC = XC_faces[face]
+        YC = YC_faces[face]
+        bathy = bathy_faces[face]
+
+        for row in range(ecco_surface_tile_min_rows[f] - point_buffer,ecco_surface_tile_min_rows[f]+ecco_sNy):
+            for col in range(ecco_surface_tile_min_cols[f], ecco_surface_tile_min_cols[f] + ecco_sNx + point_buffer):
+                if bathy[row,col]<0:
+                    if mask_faces[face][row,col]==0:
+                        mask_faces[face][row, col] = counter
+                        mask_dict[counter - 1, 0] = face
+                        mask_dict[counter - 1, 1] = row
+                        mask_dict[counter - 1, 2] = col
+                        counter += 1
+
+    # print(counter-1)
+    mask_dict = mask_dict[:np.sum(mask_dict[:, 0] != 0), :]
+
+    print('            - This mask will have '+str(counter)+' points')
+
+    return(mask_faces, mask_dict)
+
 
 def output_mask_dictionary_to_nc(output_dir,output_file_name,all_mask_dicts,mask_names):
     if output_file_name in os.listdir(output_dir):
@@ -239,67 +423,84 @@ def create_dv_masks(config_dir, ecco_path,print_status):
         print('Creating the diagnostics_vec masks to use in the L0 domain')
 
     llc = 270
-    resolution = 1/3
+    resolution = 25e3 # in m
 
-    level = 'L05'
-    model_name = 'L05_CE_Greenland'
-    sNx = 90
-    sNy = 90
-    tile_face_index_dict = {1: [1, 0, 0],
-                            2: [1, 0, sNx],
-                            3: [1, 0, 2 * sNx],
-                            4: [3, 0, 0],
-                            5: [3, sNy, 0],
-                            6: [3, 2 * sNy, 0]}
-    ordered_nonblank_tiles = [[1, 2, 3], [6, 5, 4]]
-    northern_tiles = []
-    southern_tiles = [1, 2, 3, 4]
-    eastern_tiles = [3, 4, 5, 6]
-    western_tiles = [1]
-
-    ###############################################################################################
-    # Read in the grids
+    L1_model_names = ['L1_SE','L1_W','L1_CE']#,
 
     if print_status:
-        print('    Reading in the L0 domain files')
+        print('    - Reading in the L0 domain files')
 
     # read the mitgrids to faces
     ecco_dir = os.path.join(ecco_path,'LLC'+str(llc)+'_Files')
     XC_faces, YC_faces, bathy_faces = read_global_XC_YC(ecco_dir, llc)
 
-    # step 0: get the model domain
-    print('    - Reading in the model geometry')
-    ordered_XC_tiles, ordered_YC_tiles = read_grid_tile_geometry(config_dir, model_name, ordered_nonblank_tiles, tile_face_index_dict)
+    all_mask_names = []
+    all_masks = []
+    all_mask_dicts = []
 
-    ###############################################################################################
-    # Find the boundary points
+    for L1_model_name in L1_model_names:
 
-    northern_points, southern_points, eastern_points, western_points = \
-        read_grid_tile_geometry_to_boundaries(ordered_nonblank_tiles, sNx, sNy,
-                                              ordered_XC_tiles, ordered_YC_tiles,
-                                              northern_tiles, southern_tiles, eastern_tiles, western_tiles)
+        ###############################################################################################
+        # Read in the L1 model information
 
-    ###############################################################################################
-    # Mask masks of the boundary points in the faces
+        sNx, sNy, tile_face_index_dict, ordered_nonblank_tiles, \
+        northern_tiles, southern_tiles, eastern_tiles, western_tiles, \
+        ecco_sNx, ecco_sNy, ecco_surface_tile_faces, ecco_surface_tile_min_rows, ecco_surface_tile_min_cols = L1_model_name_to_geometry(L1_model_name+'_Greenland')
 
-    mask_names = ['north','south','east','west']
-    all_masks, mask_dicts = create_boundary_masks(llc, resolution, XC_faces, YC_faces, bathy_faces,
-                                   northern_points, southern_points, eastern_points, western_points)
+        ###############################################################################################
+        # Read in the grids
+
+        # step 0: get the model domain
+        print('    - Reading in the model geometry')
+        ordered_XC_tiles, ordered_YC_tiles = read_grid_tile_geometry(config_dir, L1_model_name+'_Greenland', ordered_nonblank_tiles, tile_face_index_dict)
+
+        ###############################################################################################
+        # Find the boundary points
+
+        print('    - Reading in the points from the model boundary')
+        northern_points, southern_points, eastern_points, western_points = \
+            read_grid_tile_geometry_to_mask_points(ordered_nonblank_tiles, sNx, sNy,
+                                                  ordered_XC_tiles, ordered_YC_tiles,
+                                                  northern_tiles, southern_tiles, eastern_tiles, western_tiles)
+
+        ###############################################################################################
+        # Mask masks of the boundary points in the faces
+
+        print('    - Generating the surface mask')
+        surface_mask, surface_mask_dict = create_surface_mask(llc, XC_faces, YC_faces, bathy_faces, ecco_sNx, ecco_sNy,
+                                                              ecco_surface_tile_faces, ecco_surface_tile_min_rows,
+                                                              ecco_surface_tile_min_cols)
+        all_mask_names += [L1_model_name + '_surface']
+        all_masks += [surface_mask]
+        all_mask_dicts += [surface_mask_dict]
+
+        ###############################################################################################
+        # Mask masks of the boundary points in the faces
+
+        print('    - Generating the BC masks')
+        all_mask_names += [L1_model_name+'_north',L1_model_name+'_south',L1_model_name+'_east',L1_model_name+'_west']
+        BC_masks, BC_mask_dicts = create_boundary_masks(llc, resolution, XC_faces, YC_faces, bathy_faces,
+                                       northern_points, southern_points, eastern_points, western_points)
+        all_masks += BC_masks
+        all_mask_dicts += BC_mask_dicts
 
     ###############################################################################################
     # Convert the masks to compact and output as a binary file
 
-    for m in range(len(mask_names)):
+    for m in range(len(all_mask_names)):
         mask_faces = all_masks[m]
-        if 1 in mask_faces.keys():
-            print('   - Outputting the '+mask_names[m]+' mask to binary')
+        if bool(set(list(mask_faces.keys())) & set(list([1,2,3,4,5]))):
+            print('    - Outputting the '+all_mask_names[m]+' mask to binary')
             compact_mask = llc_faces_to_compact(mask_faces)
-            output_file = os.path.join(config_dir, 'L0', 'input', mask_names[m]+'_boundary_mask.bin')
+            output_name = all_mask_names[m]
+            if len('dv/'+output_name)>30:
+                raise ValueError('diagnostics_vec cannot take names longer than 30 chars')
+            output_file = os.path.join(config_dir, 'L0', 'input', all_mask_names[m] + '_mask.bin')
             compact_mask.ravel('C').astype('>f4').tofile(output_file)
 
     output_dir = os.path.join(config_dir, 'L0', 'input')
     output_file_name = 'L0_dv_mask_reference_dict.nc'
-    output_mask_dictionary_to_nc(output_dir,output_file_name,mask_dicts,mask_names)
+    output_mask_dictionary_to_nc(output_dir,output_file_name,all_mask_dicts,all_mask_names)
 
 
 
