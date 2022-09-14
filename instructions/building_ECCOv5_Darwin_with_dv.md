@@ -26,7 +26,7 @@ The `diagnostics_vec` package files can be easily added to MITgcm using a Python
 ```
 git clone https://github.com/mhwood/diagnostics_vec.git
 cd diagnostics_vec/utils/
-python3 copy_pkg_files_to_MITgcm.py -m ../../MITgcm
+python3 copy_pkg_files_to_MITgcm.py -m ../../darwin3
 cd ../../darwin3
 ```
 
@@ -116,10 +116,25 @@ and
 ```
 
 ### Step 2: Edit compile time files for diagnostics_vec
+There are 3 compile time files to edit for diagnostics_vec
 
-7. `packages.conf`: This file is inside the `code` directory. For this file, we simply add a line for `diagnostics_vec`.
+1. `packages.conf`: This file is inside the `../ecco_darwin/v05/llc270/code_darwin/` directory. For this file, imply add a line for `diagnostics_vec`.
 
-8. `CPP_OPTIONS.h`: This file is inside the `code` directory. For this file, we will add three lines so that `diagnostics_vec` can access external forcing variables (not available when `ecco` is used for some reason I can't figure out...):
+2. `DIAGNOSTICS_VEC_SIZE.h`: This is a new file, provided in this repository, which we will copy from the default `pkg` directory to the `../ecco_darwin/v05/llc270/code` directory. Next, edit the file so that reflects the number of `diagnostics_vec` masks which will be used in the model run, e.g.:
+```
+cp pkg/diagnostics_vec/DIAGNOSTICS_VEC_SIZE.h ../ecco_darwin/v05/llc270/code
+vim ../ecco_darwin/v05/llc270/code/DIAGNOSTICS_VEC_SIZE.h
+# File contents after modifications for this example:
+C------------------------------------------------------------------------------|
+C                           DIAGNOSTICS_VEC_SIZE.h
+C------------------------------------------------------------------------------|
+
+      INTEGER, PARAMETER :: VEC_points = 900
+      INTEGER, PARAMETER :: nVEC_mask = 3
+      INTEGER, PARAMETER :: nSURF_mask = 1
+```
+
+3. `CPP_OPTIONS.h`: Edit this file if external forcing fields are desired for the output. This file is inside the `../ecco_darwin/v05/llc270/code` directory. For this file, we will add three lines so that `diagnostics_vec` can access external forcing variables (not defined when the `ecco` package is used for some reason I can't figure out...):
 ```
 18 C-- Forcing code options:
 19 
@@ -128,22 +143,28 @@ and
 22 #define ALLOW_RUNOFF                                   # added line
 ```
 
-9. `DIAGNOSTICS_VEC_SIZE.h`: This is a new file, provided in this repository, which we will copy to the `$code` directory.
-Add this file from the `code` directory in this repository to the `code` directory of the model.
+## Finish the model build
 
 After the package is added and code modification files are edited, the model can be rebuilt using the same commands in LLC270 [readme](https://github.com/MITgcm-contrib/llc_hires/blob/master/llc_270/readme.txt) which are copied here for convenience:
 ```
- cd darwin3
+ # should be inside the darwin3 dir
  mkdir build run
  cd build
  
  module purge
- module load comp-intel/2016.2.181 mpi-sgi/mpt.2.14r19 hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
- ../tools/genmake2 -of ../../llc_270/code_ad/linux_amd64_ifort+mpi_ice_nas \
- -mo ../../llc_270/code_ad
- make depend
- make -j 16
- cd ..
+# module load comp-intel/2016.2.181 mpi-sgi/mpt.2.14r19 hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
+# ../tools/genmake2 -of ../../llc_270/code_ad/linux_amd64_ifort+mpi_ice_nas \
+# -mo ../../llc_270/code_ad
+# make depend
+# make -j 16
+# cd ..
+ 
+ module load comp-intel mpi-hpe hdf4/4.2.12 hdf5/1.8.18_mpt netcdf/4.4.1.1_mpt
+../tools/genmake2 -of ../../ecco_darwin/v05/llc270/code/linux_amd64_ifort+mpi_ice_nas \
+  -mo '../../ecco_darwin/v05/llc270/code_darwin ../../ecco_darwin/v05/llc270/code' -mpi
+make depend
+make -j 16
+ 
  ```
  
 
