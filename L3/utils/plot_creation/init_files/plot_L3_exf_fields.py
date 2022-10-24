@@ -20,9 +20,10 @@ def read_L3_rows_cols_from_grid(config_dir, model_name):
 
 def read_exf_fields(exf_dir, var_name, n_rows, n_cols, timestep):
 
-    file_path = os.path.join(exf_dir,'L3_exf_'+var_name+'.bin')
+    file_path = os.path.join(exf_dir,'L3_exf_'+var_name+'_1992')
     exf_field = np.fromfile(file_path,'>f4')
     total_timesteps = int(np.size(exf_field)/(n_rows*n_cols))
+    print('    - total timsteps: '+str(total_timesteps))
     exf_field = np.reshape(exf_field,(total_timesteps,n_rows, n_cols))
     exf_field = exf_field[timestep,:,:]
 
@@ -42,8 +43,7 @@ def create_exf_plot(config_dir, L3_model_name):
     fig = plt.figure(figsize=(20, 12))
     plt.style.use("dark_background")
 
-    timestep = randint(0,72)
-    timestep = 7
+    timestep = 90*4+17
 
     counter = 1
     exf_dir = os.path.join(config_dir,'L3',L3_model_name,'input','exf')

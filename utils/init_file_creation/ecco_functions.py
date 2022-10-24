@@ -587,3 +587,108 @@ def rotate_ecco_seaice_grids_to_natural_grids(var_names, var_grids, ecco_AngleCS
 
     return(var_grids)
 
+#################################################################################################
+# ptracer pickup functions
+
+def read_ptracer_pickup_file_to_compact(pickup_file_path):
+
+    Nr = 50
+    print('      Reading from '+pickup_file_path)
+    global_data, _, global_metadata = mds.rdmds(pickup_file_path, returnmeta=True)
+
+    var_names = []
+    var_grids = []
+
+    for vn in range(len(global_metadata['fldlist'])):
+        var_grid = global_data[vn,:,:,:]
+        var_grids.append(var_grid)
+        var_names.append(global_metadata['fldlist'][vn].strip())
+
+    return(var_names,var_grids,global_metadata)
+
+
+def read_ecco_ptracer_pickup_to_stiched_grid(pickup_file_path,ordered_ecco_tiles,ordered_ecco_tile_rotations):
+
+    ecco_Nr = 50
+    ecco_sNx = 90
+    ecco_sNy = 90
+
+    # pickup_file_path = os.path.join(ecco_dir,'LLC'+str(llc)+'_Files','input_init',pickup_file)
+    var_names,compact_var_grids,global_metadata = read_ptracer_pickup_file_to_compact(pickup_file_path)
+
+    var_grids = []
+
+    for vn in range(len(var_names)):
+        compact_var_grid = compact_var_grids[vn]
+        ecco_grid = np.zeros((ecco_Nr, ecco_sNy * len(ordered_ecco_tiles), ecco_sNx * len(ordered_ecco_tiles[0])))
+
+        for r in range(len(ordered_ecco_tiles)):
+            ecco_tile_row = ordered_ecco_tiles[r]
+            ecco_rotation_row = ordered_ecco_tile_rotations[r]
+            for c in range(len(ordered_ecco_tiles[r])):
+
+                # get the variable grid
+                var_grid = read_tile_from_ECCO_compact(compact_var_grid, tile_number=ecco_tile_row[c])
+
+                # rotate things as necessary
+                for n in range(ecco_rotation_row[c]):
+                    var_grid = np.rot90(var_grid, axes=(1, 2))
+
+                # put it into the big grid
+                ecco_grid[:, r * ecco_sNy:(r + 1) * ecco_sNy, c * ecco_sNx:(c + 1) * ecco_sNx] = var_grid
+
+        var_grids.append(ecco_grid)
+
+    return(var_names, var_grids, global_metadata)
+
+#################################################################################################
+# darwin pickup function
+
+def read_darwin_pickup_file_to_compact(pickup_file_path):
+
+    Nr = 50
+    print('      Reading from '+pickup_file_path)
+    global_data, _, global_metadata = mds.rdmds(pickup_file_path, returnmeta=True)
+
+    # there is only one field in the darwin pickup
+
+    var_names = [global_metadata['fldlist'][0]]
+    var_grids = [global_data]
+
+    return(var_names,var_grids,global_metadata)
+
+
+def read_ecco_darwin_pickup_to_stiched_grid(pickup_file_path,ordered_ecco_tiles,ordered_ecco_tile_rotations):
+
+    ecco_Nr = 50
+    ecco_sNx = 90
+    ecco_sNy = 90
+
+    # pickup_file_path = os.path.join(ecco_dir,'LLC'+str(llc)+'_Files','input_init',pickup_file)
+    var_names,compact_var_grids,global_metadata = read_darwin_pickup_file_to_compact(pickup_file_path)
+
+    var_grids = []
+
+    for vn in range(len(var_names)):
+        compact_var_grid = compact_var_grids[vn]
+        ecco_grid = np.zeros((ecco_Nr, ecco_sNy * len(ordered_ecco_tiles), ecco_sNx * len(ordered_ecco_tiles[0])))
+
+        for r in range(len(ordered_ecco_tiles)):
+            ecco_tile_row = ordered_ecco_tiles[r]
+            ecco_rotation_row = ordered_ecco_tile_rotations[r]
+            for c in range(len(ordered_ecco_tiles[r])):
+
+                # get the variable grid
+                var_grid = read_tile_from_ECCO_compact(compact_var_grid, tile_number=ecco_tile_row[c])
+
+                # rotate things as necessary
+                for n in range(ecco_rotation_row[c]):
+                    var_grid = np.rot90(var_grid, axes=(1, 2))
+
+                # put it into the big grid
+                ecco_grid[:, r * ecco_sNy:(r + 1) * ecco_sNy, c * ecco_sNx:(c + 1) * ecco_sNx] = var_grid
+
+        var_grids.append(ecco_grid)
+
+    return(var_names, var_grids, global_metadata)
+

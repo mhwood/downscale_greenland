@@ -4,7 +4,6 @@
  useKPP         = .TRUE.,
  useEXF         = .TRUE.,
  useDiagnostics = .TRUE.,
- useMNC = .TRUE.,
 # useDiagnostics_vec = .TRUE.,
  useSALT_PLUME  = .TRUE.,
  useObcs=.TRUE.,

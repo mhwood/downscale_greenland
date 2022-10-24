@@ -5,71 +5,88 @@ import matplotlib.pyplot as plt
 import argparse
 from pyproj import Transformer
 import sys
+import ast
 
 
 def create_BCs(config_dir, L3_model_name, parent_model_level, parent_model_name, print_level):
 
     sys.path.insert(1, os.path.join(config_dir, 'L3', 'utils','init_file_creation'))
 
-    start_year = 2002
+    start_year = 1993
     start_month = 1
     start_day = 1
 
-    final_year = 2002
-    final_month = 2
-    final_day = 28
-
-    ###################################################################################
-    # The BC fields are created in 3 steps
-
-    # step 1: make a reference whereby the diagnostics_vec files are organized in a dictionary
-    import create_L3_BC_field_ref as ebcr
-    ebcr.create_L3_BC_ref_file(config_dir, L3_model_name, parent_model_level, parent_model_name, print_level)
+    final_year = 1998
+    final_month = 12
+    final_day = 31
 
     # step 2: using the reference dict, organize downscaled BC into daily files
-    if parent_model_level=='L1':
+    if parent_model_level=='L1_grid':
 
-        proc_ids = np.arange(27)
+        ############################################################################################
+        # Create the BC fields (3 steps)
 
-        import create_L3_daily_bcs_from_L1_ref as cef
-        for proc_id in proc_ids:  # 7
-            if parent_model_name=='L1_CE_Greenland':
-                sNx = 180
-                sNy = 180
-                ordered_nonblank_tiles = [[1, 2, 3], [6, 5, 4]]
-                ordered_nonblank_rotations = [[0, 0, 0], [3, 3, 3]]
-                faces = [1, 3]
-                ordered_tiles_faces_dict = {1: [[1, 2, 3]],
-                                            3: [[4], [5], [6]]}
-            else:
-                raise ValueError('Did this manually last time - need to automate')
+        # # step 1: make a reference whereby the diagnostics_vec files are organized in a dictionary
+        # import create_L3_BC_field_ref as ebcr
+        # ebcr.create_L3_BC_ref_file(config_dir, L3_model_name, parent_model_level, parent_model_name, print_level)
 
-            cef.create_bc_fields_via_interpolation(config_dir, L3_model_name, parent_model_name, proc_id,
-                                                   sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                                   faces, ordered_tiles_faces_dict,
-                                                   start_year, final_year, start_month,
-                                                   final_month, start_day, final_day, print_level)
+        proc_ids = np.arange(27).tolist()
+        # proc_ids = np.arange(12).tolist()
+
+        # import create_L3_daily_bcs_from_L1_ref_grid as cef
+        # for proc_id in proc_ids:  # 7
+        #     cef.create_bc_fields_via_interpolation(config_dir, L3_model_name, parent_model_name, proc_id,
+        #                                            start_year, final_year, start_month,
+        #                                            final_month, start_day, final_day, print_level)
 
         # step 3: combine all of the BC fields into a single file
         import combine_and_rotate_L3_daily_bc_files as com
         for proc_id in proc_ids:
             com.combine_and_rotate_L3_daily_bcs(config_dir, L3_model_name, proc_id,
-                                                start_year, final_year, start_month, final_month, start_day, final_day, print_level)
+                                                start_year, final_year, print_level)
 
-    if parent_model_level == 'L2':
-        import create_L3_daily_BC_fields_from_L2_ref as cef
-        for proc_id in range(2, 3):  # 7
-            cef.create_BC_fields_via_interpolation(config_dir, L3_model_name, parent_model_level, parent_model_name,
-                                                   proc_id,
-                                                   start_year, final_year,
-                                                   start_month, final_month,
-                                                   start_day, final_day, print_level)
+    ####################################################################################################################
+    # these files would use the L1 faces files
 
-        # # step 3: combine all of the BC fields into a single file
-        # import combine_L3_daily_BC_files as com
-        # for proc_id in range(2,3):
-        #     com.combine_L3_daily_BC_files(config_dir, config_name, proc_id,
-        #                                    start_year, final_year, start_month, final_month, start_day, final_day, print_level)
+    ############################################################################################
+    # load all of the L1 model stuff
+
+    # f = open(os.path.join(config_dir, 'L1', parent_model_name, 'namelist', parent_model_name + '_geometry.dict'))
+    # dict_str = f.read()
+    # f.close()
+    # size_dict = ast.literal_eval(dict_str)
+    # sNx = size_dict['sNx']
+    # sNy = size_dict['sNy']
+    # ordered_nonblank_tiles = size_dict['ordered_nonblank_tiles']
+    # ordered_nonblank_rotations = size_dict['ordered_nonblank_rotations']
+    # faces = size_dict['faces']
+    # ordered_tiles_faces_dict = size_dict['ordered_tiles_faces_dict']
+
+    # import create_L3_daily_bcs_from_L1_ref as cef
+    # for proc_id in proc_ids:  # 7
+    #     cef.create_bc_fields_via_interpolation(config_dir, L3_model_name, parent_model_name, proc_id,
+    #                                            sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
+    #                                            faces, ordered_tiles_faces_dict,
+    #                                            start_year, final_year, start_month,
+    #                                            final_month, start_day, final_day, print_level)
+
+    ####################################################################################################################
+    # these codes would use the L2 output files
+
+    # if parent_model_level == 'L2':
+    #     import create_L3_daily_BC_fields_from_L2_ref as cef
+    #     for proc_id in range(2, 3):  # 7
+    #         cef.create_BC_fields_via_interpolation(config_dir, L3_model_name, parent_model_level, parent_model_name,
+    #                                                proc_id,
+    #                                                start_year, final_year,
+    #                                                start_month, final_month,
+    #                                                start_day, final_day, print_level)
+    #
+    #     # # step 3: combine all of the BC fields into a single file
+    #     # import combine_L3_daily_BC_files as com
+    #     # for proc_id in range(2,3):
+    #     #     com.combine_L3_daily_BC_files(config_dir, config_name, proc_id,
+    #     #                                    start_year, final_year, start_month, final_month, start_day, final_day, print_level)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

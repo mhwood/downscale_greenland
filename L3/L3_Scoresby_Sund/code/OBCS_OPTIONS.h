@@ -13,7 +13,7 @@ C Enable individual open boundaries
 #define ALLOW_OBCS_NORTH
 #define ALLOW_OBCS_SOUTH
 #define ALLOW_OBCS_EAST
-#define ALLOW_OBCS_WEST
+#undef ALLOW_OBCS_WEST
 
 C This include hooks to the Orlanski Open Boundary Radiation code
 #define ALLOW_ORLANSKI
@@ -29,7 +29,7 @@ C Allow sponge layer treatment of open boundary conditions
 #define ALLOW_OBCS_SPONGE
 
 C Include hooks to sponge layer treatment of pkg/seaice variables
-#undef ALLOW_OBCS_SEAICE_SPONGE
+#define ALLOW_OBCS_SEAICE_SPONGE
 
 C balance barotropic velocity
 #define ALLOW_OBCS_BALANCE

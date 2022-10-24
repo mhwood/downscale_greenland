@@ -56,11 +56,13 @@ def create_pickup_plot(config_dir, L3_model_name, pickup_iteration):
 
     counter = 1
 
+    print(len(var_names),len(var_grids))
+
     for ff in range(len(var_names)):
 
         plt.subplot(3, 4, counter)
 
-        print(' Plotting ' + var_names[ff])  # +' (global min: '+str(np.max(var_grids[ff][var_grids[ff]!=0]))+
+        print(' Plotting ' + var_names[ff]+' (shape: '+str(np.shape(var_grids[ff]))+')')  # +' (global min: '+str(np.max(var_grids[ff][var_grids[ff]!=0]))+
         # ', min: '+str(np.min(var_grids[ff][var_grids[ff]!=0]))+')')
 
         if np.sum(np.isnan(  var_grids[ff]  ))>0:
@@ -97,7 +99,7 @@ def create_pickup_plot(config_dir, L3_model_name, pickup_iteration):
         plt.title(var_names[ff])
         counter += 1
 
-    plt.savefig(os.path.join(output_dir, 'pickup_file_components.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(output_dir, L3_model_name+'_pickup_fields.png'), bbox_inches='tight')
     plt.close(fig)
 
 

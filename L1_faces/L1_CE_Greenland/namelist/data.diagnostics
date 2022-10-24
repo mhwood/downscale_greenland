@@ -1,0 +1,35 @@
+# Diagnostic Package Choices
+#
+ &diagnostics_list
+     dumpAtLast = .TRUE.,
+#--
+  fields(1,1) = 'ETAN    ',
+  fileName(1) = 'diags/EtaN_daily_snap/EtaN_daily_snap',
+  frequency(1) =  -86400.,
+#
+  fields(1:5,2) = 'SIarea  ','SIheff  ','SIhsnow ','SIuice ','SIvice ',
+  fileName(2) = 'diags/SI_daily_snap/SI_daily_snap',
+  frequency(2) = -86400.,
+#
+  fields(1:2,3) = 'THETA   ','SALT    ',
+  fileName(3) = 'diags/TS_surf_daily_snap/TS_surf_daily_snap',
+  frequency(3) = -86400.,
+  levels(1:2,3) = 1, 1,
+#
+  fields(1:2,4) = 'THETA   ','SALT    ',
+  fileName(4) = 'diags/TS_AW_daily_snap/TS_AW_daily_snap',
+  frequency(4) = -86400.,
+  levels(1:2,4) = 19, 19,
+#
+  fields(1:4,5) = 'UVEL    ','VVEL    ','THETA   ','SALT    ',
+  fileName(5) = 'diags/state_3d_mon_snap/state_3d_mon_snap',
+  frequency(5) = -2592000.,
+#
+  fields(1:4,6) = 'UVEL    ','VVEL    ','THETA   ','SALT    ',
+  fileName(6) = 'diags/state_3d_mon_mean/state_3d_mon_mean',
+  frequency(6) = 2592000.,
+ &
+
+# Parameter for Diagnostics of per level statistics:
+ &DIAG_STATIS_PARMS
+ &

@@ -19,7 +19,7 @@ def find_dv_files_to_read(config_dir, parent_model_level, parent_model_name, bou
     file_names = []
     file_iters = []
     n_files_in_files = []
-    dv_dir = os.path.join(config_dir, parent_model_level, parent_model_name, 'run', 'dv')
+    dv_dir = os.path.join(config_dir, parent_model_level, parent_model_name, 'run', 'dv','L3_'+boundary)
     for file_name in os.listdir(dv_dir):
         if 'L3_' in file_name and var_name in file_name and boundary in file_name:
             file_iter = int(file_name.split('.')[-2])
@@ -64,8 +64,8 @@ def create_destination_file_list(config_dir, var_name, file_names, iter_midpoint
 
     # create a list of daily bounds
     date_bounds = []
-    for year in range(2002, 2003):
-        for month in range(1, 3):
+    for year in range(1992,2022):
+        for month in range(1, 13):
             if month in [1, 3, 5, 7, 8, 10, 12]:
                 nDays = 31
             elif month in [4, 6, 9, 11]:
@@ -175,14 +175,14 @@ def create_L3_BC_ref_file(config_dir, L3_model_name, parent_model_level, parent_
     boundary = 'north'
 
     averaging_period = 3600
-    if parent_model_level=='L1':
+    if parent_model_level=='L1_grid':
         seconds_per_iter = 300
     if parent_model_level=='L2':
         seconds_per_iter = 150
 
     # first read how many points are expected in each iter (read from the mask reference)
     mask_ref_file = os.path.join(config_dir, parent_model_level, parent_model_name,'input',
-                                 parent_model_level+'_dv_mask_reference_dict.nc')
+                                 'L1_dv_mask_reference_dict.nc')
     ds = nc4.Dataset(mask_ref_file)
     points_per_output = len(ds.groups['L3_'+boundary].variables['source_rows'][:])
     ds.close()

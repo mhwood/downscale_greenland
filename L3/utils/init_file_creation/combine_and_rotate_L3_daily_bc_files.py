@@ -8,40 +8,34 @@ import argparse
 import ast
 import sys
 
-def get_dest_file_list(mask_name, var_name, Nr, n_rows_L3,n_cols_L3,
-                       start_year, final_year, start_month, final_month, start_day, final_day):
-
-    start_date = datetime(start_year, start_month, start_day)
-    final_date = datetime(final_year, final_month, final_day)
+def get_dest_file_list(mask_name, var_name, Nr, n_rows_L3,n_cols_L3, year):
 
     dest_files = []
     dest_file_shapes = {}
     total_timesteps = 0
-    for year in range(2002, 2003):
-        for month in range(1, 13):
-            if month in [1, 3, 5, 7, 8, 10, 12]:
-                nDays = 31
-            elif month in [4, 6, 9, 11]:
-                nDays = 30
+
+    for month in range(1, 13):
+        if month in [1, 3, 5, 7, 8, 10, 12]:
+            nDays = 31
+        elif month in [4, 6, 9, 11]:
+            nDays = 30
+        else:
+            if year % 4 == 0:
+                nDays = 29
             else:
-                if year % 4 == 0:
-                    nDays = 29
-                else:
-                    nDays = 28
-            for day in range(1, nDays + 1):
-                test_date = datetime(year, month, day)
-                if test_date >= start_date and test_date <= final_date:
-                    if var_name in ['UVEL','VVEL','UICE','VICE']:
-                        dest_file = 'L3_BC_'+mask_name+'_'+ var_name + '.' + str(year) + '{:02d}'.format(month)+ '{:02d}'.format(day) + '_rotated.bin'
-                    else:
-                        dest_file = 'L3_BC_'+mask_name+'_' + var_name + '.' + str(year) + '{:02d}'.format(month) + '{:02d}'.format(day) + '.bin'
-                    dest_files.append(dest_file)
-                    nTimesteps = 24
-                    total_timesteps += nTimesteps
-                    if mask_name in ['west','east']:
-                        dest_file_shapes[dest_file] = (nTimesteps, Nr, n_rows_L3, 1)
-                    if mask_name in ['north','south']:
-                        dest_file_shapes[dest_file] = (nTimesteps, Nr, 1, n_cols_L3)
+                nDays = 28
+        for day in range(1, nDays + 1):
+            if var_name in ['UVEL','VVEL','UICE','VICE']:
+                dest_file = 'L3_BC_'+mask_name+'_'+ var_name + '.' + str(year) + '{:02d}'.format(month)+ '{:02d}'.format(day) + '_rotated.bin'
+            else:
+                dest_file = 'L3_BC_'+mask_name+'_' + var_name + '.' + str(year) + '{:02d}'.format(month) + '{:02d}'.format(day) + '.bin'
+            dest_files.append(dest_file)
+            nTimesteps = 24
+            total_timesteps += nTimesteps
+            if mask_name in ['west','east']:
+                dest_file_shapes[dest_file] = (nTimesteps, Nr, n_rows_L3, 1)
+            if mask_name in ['north','south']:
+                dest_file_shapes[dest_file] = (nTimesteps, Nr, 1, n_cols_L3)
 
     return(dest_files,dest_file_shapes,total_timesteps)
 
@@ -52,9 +46,28 @@ def stack_daily_bc_files_to_one(config_dir, config_name, mask_name, var_name, An
     cols = dest_file_shapes[dest_files[0]][3]
 
     # the 2 is added because we will duplicate the first and last field
-    output_grid = np.zeros((total_timesteps+2,depth_levels,rows,cols))
-    timesteps_added = 1
+    output_grid = np.zeros((total_timesteps,depth_levels,rows,cols))
+    timesteps_added = 0
     for dest_file in dest_files:
+
+        if '19920101' in dest_file:
+            dest_file = dest_file.replace('19920101','19920102')
+
+        # ymd = dest_file.split('.')[1]  # [:8]
+        # print(dest_file,ymd)
+        # if int(ymd[4:6]) < 3:
+        #     var_grid = np.zeros(dest_file_shapes[dest_file])
+        #     print('WARNING - FILLING IN VALUES WITH ZEROS FOR TESTING')
+        #     if print_level >= 2:
+        #         print('        - Adding timesteps from file ' + dest_file + ' to levels ' + str(
+        #             timesteps_added) + ' to ' + str(timesteps_added + np.shape(var_grid)[0]))
+        # elif int(ymd[4:6]) == 3 and int(ymd[6:8]) < 30:
+        #     var_grid = np.zeros(dest_file_shapes[dest_file])
+        #     print('WARNING - FILLING IN VALUES WITH ZEROS FOR TESTING')
+        #     if print_level >= 2:
+        #         print('        - Adding timesteps from file ' + dest_file + ' to levels ' + str(
+        #             timesteps_added) + ' to ' + str(timesteps_added + np.shape(var_grid)[0]))
+        # else:
 
         if var_name in ['UVEL','VVEL','UICE','VICE']:
             if 'VEL' in var_name:
@@ -108,15 +121,11 @@ def stack_daily_bc_files_to_one(config_dir, config_name, mask_name, var_name, An
         output_grid[timesteps_added:timesteps_added+np.shape(var_grid)[0],:,:,:] = var_grid
         timesteps_added += np.shape(var_grid)[0]
 
-    # here we duplicate the first and last field
-    # this is done so that all timesteps can be interpolated by the model
-    output_grid[0,:,:,:] = output_grid[1,:,:,:]
-    output_grid[-1,:,:,:] = output_grid[-2,:,:,:]
     return(output_grid)
 
 
 def combine_and_rotate_L3_daily_bcs(config_dir, config_name, proc_id,
-                                         start_year, final_year, start_month, final_month, start_day, final_day, print_level):
+                                         start_year, final_year, print_level):
 
     var_name_list = ['THETA', 'THETA', 'THETA',
                      'SALT', 'SALT', 'SALT',
@@ -152,8 +161,8 @@ def combine_and_rotate_L3_daily_bcs(config_dir, config_name, proc_id,
     Nr = len(drF)
     ds.close()
 
-    print('There is an error at the boundary in the AngleCS/SN fields so taking')
-    print('these fields from one row/col on the interior')
+    # print('There is an error at the boundary in the AngleCS/SN fields so taking')
+    # print('these fields from one row/col on the interior')
     # if mask_name=='north':
     #     AngleCS = AngleCS[-1:,:]
     #     AngleSN = AngleSN[-1:,:]
@@ -198,18 +207,26 @@ def combine_and_rotate_L3_daily_bcs(config_dir, config_name, proc_id,
     if var_name in ['ETAN','UICE','VICE','AREA','HSNOW','HEFF']:
         Nr = 1
 
+    years = np.arange(start_year,final_year+1).tolist()
+
     if print_level >=1:
-        print('    - Combining the monthly files for ' + var_name)
-    dest_files, dest_file_shapes, total_timesteps = get_dest_file_list(mask_name, var_name, Nr, n_rows_L3, n_cols_L3,
-                                                                       start_year, final_year, start_month, final_month, start_day, final_day)
+        print('    - Combining daily BC files for ' + var_name)
 
-    if print_level >= 1:
-        print('    - Stacking all of the daily files into a big global file')
-    output_grid = stack_daily_bc_files_to_one(config_dir, config_name, mask_name, var_name,
-                                              AngleCS, AngleSN, dest_files, dest_file_shapes, total_timesteps, print_level)
+    for year in years:
 
+        if print_level >= 2:
+            print('        - Combining files in year ' + str(year))
 
-    output_file = os.path.join(config_dir, 'L3', config_name, 'input', 'obcs', 'L3_BC_'+mask_name+'_' + var_name + '.bin')
-    if print_level >= 1:
-        print('    - Outputting to ' + output_file)
-    output_grid.ravel('C').astype('>f4').tofile(output_file)
+        if print_level >= 3:
+            print('            - Getting a list of daily files')
+        dest_files, dest_file_shapes, total_timesteps = get_dest_file_list(mask_name, var_name, Nr, n_rows_L3, n_cols_L3, year)
+
+        if print_level >= 3:
+            print('            - Stacking all of the daily files into a big global file')
+        output_grid = stack_daily_bc_files_to_one(config_dir, config_name, mask_name, var_name,
+                                                  AngleCS, AngleSN, dest_files, dest_file_shapes, total_timesteps, print_level)
+
+        output_file = os.path.join(config_dir, 'L3', config_name, 'input', 'obcs', 'L3_BC_'+mask_name+'_' + var_name + '_' + str(year))
+        if print_level >= 2:
+            print('        - Outputting to ' + output_file)
+        output_grid.ravel('C').astype('>f4').tofile(output_file)

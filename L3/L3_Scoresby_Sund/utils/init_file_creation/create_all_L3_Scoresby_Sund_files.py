@@ -8,21 +8,23 @@ def create_L3_Scoresby_Sund_files(config_dir):
 
     L3_model_name = 'L3_Scoresby_Sund'
 
-    parent_model_level = 'L1'
+    parent_model_level = 'L1_grid'
     parent_model_name = 'L1_CE_Greenland'
-    parent_model_pickup_iteration = 1060992
+    parent_model_pickup_iteration = 25920
 
     sys.path.insert(1, os.path.join(config_dir, 'L3', 'utils', 'init_file_creation'))
     sys.path.insert(1, os.path.join(config_dir, 'L3', L3_model_name, 'utils', 'init_file_creation'))
 
-    print_level = 5
+    print_level = 4
 
-    steps = [5] #5
+    steps = [2]
 
     # step 1: make the grid
     if 1 in steps:
-        print('Step 1: Creating the stretched mitgrid file for the ' + L3_model_name + ' model')
-        import create_L3_Scoresby_Sund_mitgrid_stretched as cm
+        print('Step 1: Creating the mitgrid file for the ' + L3_model_name + ' model')
+        # import create_L3_Scoresby_Sund_mitgrid_stretched as cm
+        # cm.create_mitgrid(config_dir, print_level)
+        import create_L3_Scoresby_Sund_mitgrid as cm
         cm.create_mitgrid(config_dir, print_level)
 
     # step 2: make the bathymetry
@@ -67,6 +69,19 @@ def create_L3_Scoresby_Sund_files(config_dir):
         print('Step 6: Creating the boundary conditions for the ' + L3_model_name + ' model')
         import create_L3_Scoresby_Sund_BCs as cbc
         cbc.create_BCs(config_dir, L3_model_name, parent_model_level, parent_model_name, print_level)
+
+    # step 7: make the iceplume files
+    if 7 in steps:
+        print('Step 7: Creating the iceplume files for the ' + L3_model_name + ' model')
+        mankoff_dir = '/Users/michwood/Documents/Research/Data Repository/Greenland/Runoff/Mankoff_liquid'
+        import create_L3_Scoresby_Sund_iceplume as cip
+        cip.create_L3_iceplume_files(config_dir, mankoff_dir, print_level)
+
+    # step 8: make the diagnostic_vec masks
+    if 8 in steps:
+        print('Step 8: Creating the diagnostic_vec masks for the ' + L3_model_name + ' model')
+        import create_L3_Scoresby_Sund_dv_masks as dv
+        dv.create_dv_masks(config_dir, L3_model_name, print_level)
 
 
 

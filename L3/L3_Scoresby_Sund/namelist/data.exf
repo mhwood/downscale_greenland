@@ -15,50 +15,50 @@
 #
  exf_iprec         = 32,
  exf_yftype        = 'RL',
- useExfYearlyFields= .FALSE.,
+ useExfYearlyFields= .TRUE.,
  useExfCheckRange  = .FALSE.,
  /
 
  &EXF_NML_02
- uwindfile       = 'exf/L3_exf_UWIND.bin',
- vwindfile       = 'exf/L3_exf_VWIND.bin',
- atempfile         = 'exf/L3_exf_ATEMP.bin',
- aqhfile           = 'exf/L3_exf_AQH.bin',
- precipfile        = 'exf/L3_exf_PRECIP.bin',
- swdownfile        = 'exf/L3_exf_SWDOWN.bin',
- lwdownfile        = 'exf/L3_exf_LWDOWN.bin',
- runofffile        = 'exf/L3_exf_RUNOFF.bin',
+ uwindfile       = 'exf/L3_exf_UWIND',
+ vwindfile       = 'exf/L3_exf_VWIND',
+ atempfile         = 'exf/L3_exf_ATEMP',
+ aqhfile           = 'exf/L3_exf_AQH',
+ precipfile        = 'exf/L3_exf_PRECIP',
+ swdownfile        = 'exf/L3_exf_SWDOWN',
+ lwdownfile        = 'exf/L3_exf_LWDOWN',
+ runofffile        = 'exf/L3_exf_RUNOFF',
 #
- atempstartdate1   = 20011231,
- atempstartdate2   = 210000,
+ atempstartdate1   = 19920101,
+ atempstartdate2   = 030000,
  atempperiod       = 21600.0,
 #
- aqhstartdate1     = 20011231,
- aqhstartdate2     = 210000,
+ aqhstartdate1     = 19920101,
+ aqhstartdate2     = 030000,
  aqhperiod         = 21600.0,
 #
- precipstartdate1  = 20011231,
- precipstartdate2  = 210000,
+ precipstartdate1  = 19920101,
+ precipstartdate2  = 030000,
  precipperiod      = 21600.0,
 #
- runoffstartdate1  = 20011231,
- runoffstartdate2  = 210000,
+ runoffstartdate1  = 19920101,
+ runoffstartdate2  = 030000,
  runoffperiod      = 21600.0,
 #
- uwindstartdate1   = 20011231,
- uwindstartdate2   = 210000,
+ uwindstartdate1   = 19920101,
+ uwindstartdate2   = 030000,
  uwindperiod       = 21600.0,
 #
- vwindstartdate1   = 20011231,
- vwindstartdate2   = 210000,
+ vwindstartdate1   = 19920101,
+ vwindstartdate2   = 030000,
  vwindperiod       = 21600.0,
 #
- swdownstartdate1  = 20011231,
- swdownstartdate2  = 210000,
+ swdownstartdate1  = 19920101,
+ swdownstartdate2  = 030000,
  swdownperiod      = 21600.0,
 #
- lwdownstartdate1  = 20011231,
- lwdownstartdate2  = 210000,
+ lwdownstartdate1  = 19920101,
+ lwdownstartdate2  = 030000,
  lwdownperiod      = 21600.0,
 #
  /
@@ -79,17 +79,18 @@
  /
 
  &EXF_NML_OBCS
+ obcsEstartdate1     = 19920101,
+ obcsEstartdate2     = 003000,
+ obcsEperiod         = 3600.0,
 #
- obcsNstartdate1     = 20011231,
- obcsNstartdate2     = 233000,
- obcsNperiod         = 3600.0,
-#
- obcsSstartdate1     = 20011231,
- obcsSstartdate2     = 233000,
+ obcsSstartdate1     = 19920101,
+ obcsSstartdate2     = 003000,
  obcsSperiod         = 3600.0,
 #
- obcsEstartdate1     = 20011231,
- obcsEstartdate2     = 233000,
- obcsEperiod         = 3600.0,
+ obcsNstartdate1     = 19920101,
+ obcsNstartdate2     = 003000,
+ obcsNperiod         = 3600.0,
+#
+ useOBCSYearlyFields = .TRUE.,
 #
  &

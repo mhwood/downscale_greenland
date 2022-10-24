@@ -51,6 +51,9 @@ def create_mitgrid(config_dir, print_level = 1):
     y = np.arange(min_y,max_y+2*y_resolution,y_resolution)
     XC, YC = np.meshgrid(x,y)
 
+    print(np.min(x),np.max(x))
+    print(np.min(y),np.max(y))
+
     xg = x - dx/2
     yg = y - y_resolution/2
     XG, YG = np.meshgrid(xg, yg)

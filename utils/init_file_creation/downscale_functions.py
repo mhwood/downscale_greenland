@@ -564,6 +564,7 @@ def downscale_3D_field(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
 
     return(full_grid)
 
+
 def downscale_3D_field_with_zeros(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,
                                    XC_subset, YC_subset, L1_wet_grid,
                                    mean_vertical_difference=0,fill_downward=True,printing=False,remove_zeros=True):
@@ -792,6 +793,64 @@ def downscale_3D_points_with_zeros(L0_points, L0_var, L0_wet_grid, #L0_wet_grid_
         full_grid[k, :, :] = grid[:, :]
 
     return(full_grid)
+
+
+def downscale_2D_points_with_zeros(L0_points, L0_var, L0_wet_grid,
+                       XC_subset, YC_subset, L1_wet_grid,
+                       printing=False):
+
+
+    tiny_value = 1e-14
+
+    if np.any(L1_wet_grid > 0):
+        # take an initial stab at the interpolation
+        L0_values = np.reshape(L0_var, (np.size(L0_var), ))
+        L0_wet_grid_vert = np.reshape(L0_wet_grid, (np.size(L0_wet_grid), ))
+        L0_points = L0_points[L0_wet_grid_vert != 0, :]
+        L0_values = L0_values[L0_wet_grid_vert != 0]
+
+        # fill the zeros with a very tiny value
+        L0_values[L0_values == 0] = tiny_value
+
+        if len(L0_points)>4:
+            grid = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='linear',fill_value=0)
+            # grid = grid[:, :, 0]
+            # grid_nearest = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+            # grid_nearest[:,:,0]
+            if not np.any(grid!=0):
+                grid = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                # grid = grid[:, :, 0]
+        else:
+            grid = np.zeros_like(XC_subset).astype(float)
+
+        # if k==0:
+        #     plt.imshow(grid,origin='lower')
+        #     plt.show()
+
+        # mask out any values which should be 0'd based on the old bathy
+        #grid[L0_wet_grid_on_L1[k, :, :] == 0] = 0
+
+        # mask out any values which should be 0'd based on the new bathy
+        grid[L1_wet_grid == 0] = 0
+
+        # spread the the variable outward to new wet cells
+        grid, n_remaining = spread_var_horizontally_in_wet_grid(grid, L1_wet_grid)
+
+        # if, for whatever reason, there are still values to be filled, then fill em with the nearest neighbor
+        if n_remaining>0:
+            if len(L0_points) > 0:
+                grid_nearest = griddata(L0_points, L0_values, (XC_subset, YC_subset), method='nearest', fill_value=0)
+                # grid_nearest = grid_nearest[:, :, 0]
+                indices = np.logical_and(grid==0,L1_wet_grid != 0)
+                grid[indices] = grid_nearest[indices]
+
+        # now, add the end of it, make all of the tiny values actually 0
+        grid[np.abs(grid) <= 2 * tiny_value] = 0
+
+    else:
+        grid = np.zeros_like(XC_subset).astype(float)
+
+    return(grid)
 
 
 def downscale_3D_boundary_field(L0_XC, L0_YC, L0_var, L0_wet_grid, L0_wet_grid_on_L1,

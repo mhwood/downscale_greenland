@@ -376,7 +376,7 @@ def combine_panels_to_figure(config_dir, L0_model_name, L1_model_name, L2_model_
     output_path = os.path.join(config_dir,'plots','all_domain_bathymetry.png')
     page.save(output_path)
 
-def create_colorbar(output_file):
+def create_vertical_colorbar(output_file):
 
     vmin = 0
     vmax = 1500
@@ -412,17 +412,55 @@ def create_colorbar(output_file):
     plt.savefig(output_file,bbox_inches='tight')
     plt.close(fig)
 
+def create_horizontal_colorbar(output_file):
+
+    vmin = 0
+    vmax = 1500
+    cmap = cm.deep
+    units = 'm'
+    aspect = 1/80
+    fontsize = 30
+
+    fig = plt.figure(figsize=(4,12))
+
+    step = (vmax-vmin)/100
+    y = np.arange(vmin,vmax+step,step)
+    x = np.arange(0,1.1,1)
+    X, Y = np.meshgrid(x,y)
+
+    # plt.contourf(x,y,Y,100,cmap=cmap)
+    plt.imshow(Y,origin='lower',cmap=cmap,extent = [0,1, vmin,vmax],aspect=aspect)
+    plt.gca().set_yticklabels([])
+
+    plt.plot([0, 1],[500, 500],'k-',linewidth=0.6)
+    plt.plot([0, 1],[1000, 1000], 'k-', linewidth=0.6)
+
+    # plt.gca().yaxis.tick_right()
+    plt.yticks([0,500,1000,1500],fontsize=fontsize)
+    plt.gca().set_yticklabels(['0','500','1000','$\geq$1500'])
+    plt.gca().set_xticks([])
+
+    # if plot_anomaly:
+    #     plt.title(smb_model+' SMB Anomaly',fontsize=20)
+    # else:
+    #     plt.title(smb_model + ' SMB', fontsize=20)
+
+    plt.ylabel('Depth (' + units + ')', fontsize=fontsize)
+    plt.savefig(output_file,bbox_inches='tight')
+    plt.close(fig)
+
+
 def create_nested_plot(config_dir, L1_model_name, L2_model_name, L3_model_name):
 
     # L1_XC, L1_YC, L1_Depth = read_geometry_from_grid_tiles_nc(config_dir, L1_model_name)
-    L1_XC, L1_YC, L1_Depth = read_geometry_from_grid_nc(config_dir, L1_model_name)
-    L2_XC, L2_YC, L2_Depth = read_geometry_from_grid_nc(config_dir, L2_model_name)
-    L3_XC, L3_YC, L3_Depth = read_geometry_from_grid_nc(config_dir, L3_model_name)
+    # L1_XC, L1_YC, L1_Depth = read_geometry_from_grid_nc(config_dir, L1_model_name)
+    # L2_XC, L2_YC, L2_Depth = read_geometry_from_grid_nc(config_dir, L2_model_name)
+    # L3_XC, L3_YC, L3_Depth = read_geometry_from_grid_nc(config_dir, L3_model_name)
 
     # generate_L1_subdomain_plot(config_dir, L1_model_name,
     #                         L1_XC, L1_YC, L1_Depth,
-    #                         L2_XC, L2_YC)
-    #
+    #                         L3_XC, L3_YC)
+
     # generate_subdomain_plot(config_dir, L2_model_name,
     #                         L2_XC, L2_YC, L2_Depth,
     #                         L3_XC, L3_YC, interior_shift = 1500,
@@ -430,11 +468,11 @@ def create_nested_plot(config_dir, L1_model_name, L2_model_name, L3_model_name):
     #
     # generate_subdomain_plot(config_dir,L3_model_name,
     #                         L3_XC, L3_YC, L3_Depth,
-    #                         child_XC = [], child_YC = [])
+    #                         child_XC = [], child_YC = [], outline_color = 'orange')
 
 
     colorbar_file = os.path.join(config_dir, 'plots', 'bathymetry', 'bathymetry_colorbar.png')
-    create_colorbar(colorbar_file)
+    create_horizontal_colorbar(colorbar_file)
 
     # L0_model_name = 'L0_Global'
     # combine_panels_to_figure(config_dir, L0_model_name, L1_model_name, L2_model_name, L3_model_name)

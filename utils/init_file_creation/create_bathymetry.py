@@ -261,10 +261,10 @@ def create_bathymetry_file(config_dir, level_name, model_name,
                 else:
                     bathy[i,j] = 0
 
-    # C = plt.imshow(bathy, origin='lower')
-    # plt.colorbar(C)
-    # plt.title(np.shape(bathy))
-    # plt.show()
+    C = plt.imshow(bathy, origin='lower')
+    plt.colorbar(C)
+    plt.title(np.shape(bathy))
+    plt.show()
 
     ###############################################################
     # Next, make some adjustments to the bathymetry

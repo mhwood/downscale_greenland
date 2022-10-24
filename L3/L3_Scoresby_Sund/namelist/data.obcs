@@ -3,9 +3,9 @@
 #
  OBCSfixTopo=.FALSE.,
 #
- OB_Jsouth= 420*1,
+ OB_Jsouth= 810*1,
  OB_Ieast = 450*-1,
- OB_Jnorth = 420*-1,
+ OB_Jnorth = 810*-1,
 #
  useOBCSsponge = .TRUE.,
 # useOBCSsponge = .FALSE.,
@@ -14,41 +14,41 @@
 #
  useOBCSprescribe = .TRUE.,
 #
- OBEuFile = 'obcs/L3_BC_east_UVEL.bin',
- OBSuFile = 'obcs/L3_BC_south_UVEL.bin',
- OBNuFile = 'obcs/L3_BC_north_UVEL.bin',
+ OBEuFile = 'obcs/L3_BC_east_UVEL',
+ OBSuFile = 'obcs/L3_BC_south_UVEL',
+ OBNuFile = 'obcs/L3_BC_north_UVEL',
 #
- OBEvFile = 'obcs/L3_BC_east_VVEL.bin',
- OBSvFile = 'obcs/L3_BC_south_VVEL.bin',
- OBNvFile = 'obcs/L3_BC_north_VVEL.bin',
+ OBEvFile = 'obcs/L3_BC_east_VVEL',
+ OBSvFile = 'obcs/L3_BC_south_VVEL',
+ OBNvFile = 'obcs/L3_BC_north_VVEL',
 #
- OBEtFile = 'obcs/L3_BC_east_THETA.bin',
- OBStFile = 'obcs/L3_BC_south_THETA.bin',
- OBNtFile = 'obcs/L3_BC_north_THETA.bin',
+ OBEtFile = 'obcs/L3_BC_east_THETA',
+ OBStFile = 'obcs/L3_BC_south_THETA',
+ OBNtFile = 'obcs/L3_BC_north_THETA',
 #
- OBEsFile = 'obcs/L3_BC_east_SALT.bin',
- OBSsFile = 'obcs/L3_BC_south_SALT.bin',
- OBNsFile = 'obcs/L3_BC_north_SALT.bin',
+ OBEsFile = 'obcs/L3_BC_east_SALT',
+ OBSsFile = 'obcs/L3_BC_south_SALT',
+ OBNsFile = 'obcs/L3_BC_north_SALT',
 #
- OBEaFile = 'obcs/L3_BC_east_AREA.bin',
- OBSaFile = 'obcs/L3_BC_south_AREA.bin',
- OBNaFile = 'obcs/L3_BC_north_AREA.bin',
+ OBEaFile = 'obcs/L3_BC_east_AREA',
+ OBSaFile = 'obcs/L3_BC_south_AREA',
+ OBNaFile = 'obcs/L3_BC_north_AREA',
 #
- OBEhFile = 'obcs/L3_BC_east_HSNOW.bin',
- OBShFile = 'obcs/L3_BC_south_HSNOW.bin',
- OBNhFile = 'obcs/L3_BC_north_HSNOW.bin',
+ OBEhFile = 'obcs/L3_BC_east_HSNOW',
+ OBShFile = 'obcs/L3_BC_south_HSNOW',
+ OBNhFile = 'obcs/L3_BC_north_HSNOW',
 #
- OBEsnFile = 'obcs/L3_BC_east_HEFF.bin',
- OBSsnFile = 'obcs/L3_BC_south_HEFF.bin',
- OBNsnFile = 'obcs/L3_BC_north_HEFF.bin',
+ OBEsnFile = 'obcs/L3_BC_east_HEFF',
+ OBSsnFile = 'obcs/L3_BC_south_HEFF',
+ OBNsnFile = 'obcs/L3_BC_north_HEFF',
 #
- OBEuiceFile = 'obcs/L3_BC_east_UICE.bin',
- OBSuiceFile = 'obcs/L3_BC_south_UICE.bin',
- OBNuiceFile = 'obcs/L3_BC_north_UICE.bin',
+ OBEuiceFile = 'obcs/L3_BC_east_UICE',
+ OBSuiceFile = 'obcs/L3_BC_south_UICE',
+ OBNuiceFile = 'obcs/L3_BC_north_UICE',
 #
- OBEviceFile = 'obcs/L3_BC_east_VICE.bin',
- OBSviceFile = 'obcs/L3_BC_south_VICE.bin',
- OBNviceFile = 'obcs/L3_BC_north_VICE.bin',
+ OBEviceFile = 'obcs/L3_BC_east_VICE',
+ OBSviceFile = 'obcs/L3_BC_south_VICE',
+ OBNviceFile = 'obcs/L3_BC_north_VICE',
  &
 
  &OBCS_PARM02

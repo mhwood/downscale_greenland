@@ -5,4 +5,4 @@ cd run_for_grid
 ln -s ../input_for_grid/* .
 ln -s ../namelist_for_grid/* .
 ln -s ../build_for_grid/mitgcmuv .
-mpirun -np 6 ./mitgcmuv
+mpirun -np 9 ./mitgcmuv

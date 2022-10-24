@@ -1,7 +1,0 @@
-{'sNx': 180,
- 'sNy': 180,
- 'ordered_nonblank_tiles': [[1, 2, 3], [6, 5, 4]],
- 'ordered_nonblank_rotations': [[0, 0, 0], [3, 3, 3]],
- 'faces': [1, 3],
- 'ordered_tiles_faces_dict': {1: [[1, 2, 3]], 3: [[4], [5], [6]]}
- }

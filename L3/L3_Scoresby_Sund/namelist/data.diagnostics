@@ -4,24 +4,53 @@
      dumpAtLast = .TRUE.,
 #--
   fields(1,1) = 'ETAN    ',
-  levels(1,1) = 1.,
-  fileName(1) = 'surfDiag',
-  frequency(1) =  -3600.,
-#
-  fields(1:4,2) = 'UVEL    ','VVEL    ','THETA   ','SALT    ',
-  fileName(2) = 'dynDiag',
-  frequency(2) = -3600.,
-  levels(1:4,2) = 1,
+  fileName(1) = 'diags/EtaN_day_snap/EtaN_day_snap',
+#  frequency(1) =  -86400.,
+  frequency(1) =  -120.,
+#--
+#  fields(1,2) = 'ETAN    ',
+#  fileName(2) = 'diags/EtaN_mon_mean/EtaN_mon_mean',
+#  frequency(2) =  2592000.,
 #
   fields(1:5,3) = 'SIarea  ','SIheff  ','SIhsnow ','SIuice ','SIvice ',
-  fileName(3) = 'seaiceDiag',
-  frequency(3) = -3600.,
-  levels(1:5,3) = 1,
+  fileName(3) = 'diags/SI_daily_snap/SI_daily_snap',
+#  frequency(3) = -86400.,
+  frequency(3) = -120.,
 #
   fields(1:2,4) = 'THETA   ','SALT    ',
-  fileName(4) = 'awDiag',
-  frequency(4) = -3600.,
-  levels(1:2,4) = 19,
+  fileName(4) = 'diags/TS_surf_daily_snap/TS_surf_daily_snap',
+#  frequency(4) = -86400.,
+  frequency(4) = -120.,
+  levels(:,4) = 1,
+#
+  fields(1:2,5) = 'UVEL    ','VVEL    ',
+  fileName(5) = 'diags/vel_surf_daily_snap/vel_surf_daily_snap',
+#  frequency(5) = -86400.,
+  frequency(5) = -120.,
+  levels(:,5) = 1,
+#
+  fields(1:2,6) = 'THETA   ','SALT    ',
+  fileName(6) = 'diags/TS_AW_daily_snap/TS_AW_daily_snap',
+#  frequency(6) = -86400.,
+  frequency(6) = -120.,
+  levels(:,6) = 19,
+#
+#  fields(1:2,7) = 'THETA   ','SALT    ',
+#  fileName(7) = 'diags/state_3D_mon_snap/state_3D_mon_snap',
+#  frequency(7) = -2592000.,
+#
+#  fields(1:2,8) = 'UVEL    ','VVEL    ',
+#  fileName(8) = 'diags/vel_3D_mon_snap/vel_3D_mon_snap',
+#  frequency(8) = -2592000.,
+#
+#  fields(1:2,9) = 'THETA   ','SALT    ',
+#  fileName(9) = 'diags/state_3D_mon_mean/state_3D_mon_mean',
+#  frequency(9) = 2592000.,
+#
+#  fields(1:2,10) = 'THETA   ','SALT    ',
+#  fileName(10) = 'diags/vel_3D_mon_mean/vel_3D_mon_mean',
+#  frequency(10) = 2592000.,
+#
  &
 
 # Parameter for Diagnostics of per level statistics:

@@ -7,7 +7,7 @@ from pyproj import Transformer
 import sys
 
 
-def create_mitgrid(config_dir):
+def create_mitgrid(config_dir, print_level):
 
     sys.path.insert(1, os.path.join(config_dir,'L3', 'utils','init_file_creation'))
     import create_L3_mitgrid as cm
@@ -15,36 +15,45 @@ def create_mitgrid(config_dir):
     model_name = 'L3_Scoresby_Sund'
 
     # pass this a grid on the subdomain in EPSG 3413 coordinates
-    print('Creating the mitgrid file for the '+model_name+' model')
+    if print_level >= 1:
+        print('Creating the mitgrid file for the '+model_name+' model')
 
-    print('    - Generating the grid in polar coordinates')
+    if print_level >= 1:
+        print('    - Generating the grid in polar coordinates')
 
     # make the point grid in polar coordinates
-    min_x = 543736
-    max_x = 897457
-    max_y = -1873700
-    min_y = -2092319
+    min_x = 542500.0004588533
+    max_x = 933322.4225522613
+    max_y = -1869000
+    min_y = -2094000
 
-    resolution = 2000
+    resolution = 500
 
     min_x = int(min_x/resolution)*resolution
     max_x = (int(max_x / resolution)+1) * resolution
     min_y = int(min_y / resolution) * resolution
-    max_y = (int(max_y / resolution)+1) * resolution
+    max_y = (int(max_y / resolution)) * resolution
 
-    x = np.arange(min_x,max_x+resolution,resolution)
-    y = np.arange(min_y,max_y+resolution,resolution)
+    x = np.arange(max_x - 2*resolution, min_x - 30 * resolution, -resolution)
+    x = np.flip(x)
+    # x = np.arange(min_x,max_x+resolution,resolution)
+    y = np.arange(min_y,max_y,resolution)
     XC, YC = np.meshgrid(x,y)
 
-    x = np.arange(min_x, max_x + 2 * resolution, resolution)
-    y = np.arange(min_y, max_y + 2 * resolution, resolution)
+    x = np.arange(max_x-resolution, min_x-30*resolution, -resolution)
+    x = np.flip(x)
+    y = np.arange(min_y, max_y+resolution, resolution)
     XG, YG = np.meshgrid(x-resolution/2,y-resolution/2)
 
-    print('    - The C grid has '+str(np.shape(XC)[0])+' rows and '+str(np.shape(XC)[1])+' cols')
-    print('    - The G grid has ' + str(np.shape(XG)[0]) + ' rows and ' + str(np.shape(XG)[1]) + ' cols')
+    if print_level >= 1:
+        print('    - The C grid has '+str(np.shape(XC)[0])+' rows and '+str(np.shape(XC)[1])+' cols')
+        print('        - x: '+str(np.min(x))+' to '+str(np.max(x)))
+        print('        - y: ' + str(np.min(y)) + ' to ' + str(np.max(y)))
+        print('    - The G grid has ' + str(np.shape(XG)[0]) + ' rows and ' + str(np.shape(XG)[1]) + ' cols')
 
     # reproject the grid to lon, lat
-    print('    - Reprojecting the grid to lat/lon')
+    if print_level >= 1:
+        print('    - Reprojecting the grid to lat/lon')
     transformer = Transformer.from_crs('EPSG:' + str(3413), 'EPSG:' + str(4326))
 
     Lat_C, Lon_C = transformer.transform(XC.ravel(), YC.ravel())
@@ -69,7 +78,7 @@ def create_mitgrid(config_dir):
     # plt.show()
 
     # pass to general function to generate mitgrid
-    cm.create_L3_mitgrid_file(config_dir,model_name,Lat_C, Lon_C,Lat_G, Lon_G)
+    cm.create_L3_mitgrid_file(config_dir,model_name,Lat_C, Lon_C,Lat_G, Lon_G, print_level)
 
 
 

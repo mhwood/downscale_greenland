@@ -13,13 +13,13 @@ def read_L3_Scoresby_Sund_boundary_condition(config_dir, L3_model_name, boundary
 
     if boundary=='south' or boundary=='north':
         boundary_file = os.path.join(config_dir,'L3',L3_model_name,'input','obcs',
-                                     'L3_BC_'+boundary+'_'+field_name.upper()+'.bin')
+                                     'L3_BC_'+boundary+'_'+field_name.upper()+'_1992')
         boundary_grid = np.fromfile(boundary_file,'>f4')
         boundary_grid = boundary_grid.reshape((n_timesteps, Nr, n_cols_L3))
 
     if boundary == 'east' or boundary == 'west':
         boundary_file = os.path.join(config_dir, 'L3', L3_model_name, 'input', 'obcs',
-                                     'L3_BC_' + boundary + '_' + field_name.upper() + '.bin')
+                                     'L3_BC_' + boundary + '_' + field_name.upper() + '_1992')
         boundary_grid = np.fromfile(boundary_file, '>f4')
         boundary_grid = boundary_grid.reshape((n_timesteps, Nr, n_rows_L3))
 
@@ -149,8 +149,8 @@ def plot_L3_Scoresby_Sund_BCs(config_dir, L3_model_name, print_level):
 
     sys.path.insert(1, os.path.join(config_dir, 'L3', 'utils', 'plot_creation','init_files'))
 
-    n_timesteps = 2*24 + 2
-    timestep = 31
+    n_timesteps = 121*24
+    timestep = 90*24+17
 
     grid_file = os.path.join(config_dir, 'nc_grids', L3_model_name + '_grid.nc')
     ds = nc4.Dataset(grid_file)

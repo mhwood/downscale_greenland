@@ -7,13 +7,13 @@ import numpy as np
 def plot_L3_Scoresby_Sund_init_fields(config_dir):
 
     L3_model_name = 'L3_Scoresby_Sund'
-    pickup_iteration = 5304960
+    pickup_iteration = 129600
 
     sys.path.insert(1, os.path.join(config_dir, 'L3', L3_model_name, 'utils', 'plot_creation','init_files'))
 
     print_level = 3
 
-    steps = [3,4]
+    steps = [2]
 
     # step 1: plot the mitgrid components
     if 1 in steps:
