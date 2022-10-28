@@ -42,3 +42,6 @@ This run will generate 12 tiles, each containing a piece of the grid. To put the
 python3 init_file_creation/stitch_L0_W_Greenland_nc_grid_files_for_ref.py -d ../../../../
 ```
 
+### Step 4: Generate the inital conditions
+
+Next, we will create an initial conditions file by subsetting the initial conditions files for the ECCOv5 model. 
