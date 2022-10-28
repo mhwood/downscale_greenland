@@ -28,4 +28,12 @@ Script: create_L0_W_Greenland_bathymetry.py
 Next, we will use the migrid to subset the global bathymetry file onto our domain. Further, we will make some modification to the regional bathymetry to avoid numerical issues. Specifically, we will close off Hudson Bay and the Gulf of St Lawrence, and then ensure that all wet areas of the domain are connected. If any areas are not connected, they are filled in. This process ensures that there are no "lakes" or other regions which might otherwise create numerical issues.
 
 ### Step 3: Generate a reference grid
-Next, we will leverage the 
+For the subsequent binaries (initial conditions, external forcings, and boundary conditions) we will need further information about our grid - namely the angles of the curvilinear grid and the vertical fraction of each cell which is wet. For this, we we will leverage the nice capabilities of the ```mnc``` package to generate a convient reference grid. Here, we will run the model for 1 timestep using the data_for_grid file inside the namelist directory. To run with this file, use the following steps:
+
+```
+cd run
+ln -s ../namelist/* .
+ln -s ../input/* .
+ln -s ../build/* .
+mpirun -np 12 ./mitgcmuv
+```
