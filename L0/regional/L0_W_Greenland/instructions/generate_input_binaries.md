@@ -37,3 +37,8 @@ ln -s ../input/* .
 ln -s ../build/* .
 mpirun -np 12 ./mitgcmuv
 ```
+This run will generate 12 tiles, each containing a piece of the grid. To put them together, use the following code:
+```
+python3 init_file_creation/stitch_L0_W_Greenland_nc_grid_files_for_ref.py -d ../../../../
+```
+
