@@ -1,6 +1,6 @@
 # iceplume implementation
 
-This note is to describe manual changes to the MITgcm src/inc files to implement the iceplume package. I have added this manually here because a) I have already altered these files with `diagnostics_vec`, which is not yet checked in to MITgcm, and because I would like to understand how the package is implemented.
+This note is to describe manual changes to the MITgcm src/inc files to implement the iceplume package, which is currently activated in the L3 models. I have added the iceplume package manually here (rather than An Nguyen's pull request fork) because a) I have already altered thee boot sequence files with `diagnostics_vec`, which is not yet checked in to MITgcm, b) I would like to understand how the package is implemented, and c) I made some modifications to the code after running into some complime-time errors.
 
 The first several steps are just to modify the standard boot sequence. The notes at the end are specific changes to other scripts.
 
@@ -88,8 +88,9 @@ C--   if useICEPLUME=T, set mypackage parameters; otherwise just return
   - exf/exf_getffields.F
 
 ### Final notes:
-There are two snags I ran into that could potentially be implemented in iceplume_check.F:
+There are a few snags I ran into:
 1. Ensure that `#ALLOW_ADDFLUID` is defined in CPP_OPTIONS.h
 2. Make sure `exf` is turned on - it obviously is here but this is not always the case (e.g. when testing toy models).
-`
+3. There were some issues with the overlap in iceplume_calc.F. I edited some of the loops to includes the overlaps.
+4. In iceplume_readparms.F, an `#ALLOW_EXCH2` header block needed to be moved above a `#USE_EXF_INTERPOLATION` block.
 
