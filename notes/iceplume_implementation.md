@@ -93,8 +93,9 @@ C--   if useICEPLUME=T, set mypackage parameters; otherwise just return
 
 ### Final notes:
 There are a few snags I ran into:
-1. Ensure that `#ALLOW_ADDFLUID` is defined in CPP_OPTIONS.h
-2. Make sure `exf` is turned on - it obviously is here but this is not always the case (e.g. when testing toy models).
-3. There were some issues with the overlap in iceplume_calc.F. I edited some of the loops to includes the overlaps.
-4. In iceplume_readparms.F, an `#ALLOW_EXCH2` header block needed to be moved above a `#USE_EXF_INTERPOLATION` block.
+1. Ensure that `#ALLOW_ADDFLUID` is defined in `CPP_OPTIONS.h`
+2. Ensure that `selectAddFluid = 1,` in the `data` file.
+3. Make sure `exf` is turned on - it obviously is here but this is not always the case (e.g. when testing toy models).
+4. There were some issues with the overlap in iceplume_calc.F. I edited some of the loops to includes the overlaps.
+5. In `iceplume_readparms.F`, an `#ALLOW_EXCH2` header block needed to be moved above a `#USE_EXF_INTERPOLATION` block.
 
