@@ -98,4 +98,5 @@ There are a few snags I ran into:
 3. Make sure `exf` is turned on - it obviously is here but this is not always the case (e.g. when testing toy models).
 4. There were some issues with the overlap in iceplume_calc.F. I edited some of the loops to includes the overlaps.
 5. In `iceplume_readparms.F`, an `#ALLOW_EXCH2` header block needed to be moved above a `#USE_EXF_INTERPOLATION` block.
+6. The pickup files need an `AddMass` field. If the model is initialized in winter, an AddMass field can be added which is all 0's.
 
