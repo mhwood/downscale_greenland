@@ -43,5 +43,24 @@ python3 init_file_creation/stitch_L0_W_Greenland_nc_grid_files_for_ref.py -d ../
 ```
 
 ### Step 4: Generate the inital conditions
+Script: create_L0_W_Greenland_pickup.py
+Sub-script: create_L0_ECCO_pickup.py
 
-Next, we will create an initial conditions file by subsetting the initial conditions files for the ECCOv5 model. 
+Next, we will create an initial conditions file by subsetting the initial conditions files for the ECCOv5 model. The main tricky part of this procedure is to correctly map the "Lat-Lon-Cap" geometry files onto the regular grid of the regional model. The initial condittions are conveniently stored in the "pickup" file. 
+
+### Step 5: Generate the sea ice inital conditions
+Script: create_L0_W_Greenland_seaice_pickup.py
+Sub-script: create_L0_ECCO_seaice_pickup.py
+
+The seaice variables are stored in a different file than the usual variables. Heere, we will create an initial conditions file for the sea ice variables by subsetting the initial conditions files for the ECCOv5 model. 
+
+### Step 6: Generate the external forcing conditions
+Script: create_L0_W_Greenland_exf.py
+Sub-script: create_L0_ECCO_exf.py
+
+### Step 7: Generate the boundary condtions
+Script: create_L0_W_Greenland_BCs.py
+Sub-script: create_L0_ECCO_BCs.py
+
+In this example, the boundary conditions are generated using monthly mean output from the ECCOv5 solution. Using the files downloaded previously (see the "Pertinent Files" instructions"), the global solution is subsetted onto the regional domain and stored in annual files.
+
