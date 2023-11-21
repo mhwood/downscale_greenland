@@ -1,6 +1,6 @@
 # diagnostics_main_init.F
 
-Add a new block for addMass around line 178:
+Add a new block for addMass before RELHUM (around line 178):
 ```
 #ifdef ALLOW_ADDFLUID
       diagName  = 'addMass '
