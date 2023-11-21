@@ -7,7 +7,7 @@ First, add a block for the FFIELDS header under the GAD block (aronud line 28)
 #endif
 ```
 
-Second, add a line for addMass (around line 422):
+Second, add a line for addMass before the ALLOW_FIZHI block (around line 422):
 ```
 #ifdef ALLOW_ADDFLUID
         CALL DIAGNOSTICS_FILL(addMass,'addMass ',0,Nr,0,1,1,myThid)
