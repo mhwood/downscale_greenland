@@ -140,6 +140,7 @@ Then, just as for temperature, the tmpVar is zero'd after the FIZHI_TENDENCY_APP
 ```
 Similarly, the ALLOW_ADDFLUID block is updated as follows:
 ```
+#ifdef ALLOW_ICEPLUME
       IF ( useICEPLUME ) THEN
        IF ( selectAddFluid.NE.0) THEN
         IF ( ( selectAddFluid.GE.1 .AND. nonlinFreeSurf.GT.0 )
