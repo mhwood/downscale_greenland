@@ -1,6 +1,6 @@
 # apply_forcing.F functions
 
-There changes in the apply_forcing.F file are in two functions: APPLY_FORCING_T and APPLY_FORCING_S
+The changes in the apply_forcing.F script are in two functions: APPLY_FORCING_T and APPLY_FORCING_S
 
 ## Changes to APPLY_FORCING_T
 
