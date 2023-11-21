@@ -74,7 +74,7 @@ C--   if useICEPLUME=T, set mypackage parameters; otherwise just return
 #endif
 ```
 
-### Step 8: Add the following `src` list of files from An Nguyen's modifications:
+### Step 8: Update the following `src` list of files from An Nguyen's modifications:
   - apply_forcing.F
   - do_oceanic_phys.F
   - external_fields_load.F
@@ -87,10 +87,15 @@ C--   if useICEPLUME=T, set mypackage parameters; otherwise just return
   - iceplume_calc.F
   - iceplume_init_varia.F
 
-### Step 9: Add the following `pkg` list of files from An Nguyen's modifications:
+### Step 9: Update the following `pkg` list of files from An Nguyen's modifications:
   - diagnostics/diagnostics_fill_state.F
   - diagnostics/diagnostics_main_init.F
   - exf/exf_getffields.F
+
+### Step 10: Update the following `pkg` file from my modifications:
+  - obcs/obcs_balance_fields.F
+
+The changes to all of the above files is summarized in the [iceplume_mods](https://github.com/mhwood/downscale_greenland/tree/main/notes/iceplume_mods) notes
 
 ### Final notes:
 There are a few snags I ran into:
