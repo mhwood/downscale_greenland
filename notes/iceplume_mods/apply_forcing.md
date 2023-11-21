@@ -4,7 +4,7 @@ There changes in the apply_forcing.F file are in two functions: APPLY_FORCING_T 
 
 ## Changes to APPLY_FORCING_T
 
-Inside the APPLY_FORCING_T, the iceplume header files is includes (around line 415):
+Inside the APPLY_FORCING_T, the iceplume header files is included (around line 415):
 ```
 #ifdef ALLOW_ICEPLUME
 #include "ICEPLUME.h"
@@ -114,6 +114,125 @@ After all of the tendencies have been updates, the tendency is applied after the
      &     CALL ICEPLUME_TENDENCY_APPLY_T(
      U                   gT_arr,
      I                   iMin,iMax,jMin,jMax, 
+     I                   k, bi, bj, myTime, myIter, myThid )
+#endif /* ALLOW_ICEPLUME */
+```
+
+## Changes to APPLY_FORCING_S
+
+Inside the APPLY_FORCING_S, the iceplume header files is included (around line 916):
+```
+#ifdef ALLOW_ICEPLUME
+#include "ICEPLUME.h"
+#endif /* ALLOW_ICEPLUME */
+```
+Then, a tmpVar is defined in the header block (around line 938):
+```
+      _RL     tmpVar(1-OLx:sNx+OLx,1-OLy:sNy+OLy)
+```
+Then, just as for temperature, the tmpVar is zero'd after the FIZHI_TENDENCY_APPLY function:
+```
+      DO j=1-OLy,sNy+OLy
+       DO i=1-OLx,sNx+OLx
+        tmpVar(i,j) = 0. _d 0
+       ENDDO
+      ENDDO
+```
+Similarly, the ALLOW_ADDFLUID block is updated as follows:
+```
+      IF ( useICEPLUME ) THEN
+       IF ( selectAddFluid.NE.0) THEN
+        IF ( ( selectAddFluid.GE.1 .AND. nonlinFreeSurf.GT.0 )
+     &      .OR. convertFW2Salt.EQ.-1. _d 0 ) THEN
+         DO j=0,sNy+1
+          DO i=0,sNx+1
+
+           tmpVar(i,j) =
+     &          addMass3Dplume(i,j,k,bi,bj)*mass2rUnit
+     &          *( salt_addMass3Dplume(I,J,k,bi,bj)-salt(i,j,k,bi,bj) )
+     &          *recip_rA(i,j,bi,bj)
+     &          *recip_drF(k)*_recip_hFacC(i,j,k,bi,bj)
+
+           gS_arr(i,j) = gS_arr(i,j) + tmpVar(i,j)
+          ENDDO
+         ENDDO
+       ELSE
+         DO j=0,sNy+1
+          DO i=0,sNx+1
+
+           tmpVar(i,j) =
+     &          addMass3Dplume(i,j,k,bi,bj)*mass2rUnit
+     &          *( salt_addMass3Dplume(I,J,k,bi,bj) - sRef(k) )
+     &          *recip_rA(i,j,bi,bj)
+     &          *recip_drF(k)*_recip_hFacC(i,j,k,bi,bj)
+
+           gS_arr(i,j) = gS_arr(i,j) + tmpVar(i,j)
+          ENDDO
+         ENDDO
+        ENDIF
+       ENDIF
+      ENDIF
+#else
+catn: make sure (salt,temp)_addMass are unset so we dont enter here
+      IF ( selectAddFluid.NE.0 .AND. salt_addMass.NE.UNSET_RL ) THEN
+       IF ( ( selectAddFluid.GE.1 .AND. nonlinFreeSurf.GT.0 )
+     &      .OR. convertFW2Salt.EQ.-1. _d 0 ) THEN
+
+         DO j=0,sNy+1
+          DO i=0,sNx+1
+
+            tmpVar(i,j) =
+     &          addMass(i,j,k,bi,bj)*mass2rUnit
+     &          *( salt_addMass - salt(i,j,k,bi,bj) )
+     &          *recip_rA(i,j,bi,bj)
+     &          *recip_drF(k)*_recip_hFacC(i,j,k,bi,bj)
+
+            gS_arr(i,j) = gS_arr(i,j) + tmpVar(i,j)
+          ENDDO
+         ENDDO
+       ELSE
+         DO j=0,sNy+1
+          DO i=0,sNx+1
+
+            tmpVar(i,j) =
+     &          addMass(i,j,k,bi,bj)*mass2rUnit
+     &          *( salt_addMass - sRef(k) )
+     &          *recip_rA(i,j,bi,bj)
+     &          *recip_drF(k)*_recip_hFacC(i,j,k,bi,bj)
+
+            gS_arr(i,j) = gS_arr(i,j) + tmpVar(i,j)
+          ENDDO
+         ENDDO
+       ENDIF
+      ENDIF
+#endif /* ALLOW_ICEPLUME */
+
+#ifdef ALLOW_DIAGNOSTICS
+      IF ( useDiagnostics ) THEN
+          CALL DIAGNOSTICS_FILL(tmpVar,
+     &                     'gSaddMas',k,1,2,bi,bj,myThid )
+#ifdef ALLOW_ICEPLUME
+         DO j=0,sNy+1
+          DO i=0,sNx+1
+            tmpVar(i,j)=salt(i,j,k,bi,bj)
+     &          *addMass3Dplume(i,j,k,bi,bj)*mass2rUnit
+     &          *recip_rA(i,j,bi,bj)
+     &          *recip_drF(k)*_recip_hFacC(i,j,k,bi,bj)
+          ENDDO
+        ENDDO
+          CALL DIAGNOSTICS_FILL(tmpVar,
+     &                     'sAddMass',k,1,2,bi,bj,myThid )
+#endif /* ALLOW_ICEPLUME */
+      ENDIF
+#endif /* ALLOW_DIAGNOSTICS */
+```
+The last change is to call the TENDENCY_APPLY function after the same one for icefront:
+```
+#ifdef ALLOW_ICEPLUME
+      IF ( useICEPLUME )
+     &     CALL ICEPLUME_TENDENCY_APPLY_S(
+     U                   gS_arr,
+     I                   iMin,iMax,jMin,jMax,
      I                   k, bi, bj, myTime, myIter, myThid )
 #endif /* ALLOW_ICEPLUME */
 ```
