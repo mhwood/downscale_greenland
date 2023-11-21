@@ -23,7 +23,7 @@ This script is modified with the following components:
 # endif /* ALLOW_ICEPLUME */
 ```
 
-3. Another ALLOW_ICEPLUME block after the `ATMOSPHERIC_LOADING` block around line 350:
+3. Another ALLOW_ICEPLUME block after the `ATMOSPHERIC_LOADING` block (around line 350, preceeding the final two ENDDOs):
 ```
 #ifdef ALLOW_ICEPLUME
         IF ( runoffQsgFile .NE. ' '  ) THEN
