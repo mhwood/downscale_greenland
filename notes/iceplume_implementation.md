@@ -97,6 +97,14 @@ C--   if useICEPLUME=T, set mypackage parameters; otherwise just return
 
 The changes to all of the above files is summarized in the [iceplume_mods](https://github.com/mhwood/downscale_greenland/tree/main/notes/iceplume_mods) notes
 
+### Step 11: Add/Update the runtime files:
+ - namelist/data.iceplume
+ - namelist/data.diagnostics_vec (be sure size is accounted for in compile)
+ - input/iceplume/iceplume_mask.bin
+ - input/iceplume/iceplume_lengths.bin
+ - input/iceplume/L2_Qsg_*
+ - input/pickup.* updated with an AddMass field
+
 ### Final notes:
 There are a few snags I ran into:
 1. Ensure that `#ALLOW_ADDFLUID` is defined in `CPP_OPTIONS.h`
