@@ -6,6 +6,10 @@ First, a new variable needs to be defined under the shelfIceNetMassFlux variable
 ```
       _RL addMassMassFlux
 ```
+Then initialize the addMassMassFlux before the OBCSbalance loop (around line 290):
+```
+       addMassMassFlux = 0. _d 0
+```
 
 Then, a loop is added so that the addMass flux is accounted for in the sum of the imbalance (around line 320):
 ```
