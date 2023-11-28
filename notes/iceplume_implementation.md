@@ -1,6 +1,10 @@
 # iceplume implementation
 
-This note is to describe manual changes to the MITgcm src/inc files to implement the iceplume package, which is currently activated in the L3 models. I have added the iceplume package manually here (rather than using An Nguyen's pull request fork) because a) I have already altered thee boot sequence files with `diagnostics_vec`, which is not yet checked in to MITgcm, b) I would like to understand how the package is implemented, and c) I made some modifications to the code after running into some complime-time errors.
+This note is to describe manual changes to the MITgcm src/inc files to implement the iceplume package, which is currently activated in the L2 and L3 models.
+
+The iceplume packages were submitted to MITgcm by An Nguyen in [pull request #682](https://github.com/MITgcm/MITgcm/pull/682)
+
+I have added the iceplume package manually here (rather than using An Nguyen's pull request fork) because a) I have already altered thee boot sequence files with `diagnostics_vec`, which is not yet checked in to MITgcm, b) I would like to understand how the package is implemented, and c) I made some modifications to the code after running into some complime-time errors.
 
 The first several steps are just to modify the standard boot sequence. The notes at the end are specific changes to other scripts.
 
