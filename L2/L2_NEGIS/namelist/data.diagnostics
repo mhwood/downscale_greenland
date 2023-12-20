@@ -1,0 +1,80 @@
+# Diagnostic Package Choices
+#
+ &diagnostics_list
+     dumpAtLast = .TRUE.,
+#--
+  fields(1,1) = 'ETAN    ',
+  fileName(1) = 'diags/EtaN_day_snap/EtaN_day_snap',
+  frequency(1) =  -86400.,
+#--
+  fields(1,2) = 'ETAN    ',
+  fileName(2) = 'diags/EtaN_mon_mean/EtaN_mon_mean',
+  frequency(2) =  2592000.,
+#
+  fields(1:5,3) = 'SIarea  ','SIheff  ','SIhsnow ','SIuice ','SIvice ',
+  fileName(3) = 'diags/SI_daily_snap/SI_daily_snap',
+  frequency(3) = -86400.,
+#
+  fields(1:2,4) = 'THETA   ','SALT    ',
+  fileName(4) = 'diags/TS_surf_daily_snap/TS_surf_daily_snap',
+  frequency(4) = -86400.,
+  levels(1:2,4) = 1, 1,
+#
+  fields(1:2,5) = 'THETA   ','SALT    ',
+  fileName(5) = 'diags/TS_AW_daily_snap/TS_AW_daily_snap',
+  frequency(5) = -86400.,
+  levels(1:2,5) = 19, 19,
+#
+  fields(1:2,6) = 'THETA   ','SALT    ',
+  fileName(6) = 'diags/state_3D_mon_snap/state_3D_mon_snap',
+  frequency(6) = -2592000.,
+#
+  fields(1:2,7) = 'UVEL    ','VVEL    ',
+  fileName(7) = 'diags/vel_3D_mon_snap/vel_3D_mon_snap',
+  frequency(7) = -2592000.,
+#
+  fields(1:2,8) = 'THETA   ','SALT    ',
+  fileName(8) = 'diags/state_3D_mon_mean/state_3D_mon_mean',
+  frequency(8) = 2592000.,
+#
+  fields(1:2,9) = 'UVEL    ','VVEL    ',
+  fileName(9) = 'diags/vel_3D_mon_mean/vel_3D_mon_mean',
+  frequency(9) = 2592000.,
+#
+  fields(1:10,10) = 'UVELMASS','VVELMASS','ADVx_TH ','ADVy_TH ','DFxE_TH ','DFyE_TH ','ADVx_SLT','ADVy_SLT','DFxE_SLT','DFyE_SLT',
+  fileName(10) = 'diags/budg3d_hflux_set2/budg3d_hflux_set2',
+  frequency(10) = 2592000.,
+#
+  fields(1:6,11) = 'ADVr_TH ','DFrE_TH ','DFrI_TH ', 'ADVr_SLT','DFrE_SLT','DFrI_SLT',
+  fileName(11) = 'diags/budg3d_zflux_set2/budg3d_zflux_set2',
+  frequency(11) = 2592000.,
+#
+  fields(1:5,12) = 'KPPg_TH ','KPPg_SLT','oceSPtnd','AB_gT   ','AB_gS   ',
+  fileName(12) = 'diags/budg3d_kpptend_set1/budg3d_kpptend_set1',
+  frequency(12) = 2592000.,
+#
+  fields(1:7,13) = 'oceFWflx','SIatmFW ','TFLUX   ','SItflux ','SFLUX   ','oceQsw  ','oceSPflx',
+  fileName(13) = 'diags/budg2d_zflux_set1/budg2d_zflux_set1',
+  frequency(13) = 2592000.,
+#
+  fields(1:10,14) = 'SRELAX  ','TRELAX  ','WTHMASS ','WSLTMASS','oceSflux','oceQnet ','SIatmQnt','SIaaflux','SIsnPrcp','SIacSubl',
+  fileName(14) = 'diags/budg2d_zflux_set2/budg2d_zflux_set2',
+  frequency(14) = 2592000.,
+#
+  fields(1:4,15) = 'ADVxHEFF','ADVyHEFF','ADVxSNOW','ADVySNOW',
+  fileName(15) = 'diags/budg2d_hflux_set1/budg2d_hflux_set1',
+  frequency(15) = 2592000.,
+#
+  fields(1:6,16) = 'ETAN    ','SIheff  ','SIhsnow ','SIarea  ','sIceLoad','PHIBOT  ',
+  fileName(16) = 'diags/budg2d_snap_set1/budg2d_snap_set1',
+  frequency(16) = -2592000.,
+##
+  fields(1:10,17) = 'EXFpreci','EXFevap ','EXFroff ','EXFempmr','EXFswdn ','EXFlwdn ','EXFswnet','EXFlwnet','EXFqnet ','EXFatemp',
+  fields(11:18,17) = 'EXFaqh  ','EXFtaux ','EXFtauy ','EXFuwind','EXFvwind','EXFpress','EXFhs   ','EXFhl   ',
+  fileName(17) = 'diags/exf_zflux_set1/exf_zflux_set1',
+  frequency(17) = -2592000.,
+ &
+
+# Parameter for Diagnostics of per level statistics:
+ &DIAG_STATIS_PARMS
+ &

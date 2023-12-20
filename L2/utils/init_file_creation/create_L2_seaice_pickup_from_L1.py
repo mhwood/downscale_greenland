@@ -83,28 +83,11 @@ def read_seaice_pickup_file_to_compact(pickup_file_path):
 
     return(var_names,row_bounds,var_grids,global_metadata)
 
-def read_seaice_pickup_to_stiched_grid(pickup_file_path, sNx, sNy,
-                                ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                faces, ordered_tiles_faces_dict):
+def read_seaice_pickup(pickup_file_path):
 
     var_names,row_bounds,compact_var_grids,global_metadata = read_seaice_pickup_file_to_compact(pickup_file_path)
 
-    var_grids = []
-
-    for vn in range(len(var_names)):
-        compact_var_grid = compact_var_grids[vn]
-        grid = np.zeros((1, sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
-
-        face_1 = compact_var_grid[:,:3*sNx,:]
-        face_1 = np.reshape(face_1, (np.shape(face_1)[0], sNx, 3 * sNx))
-        grid[:,:sNy,:] = face_1
-
-        face_3 = np.rot90(compact_var_grid[:, 3 * sNx:, :],axes=(1,2),k=3)
-        grid[:, sNy:, :] = face_3
-
-        var_grids.append(grid)
-
-    return(var_names, var_grids, global_metadata)
+    return(var_names, compact_var_grids, global_metadata)
 
 def read_grid_mask_from_nc(config_dir,model_name,var_name):
     nc_file = os.path.join(config_dir,'nc_grids',model_name+'_grid.nc')
@@ -231,9 +214,7 @@ def write_seaice_pickup_file(output_file,dtype,pickup_grid,subset_metadata):
 ########################################################################################################################
 
 
-def create_seaice_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name,
-                                 sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                 faces, ordered_tiles_faces_dict, print_level):
+def create_L2_seaice_pickup_file(config_dir, L1_model_name, L1_iteration, L2_model_name, print_level):
 
     print('    - Creating the pickup file for the ' + L2_model_name + ' model')
 
@@ -244,35 +225,17 @@ def create_seaice_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_mod
     # output_dir = os.path.join(config_dir,'L2',L2_model_name,'input')
 
     print('    - Reading in the geometry of the L1 domain')
-    L1_XC, L1_YC, L1_AngleCS, L1_AngleSN, L1_Hfac = read_L1_grid_tile_geometry(config_dir,L1_model_name,sNx, sNy,
-                                                                        ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                                                        faces, ordered_tiles_faces_dict)
+    L1_XC, L1_YC, L1_AngleCS, L1_AngleSN = read_grid_geometry_from_nc(config_dir, L1_model_name)
 
-
-    # plt.subplot(2,3,1)
-    # C = plt.imshow(L1_XC, origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 2)
-    # C = plt.imshow(L1_YC, origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 3)
-    # C = plt.imshow(L1_Hfac[0,:,:], origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 4)
-    # C = plt.imshow(L1_AngleCS, origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 5)
-    # C = plt.imshow(L1_AngleSN, origin='lower')
-    # plt.colorbar(C)
-    # plt.show()
+    L1_Hfac = read_grid_mask_from_nc(config_dir, L1_model_name, 'Theta')
+    L1_wet_cells = np.copy(L1_Hfac)
+    L1_wet_cells[L1_wet_cells > 0] = 1
 
     L2_XC, L2_YC, L2_AngleCS, L2_AngleSN = read_grid_geometry_from_nc(config_dir,L2_model_name)
 
     pickup_file = 'pickup_seaice.'+'{:010d}'.format(L1_iteration)
     pickup_file_path = os.path.join(config_dir,'L1',L1_model_name,'run',pickup_file)
-    var_names, var_grids, pickup_metadata = read_seaice_pickup_to_stiched_grid(pickup_file_path, sNx, sNy,
-                                                                        ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                                                        faces, ordered_tiles_faces_dict)
+    var_names, var_grids, pickup_metadata = read_seaice_pickup(pickup_file_path)
 
     # plt.imshow(var_grids[5][0,:,:],origin='lower',vmin=-0.5,vmax=0.5,cmap='seismic')
     # plt.show()
@@ -320,23 +283,21 @@ def create_seaice_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_mod
                                                  mean_vertical_difference=0, fill_downward=True,
                                                  printing=True)
 
-            print(np.shape(interp_field))
-
             if np.sum(np.isnan(interp_field)) > 0:
                 print('Setting ' + str(np.sum(np.isnan(interp_field))) + ' values to 0 in this grid')
                 interp_field[np.isnan(interp_field)] = 0
 
-            # plt.subplot(2, 3, 1)
-            # plt.imshow(L1_wet_cells[0, :, :], origin='lower')
-            # plt.subplot(2, 3, 2)
-            # plt.imshow(L1_wet_cells_on_domain[0, :, :], origin='lower')
-            # plt.subplot(2, 3, 3)
-            # plt.imshow(domain_wet_cells[0, :, :], origin='lower')
-            # plt.subplot(2, 2, 3)
-            # plt.imshow(var_grid[0, :, :], origin='lower')
-            # plt.subplot(2, 2, 4)
-            # plt.imshow(interp_field[0, :, :], origin='lower')
-            # plt.show()
+            plt.subplot(2, 3, 1)
+            plt.imshow(L1_wet_cells[0, :, :], origin='lower')
+            plt.subplot(2, 3, 2)
+            plt.imshow(L1_wet_cells_on_domain[0, :, :], origin='lower')
+            plt.subplot(2, 3, 3)
+            plt.imshow(domain_wet_cells[0, :, :], origin='lower')
+            plt.subplot(2, 2, 3)
+            plt.imshow(var_grid[0, :, :], origin='lower')
+            plt.subplot(2, 2, 4)
+            plt.imshow(interp_field[0, :, :], origin='lower')
+            plt.show()
 
             # interp_field[domain_wet_cells_3D[:np.shape(interp_field)[0], :, :] == 0] = 0
         else:
@@ -361,7 +322,7 @@ def create_seaice_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_mod
     pickup_grid = stack_grids_to_pickup(interp_grids)
 
     output_dir = os.path.join(config_dir, 'L2', L2_model_name, 'input')
-    output_file = os.path.join(output_dir, 'pickup_seaice.' + '{:010d}'.format(L1_iteration*2))
+    output_file = os.path.join(output_dir, 'pickup_seaice.' + '{:010d}'.format(L1_iteration*5))
     dtype = '>f8'
     pickup_metadata['timestepnumber'] = [int(1)]
     pickup_metadata['nFlds'] = [6]

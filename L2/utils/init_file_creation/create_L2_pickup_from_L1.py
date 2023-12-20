@@ -10,47 +10,6 @@ import argparse
 import ast
 import sys
 
-def read_L1_grid_tile_geometry(config_dir,model_name, sNx, sNy, Nr,
-                               ordered_nonblank_tiles, ordered_nonblank_rotations,
-                               faces, ordered_tiles_faces_dict):
-
-    stitched_XC_grid = np.zeros((sNy*len(ordered_tiles_faces_dict), sNx*len(ordered_nonblank_tiles[1])))
-    stitched_YC_grid = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[1])))
-    stitched_AngleCS_grid = np.zeros((sNy * len(ordered_tiles_faces_dict), sNx * len(ordered_nonblank_tiles[1])))
-    stitched_AngleSN_grid = np.zeros((sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[1])))
-    stitched_HFac_grid = np.zeros((Nr, sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[1])))
-
-    N = len(ordered_nonblank_tiles) * len(ordered_nonblank_tiles[0])
-
-    grid_dir = os.path.join(config_dir, 'L1', model_name, 'run_for_grid')
-
-    for r in range(len(ordered_nonblank_tiles)):
-        for c in range(len(ordered_nonblank_tiles[0])):
-            tile_number = ordered_nonblank_tiles[r][c]
-            for n in range(N):
-                if 'grid.t'+'{:03d}'.format(tile_number)+'.nc' in os.listdir(os.path.join(grid_dir,'mnc_'+'{:04d}'.format(n+1))):
-                    ds = nc4.Dataset(os.path.join(grid_dir,'mnc_'+'{:04d}'.format(n+1),'grid.t'+'{:03d}'.format(tile_number)+'.nc'))
-                    XC = ds.variables['XC'][:, :]
-                    YC = ds.variables['YC'][:, :]
-                    AngleCS = ds.variables['AngleCS'][:, :]
-                    AngleSN = ds.variables['AngleSN'][:, :]
-                    HFac = ds.variables['HFacC'][:,:,:]
-                    ds.close()
-
-                    for i in range(ordered_nonblank_rotations[r][c]):
-                        XC = np.rot90(XC)
-                        YC = np.rot90(YC)
-                        AngleCS = np.rot90(AngleCS)
-                        AngleSN = np.rot90(AngleSN)
-                        HFac = np.rot90(HFac,axes=(1,2))
-
-                    stitched_XC_grid[r * sNy:(r + 1) * sNy,c * sNx: (c + 1) * sNx] = XC
-                    stitched_YC_grid[r * sNy:(r + 1) * sNy,c * sNx: (c + 1) * sNx] = YC
-                    stitched_AngleCS_grid[r * sNy:(r + 1) * sNy, c * sNx: (c + 1) * sNx] = AngleCS
-                    stitched_AngleSN_grid[r * sNy:(r + 1) * sNy, c * sNx: (c + 1) * sNx] = AngleSN
-                    stitched_HFac_grid[:, r * sNy:(r + 1) * sNy, c * sNx: (c + 1) * sNx] = HFac
-
-    return(stitched_XC_grid, stitched_YC_grid, stitched_AngleCS_grid, stitched_AngleSN_grid, stitched_HFac_grid)
 
 def read_grid_geometry_from_nc(config_dir,model_name):
     nc_file = os.path.join(config_dir,'nc_grids',model_name+'_grid.nc')
@@ -59,8 +18,9 @@ def read_grid_geometry_from_nc(config_dir,model_name):
     YC = ds.variables['YC'][:, :]
     AngleCS = ds.variables['AngleCS'][:, :]
     AngleSN = ds.variables['AngleSN'][:, :]
+    delR = np.array(ds.variables['drF'][:])
     ds.close()
-    return(XC,YC,AngleCS,AngleSN)
+    return(XC,YC,AngleCS,AngleSN,delR)
 
 def read_pickup_file_to_compact(pickup_file_path, Nr):
 
@@ -90,31 +50,14 @@ def read_pickup_file_to_compact(pickup_file_path, Nr):
 
     return(var_names,row_bounds,var_grids,global_metadata)
 
-def read_pickup_to_stiched_grid(pickup_file_path, Nr, sNx, sNy,
-                                ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                faces, ordered_tiles_faces_dict):
+def read_pickup_grid(pickup_file_path, Nr):
 
     var_names,row_bounds,compact_var_grids,global_metadata = read_pickup_file_to_compact(pickup_file_path, Nr)
 
-    var_grids = []
+    # for vn in range(len(var_names)):
+    #     print(var_names[vn],np.shape(compact_var_grids[vn]))
 
-    for vn in range(len(var_names)):
-        compact_var_grid = compact_var_grids[vn]
-        if var_names[vn].lower() not in ['etan', 'detahdt', 'etah']:
-            grid = np.zeros((Nr, sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
-        else:
-            grid = np.zeros((1, sNy * len(ordered_nonblank_tiles), sNx * len(ordered_nonblank_tiles[0])))
-
-        face_1 = compact_var_grid[:,:3*sNx,:]
-        face_1 = np.reshape(face_1, (np.shape(face_1)[0], sNx, 3 * sNx))
-        grid[:,:sNy,:] = face_1
-
-        face_3 = np.rot90(compact_var_grid[:, 3 * sNx:, :],axes=(1,2),k=3)
-        grid[:, sNy:, :] = face_3
-
-        var_grids.append(grid)
-
-    return(var_names, var_grids, global_metadata)
+    return(var_names, compact_var_grids, global_metadata)
 
 def read_grid_mask_from_nc(config_dir,model_name,var_name):
     nc_file = os.path.join(config_dir,'nc_grids',model_name+'_grid.nc')
@@ -269,9 +212,7 @@ def write_pickup_file(output_file,dtype,pickup_grid,subset_metadata):
 ########################################################################################################################
 
 
-def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name,
-                           sNx, sNy, ordered_nonblank_tiles, ordered_nonblank_rotations,
-                           faces, ordered_tiles_faces_dict, print_level):
+def create_L2_pickup_file(config_dir, L1_model_name, L1_iteration, L2_model_name, zero_etan, print_level):
 
     if print_level>=1:
         print('    - Creating the pickup file for the ' + L2_model_name + ' model from the '+L1_model_name+' model')
@@ -279,52 +220,19 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
     sys.path.insert(1, os.path.join(config_dir, 'utils','init_file_creation'))
     import downscale_functions as df
 
-    # this is the dir where the output will be stored
-    output_dir = os.path.join(config_dir,'L2',L2_model_name,'input')
-
-    grid_file = os.path.join(config_dir, 'nc_grids', L1_model_name + '_grid.nc')
-    ds = nc4.Dataset(grid_file)
-    delR_in = np.array(ds.variables['drF'][:])
-    ds.close()
+    L1_XC, L1_YC, L1_AngleCS, L1_AngleSN, delR_in = read_grid_geometry_from_nc(config_dir, L1_model_name)
     Nr_in = len(delR_in)
 
-    grid_file = os.path.join(config_dir, 'nc_grids', L2_model_name + '_grid.nc')
-    ds = nc4.Dataset(grid_file)
-    delR_out = np.array(ds.variables['drF'][:])
-    ds.close()
+    L1_Hfac = read_grid_mask_from_nc(config_dir, L1_model_name, 'Theta')
+    L1_wet_cells = np.copy(L1_Hfac)
+    L1_wet_cells[L1_wet_cells > 0] = 1
+
+    L2_XC, L2_YC, L2_AngleCS, L2_AngleSN, delR_out = read_grid_geometry_from_nc(config_dir,L2_model_name)
     Nr_out = len(delR_out)
-
-    if print_level>=1:
-        print('    - Reading in the geometry of the L1 domain')
-    L1_XC, L1_YC, L1_AngleCS, L1_AngleSN, L1_Hfac = read_L1_grid_tile_geometry(config_dir,L1_model_name,sNx, sNy, Nr_in,
-                                                                        ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                                                        faces, ordered_tiles_faces_dict)
-
-
-    # plt.subplot(2,3,1)
-    # C = plt.imshow(L1_XC, origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 2)
-    # C = plt.imshow(L1_YC, origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 3)
-    # C = plt.imshow(L1_Hfac[0,:,:], origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 4)
-    # C = plt.imshow(L1_AngleCS, origin='lower')
-    # plt.colorbar(C)
-    # plt.subplot(2, 3, 5)
-    # C = plt.imshow(L1_AngleSN, origin='lower')
-    # plt.colorbar(C)
-    # plt.show()
-
-    L2_XC, L2_YC, L2_AngleCS, L2_AngleSN = read_grid_geometry_from_nc(config_dir,L2_model_name)
 
     pickup_file = 'pickup.'+'{:010d}'.format(L1_iteration)
     pickup_file_path = os.path.join(config_dir,'L1',L1_model_name,'run',pickup_file)
-    var_names, var_grids, pickup_metadata = read_pickup_to_stiched_grid(pickup_file_path, Nr_in, sNx, sNy,
-                                                                        ordered_nonblank_tiles, ordered_nonblank_rotations,
-                                                                        faces, ordered_tiles_faces_dict)
+    var_names, var_grids, pickup_metadata = read_pickup_grid(pickup_file_path, Nr_in)
 
     var_grids, var_names = rotate_directional_fields_to_natural(var_grids, var_names, L1_AngleCS, L1_AngleSN)
 
@@ -377,13 +285,27 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
                                                  L1_wet_cells_on_domain_3D,
                                                  L2_XC, L2_YC, domain_wet_cells_3D,
                                                  mean_vertical_difference=0, fill_downward=True, remove_zeros=True,
-                                                 printing=True)
+                                                 printing=True, testing=False)
             if print_level >= 3:
                 print('            - Field output shape: '+str(np.shape(interp_field)))
 
             if np.sum(np.isnan(interp_field)) > 0:
                 print('Setting ' + str(np.sum(np.isnan(interp_field))) + ' values to 0 in this grid')
                 interp_field[np.isnan(interp_field)] = 0
+
+            if zero_etan and var_name.lower() == 'etan':
+                etan_field = np.copy(interp_field)
+                indices = etan_field!=0
+                etan_field[indices] -= np.mean(etan_field[indices])
+                interp_field = etan_field
+                # interp_field*=0
+
+            if zero_etan and var_name.lower() == 'etah':
+                etan_field = np.copy(interp_field)
+                indices = etan_field != 0
+                etan_field[indices] -= np.mean(etan_field[indices])
+                interp_field = etan_field
+                # interp_field*=0
 
             # plt.subplot(2, 3, 1)
             # plt.imshow(L1_wet_cells[0, :, :], origin='lower')
@@ -392,9 +314,11 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
             # plt.subplot(2, 3, 3)
             # plt.imshow(domain_wet_cells_3D[0, :, :], origin='lower')
             # plt.subplot(2, 2, 3)
-            # plt.imshow(var_grid[0, :, :], origin='lower')
+            # C = plt.imshow(var_grid[0, :, :], origin='lower')
+            # plt.colorbar(C)
             # plt.subplot(2, 2, 4)
-            # plt.imshow(interp_field[0, :, :], origin='lower')
+            # C = plt.imshow(interp_field[0, :, :], origin='lower')
+            # plt.colorbar(C)
             # plt.show()
 
             # interp_field[domain_wet_cells_3D[:np.shape(interp_field)[0], :, :] == 0] = 0
@@ -426,7 +350,7 @@ def create_pickup_from_L1(config_dir, L1_model_name, L1_iteration, L2_model_name
     pickup_grid = stack_grids_to_pickup(interp_grids)
 
     output_dir = os.path.join(config_dir, 'L2', L2_model_name, 'input')
-    output_file = os.path.join(output_dir, 'pickup.' + '{:010d}'.format(L1_iteration*2))
+    output_file = os.path.join(output_dir, 'pickup.' + '{:010d}'.format(L1_iteration*5))
     dtype = '>f8'
     pickup_metadata['timestepnumber'] = [int(1)]
     pickup_metadata['nFlds'] = [11]
