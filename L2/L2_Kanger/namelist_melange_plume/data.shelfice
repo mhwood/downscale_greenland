@@ -1,0 +1,11 @@
+# ===================================
+# | Parameters for SHELFICE package |
+# ===================================
+ &SHELFICE_PARM01
+ SHELFICEboundaryLayer = .TRUE.,
+ SHELFICEtopoFile='melange/melange_draft.bin',
+ SHELFICEloadAnomalyFile = 'melange/melange_load.bin',
+ SHELFICEuseGammaFrict = .FALSE.,
+ no_slip_shelfice = .FALSE.,
+ SHELFICEwriteState = .FALSE.,
+ &
