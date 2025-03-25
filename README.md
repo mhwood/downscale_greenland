@@ -12,9 +12,9 @@ All models here are labeled L0, L1, and L2 to denote the extent to which they ha
 
    The models associated with this manuscript are the L0 [global](https://github.com/mhwood/downscale_greenland/tree/main/L0/global) model, the [L1_CE_Greenland](https://github.com/mhwood/downscale_greenland/tree/main/L1/L1_CE_Greenland) model, and the [L2_Scoresby_Sund](https://github.com/mhwood/downscale_greenland/tree/main/L2/L2_Scoresby_Sund) model.
 
-2. Feedbacks between fjord circulation, mélange melt, and the subglacial discharge plume at Kangerlussuaq Glacier, East Greenland
+2. [Feedbacks between fjord circulation, mélange melt, and the subglacial discharge plume at Kangerlussuaq Glacier, East Greenland](https://doi.org/10.1029/2024JC021639)
 
-   Wood et al 2024 b, Under Review
+   Wood et al 2025
 
    The models associated with this manuscript are listed under [L2_Kanger](https://github.com/mhwood/downscale_greenland/tree/main/L2/L2_Kanger) model.
 
